@@ -1,57 +1,92 @@
 import json
 import math
 import time
+from urllib.parse import urlencode
+
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET
-from planner.data import location, stations
-from planner.routing import fetch_route, RoutingError
-from planner.optimizer import candidates, optimize, InfeasibleRoute
+from django.views.decorators.http import require_GET, require_http_methods
+
+from planner.data import location
+from planner.optimizer import CAPACITY_GALLONS, InfeasibleRoute
+from planner.routing import RoutingError
+from planner.services import plan_trip
+
+FIELDS = {"start", "finish", "initial_fuel_gallons", "corridor_miles"}
+
+
+class UnsupportedMediaType(Exception):
+    pass
+
+
+NUMBER_LIMITS = {"initial_fuel_gallons": (0.0, CAPACITY_GALLONS, 0.0), "corridor_miles": (0.1, 25.0, 5.0)}
+
+
+def _number(data, name):
+    minimum, maximum, default = NUMBER_LIMITS[name]
+    value = data.get(name, default)
+    if isinstance(value, str):
+        try:
+            value = float(value)
+        except ValueError:
+            pass
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not minimum <= value <= maximum:
+        raise ValueError(f"{name} must be a number between {minimum:g} and {maximum:g}.")
+    return float(value)
+
+
+def _parse(request):
+    """Read trip parameters from a JSON body (POST) or the query string (GET)."""
+    if request.method == "GET":
+        data = request.GET.dict()
+    else:
+        if request.content_type != "application/json":
+            raise UnsupportedMediaType("Content-Type must be application/json.")
+        data = json.loads(request.body)
+        if not isinstance(data, dict):
+            raise ValueError("Request body must be a JSON object.")
+    unknown = set(data) - FIELDS
+    if unknown:
+        raise ValueError(f"Unknown fields: {', '.join(sorted(unknown))}. Allowed: {', '.join(sorted(FIELDS))}.")
+    start, finish = location(data.get("start")), location(data.get("finish"))
+    if (start["latitude"], start["longitude"]) == (finish["latitude"], finish["longitude"]):
+        raise ValueError("Start and finish must be different places.")
+    return data, start, finish, _number(data, "initial_fuel_gallons"), _number(data, "corridor_miles")
+
+
+def _error(message, status, code):
+    return JsonResponse({"error": message, "code": code}, status=status)
+
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def route(request):
+    started = time.perf_counter()
+    try:
+        data, start, finish, initial, corridor = _parse(request)
+        result = plan_trip(start, finish, initial, corridor)
+    except UnsupportedMediaType as exc:
+        return _error(str(exc), 415, "unsupported_media_type")
+    except (ValueError, UnicodeDecodeError) as exc:
+        return _error(str(exc), 400, "invalid_request")
+    except InfeasibleRoute as exc:
+        return _error(str(exc), 422, "insufficient_station_coverage")
+    except RoutingError as exc:
+        return _error(str(exc), 503, "routing_unavailable")
+
+    query = {k: data[k] for k in ("start", "finish", "initial_fuel_gallons", "corridor_miles") if k in data}
+    result["metadata"]["timing_ms"]["total"] = round((time.perf_counter() - started) * 1000, 1)
+    map_url = request.build_absolute_uri(f"{reverse('map')}?{urlencode(query)}")
+    return JsonResponse({"map_url": map_url, **result})
 
 
 @require_GET
-def index(request):
+def map_view(request):
     return render(request, "planner/index.html")
 
 
 @require_GET
 def health(request):
     return JsonResponse({"status": "ok"})
-
-
-@csrf_exempt
-def route(request):
-    if request.method != "POST":
-        response = JsonResponse({"error": "Use POST with a JSON body."}, status=405)
-        response["Allow"] = "POST"
-        return response
-    if request.content_type != "application/json":
-        return JsonResponse({"error": "Content-Type must be application/json."}, status=415)
-    started = time.perf_counter()
-    try:
-        body = json.loads(request.body)
-        if not isinstance(body, dict):
-            raise ValueError("Body must be a JSON object.")
-        unknown = set(body) - {"start", "finish", "initial_fuel_gallons", "corridor_miles"}
-        if unknown:
-            raise ValueError(f"Unknown fields: {', '.join(sorted(unknown))}")
-        start, finish = location(body.get("start")), location(body.get("finish"))
-        if start == finish:
-            raise ValueError("Start and finish must differ.")
-        initial = body.get("initial_fuel_gallons", 50)
-        corridor = body.get("corridor_miles", 5)
-        for name, value, minimum, maximum in [("initial_fuel_gallons", initial, 0, 50), ("corridor_miles", corridor, 0.1, 25)]:
-            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not minimum <= value <= maximum:
-                raise ValueError(f"{name} must be a finite number between {minimum} and {maximum}.")
-        road, hit = fetch_route(start, finish)
-        inventory, skipped = stations()
-        nearby = candidates(road, inventory, corridor)
-        plan = optimize(nearby, road["distance_miles"], initial)
-        return JsonResponse({"start": start, "finish": finish, "distance_miles": round(road["distance_miles"], 3), "duration_seconds": round(road["duration_seconds"]), "map": {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"kind": "route"}, "geometry": road["geometry"]}] + [{"type": "Feature", "properties": stop, "geometry": {"type": "Point", "coordinates": [stop["longitude"], stop["latitude"]]}} for stop in plan["fuel_stops"]]}, **plan, "assumptions": {"range_miles": 500, "mpg": 10, "capacity_gallons": 50, "initial_fuel_gallons": initial, "initial_fuel_cost_included": False, "currency": "USD", "corridor_miles": corridor, "optimization": "Minimum purchase cost along the supplied route with zero detour cost; not a global route optimization.", "station_locations": "City centroids unless verified coordinates are supplied. Offsets are straight-line estimates; road access and detour fuel are not verified.", "prices": "Static assessment CSV prices, not live prices."}, "metadata": {"routing_calls": 0 if hit else 1, "route_cache_hit": hit, "candidate_stations": len(nearby), "stations_without_coordinates": skipped, "elapsed_ms": round((time.perf_counter() - started) * 1000, 2)}})
-    except (ValueError, UnicodeDecodeError) as exc:
-        return JsonResponse({"error": str(exc)}, status=400)
-    except InfeasibleRoute as exc:
-        return JsonResponse({"error": str(exc), "code": "insufficient_station_coverage"}, status=422)
-    except RoutingError as exc:
-        return JsonResponse({"error": str(exc)}, status=503)
