@@ -61,12 +61,34 @@ class FuelDataTests(SimpleTestCase):
 
 
 class LocationTests(SimpleTestCase):
-    def test_location_formats(self):
-        self.assertEqual(location("Chicago, IL")["name"], "Chicago, IL")
-        self.assertEqual(location("chicago , illinois")["name"], "Chicago, IL")
-        self.assertEqual(location("St. Louis, MO")["name"], location("saint louis, mo")["name"])
+    def test_accepted_formats(self):
+        cases = {
+            "Chicago, IL": "Chicago, IL",
+            "chicago , illinois": "Chicago, IL",
+            "Chicago IL": "Chicago, IL",
+            "Chicago, Illinois, USA": "Chicago, IL",
+            "Los Angeles, CA 90012": "Los Angeles, CA",
+            "Salt Lake City Utah": "Salt Lake City, UT",
+            "Washington DC": "Washington, DC",
+            "New York City, NY": "New York, NY",
+            "NYC": "New York, NY",
+            "St. Louis, MO": "Saint Louis, MO",
+            "Albuquerque": "Albuquerque, NM",  # only one state has it
+            "233 S Wacker Dr, Chicago, IL 60606": "Chicago, IL",  # offline fallback to the city
+        }
+        for text, expected in cases.items():
+            self.assertEqual(location(text)["name"], expected, text)
+        self.assertEqual(location("41.88 -87.63")["matched"], "coordinates")
         self.assertAlmostEqual(location("41.88, -87.63")["latitude"], 41.88)
-        for bad in ["Paris, FR", "48.85, 2.35", "Chicago", "", None, 5]:
+
+    def test_helpful_errors(self):
+        with self.assertRaisesMessage(ValueError, "Did you mean Chicago, IL?"):
+            location("Chicgo, IL")
+        with self.assertRaisesMessage(ValueError, "Please add the state"):
+            location("Kansas City")
+        with self.assertRaisesMessage(ValueError, "not within the USA"):
+            location("48.85, 2.35")
+        for bad in ["Paris, FR", "", None, 5, "x" * 201]:
             with self.assertRaises(ValueError):
                 location(bad)
 

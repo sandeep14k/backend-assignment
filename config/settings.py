@@ -53,6 +53,9 @@ OSRM_URLS = [
 OSRM_HEDGE_AFTER_SECONDS = float(os.environ.get("OSRM_HEDGE_AFTER_SECONDS", 1.5))
 OSRM_CONNECT_TIMEOUT = 3.05
 OSRM_READ_TIMEOUT = 15
+# Street addresses only (cities and coordinates resolve offline).
+GEOCODER_URL = os.environ.get("GEOCODER_URL", "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress")
+
 # Keep HTTPS connections to OSRM open (HEAD / every 45 s) while the API was used in the last 15 minutes.
 OSRM_KEEP_WARM_SECONDS = int(os.environ.get("OSRM_KEEP_WARM_SECONDS", 15 * 60))
 OSRM_KEEPALIVE_INTERVAL = 45

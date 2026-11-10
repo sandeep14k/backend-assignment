@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods
 
-from planner.data import location
+from planner.geocoding import resolve_pair
 from planner.optimizer import CAPACITY_GALLONS, InfeasibleRoute
 from planner.routing import NoRoute, RoutingError
 from planner.services import plan_trip
@@ -57,19 +57,11 @@ def _parse(request):
     unknown = set(data) - FIELDS
     if unknown:
         raise ValueError(f"Unknown fields: {', '.join(sorted(unknown))}. Allowed: {', '.join(sorted(FIELDS))}.")
-    start, finish = location(data.get("start")), location(data.get("finish"))
-    if (start["latitude"], start["longitude"]) == (
-        finish["latitude"],
-        finish["longitude"],
-    ):
+    initial, corridor = _number(data, "initial_fuel_gallons"), _number(data, "corridor_miles")
+    start, finish, geocoding_calls = resolve_pair(data.get("start"), data.get("finish"))
+    if (start["latitude"], start["longitude"]) == (finish["latitude"], finish["longitude"]):
         raise ValueError("Start and finish must be different places.")
-    return (
-        data,
-        start,
-        finish,
-        _number(data, "initial_fuel_gallons"),
-        _number(data, "corridor_miles"),
-    )
+    return data, start, finish, initial, corridor, geocoding_calls
 
 
 def _error(message, status, code):
@@ -81,7 +73,7 @@ def _error(message, status, code):
 def route(request):
     started = time.perf_counter()
     try:
-        data, start, finish, initial, corridor = _parse(request)
+        data, start, finish, initial, corridor, geocoding_calls = _parse(request)
         result = plan_trip(start, finish, initial, corridor)
     except UnsupportedMediaType as exc:
         return _error(str(exc), 415, "unsupported_media_type")
@@ -95,6 +87,7 @@ def route(request):
         return _error(str(exc), 503, "routing_unavailable")
 
     query = {k: data[k] for k in ("start", "finish", "initial_fuel_gallons", "corridor_miles") if k in data}
+    result["metadata"]["geocoding_calls"] = geocoding_calls
     result["metadata"]["timing_ms"]["total"] = round((time.perf_counter() - started) * 1000, 1)
     map_url = request.build_absolute_uri(f"{reverse('map')}?{urlencode(query)}")
     return JsonResponse({"map_url": map_url, **result})

@@ -18,8 +18,8 @@
    - `routing_calls: 1` and `timing_ms` (about 0.6 s, nearly all OSRM; our own work is about 15 ms).
 2. **Click `map_url`.** The browser shows the route with numbered stops. Click one.
 3. **Request 2, same trip.** Point at `routing_calls: 0`, `route_source: memory` and under 1 ms.
-4. **Requests 3 and 4.** Full state names and raw coordinates, resolved offline, so no extra API calls.
-5. **Request 6, Paris → 400.** Mention 422 for no road / no stations and 503 when routing is down.
+4. **Requests 3–5.** Full state names, coordinates and real street addresses. Cities resolve offline; an address costs one cached Census geocoder call (`geocoding_calls`).
+5. **Request 7, typo → 400 "Did you mean Chicago, IL?".** Mention 422 for no road / no stations and 503 when routing is down.
 6. **Postman Test Results tab:** receipts add up to the total and the tank never goes over 50 gallons.
 
 **1:45–2:30 · Why OSRM, and how few calls (README)**
@@ -42,7 +42,7 @@
 **3:45–4:15 · Data and tests**
 - Run `python manage.py audit_fuel_data`:
   > "All 6,626 US stations are used. The 112 skipped are Canadian. Duplicate listings get their mean price."
-- Run `python manage.py test`: 41 offline tests, including the brute-force, reference-implementation and concurrency checks.
+- Run `python manage.py test`: 47 offline tests, including the brute-force, reference-implementation and concurrency checks.
 
 **4:15–4:40 · Limitations and close**
 > "Stations sit at their city's coordinates because the CSV has no coordinates, so detours aren't counted. Pump coordinates plus one extra routing call would fix that. Thanks — the repo link is below."

@@ -171,7 +171,46 @@
       ]
     },
     {
-      "name": "5. Short trip (one fill at start)",
+      "name": "5. Street addresses (Census geocoder, cached)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": \"1600 Pennsylvania Ave NW, Washington, DC 20500\",\n  \"finish\": \"233 S Wacker Dr, Chicago, IL 60606\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/api/route/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "const d = pm.response.json();",
+              "pm.test(\"total cost equals sum of receipts\", () => { const s = d.fuel_stops.reduce((a, x) => a + Number(x.cost_usd), 0); pm.expect(s).to.be.closeTo(Number(d.total_cost_usd), 0.001); });",
+              "pm.test(\"tank never exceeds 50 gallons\", () => d.fuel_stops.forEach(x => pm.expect(x.gallons_on_departure).to.be.at.most(50.001)));",
+              "pm.test(\"at most 2 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(2));",
+              "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
+              "pm.test(\"matched as addresses\", () => pm.expect(d.start.matched).to.eql(\"address\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Short trip (one fill at start)",
       "request": {
         "method": "POST",
         "header": [
@@ -210,7 +249,7 @@
       ]
     },
     {
-      "name": "6. Invalid location -> 400",
+      "name": "7. Typo -> 400 with suggestion",
       "request": {
         "method": "POST",
         "header": [
@@ -221,7 +260,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"start\": \"Paris, FR\",\n  \"finish\": \"Chicago, IL\"\n}",
+          "raw": "{\n  \"start\": \"Chicgo, IL\",\n  \"finish\": \"Denver, CO\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -237,14 +276,14 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"400\", () => pm.response.to.have.status(400));",
-              "pm.test(\"error code\", () => pm.expect(pm.response.json().code).to.eql(\"invalid_request\"));"
+              "pm.test(\"suggests a fix\", () => pm.expect(pm.response.json().error).to.include(\"Did you mean Chicago, IL\"));"
             ]
           }
         }
       ]
     },
     {
-      "name": "7. Unknown field -> 400",
+      "name": "8. Unknown field -> 400",
       "request": {
         "method": "POST",
         "header": [

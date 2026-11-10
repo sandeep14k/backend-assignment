@@ -5,6 +5,7 @@ handling never geocodes over the network.
 """
 
 import csv
+import difflib
 import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
@@ -23,7 +24,9 @@ US_BOUNDS = [
     (18.5, 22.5, -160.5, -154.5),
 ]
 CANADIAN_PROVINCES = {"AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"}
-LOCATION_HELP = "Use 'City, ST' (e.g. 'Chicago, IL'), 'City, State' or 'latitude, longitude'."
+LOCATION_HELP = "Use 'City, ST' (e.g. 'Chicago, IL'), a street address, or 'latitude, longitude'."
+COUNTRY_NAMES = {"usa", "us", "unitedstates", "unitedstatesofamerica", "america"}
+INPUT_ALIASES = {"nyc": ("New York", "NY"), "newyorkcity": ("New York", "NY")}
 ABBREVIATIONS = {"st": "saint", "ste": "sainte", "ft": "fort", "mt": "mount"}
 
 # The city file has one row per (city, county). For cities whose rows sit far
@@ -49,6 +52,7 @@ CITY_ALIASES = {
     ("Henrico", "VA"): "Richmond",
     ("Elizabethport", "NJ"): "Elizabeth",
     ("Evergreen", "AL"): "Castleberry",
+    ("New York City", "NY"): "New York",
 }
 
 
@@ -113,39 +117,116 @@ def in_us(latitude, longitude):
     return any(s <= latitude <= n and w <= longitude <= e for s, n, w, e in US_BOUNDS)
 
 
-def _coordinates(first, second):
-    try:
-        latitude, longitude = float(first), float(second)
-    except ValueError:
-        return None
+def _point(latitude, longitude, matched):
     if not in_us(latitude, longitude):
         raise ValueError(f"Coordinates {latitude}, {longitude} are not within the USA.")
     return {
         "name": f"{latitude:.5f}, {longitude:.5f}",
         "latitude": latitude,
         "longitude": longitude,
+        "matched": matched,
     }
 
 
-def location(value):
-    """Resolve 'City, ST', 'City, State Name' or 'lat, lon' without network calls."""
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"Start and finish are required. {LOCATION_HELP}")
-    if len(value) > 150 or "," not in value:
-        raise ValueError(f"Could not read location '{value[:150]}'. {LOCATION_HELP}")
-    first, second = (part.strip() for part in value.rsplit(",", 1))
-    point = _coordinates(first, second)
-    if point:
-        return point
-    state = state_codes().get(_state_key(second))
-    row = find_city(first, state) if state else None
-    if row is None:
-        raise ValueError(f"Unknown US city: '{value}'. {LOCATION_HELP}")
+def _city_point(row):
     return {
         "name": f"{row['CITY']}, {row['STATE_CODE']}",
         "latitude": float(row["LATITUDE"]),
         "longitude": float(row["LONGITUDE"]),
+        "matched": "city",
     }
+
+
+@lru_cache(maxsize=1)
+def _cities_by_name():
+    """Normalized city name -> sorted state codes that have it (for state-less input and suggestions)."""
+    names = {}
+    for name, state in cities():
+        names.setdefault(name, []).append(state)
+    return {name: sorted(states) for name, states in names.items()}
+
+
+def _suggest(name, state=None):
+    """Up to three close spellings, e.g. 'Chicgo, IL' -> 'Chicago, IL'."""
+    pool = [key for key in cities() if state is None or key[1] == state]
+    close = difflib.get_close_matches(normalize(name), [key[0] for key in pool], n=3, cutoff=0.8)
+    found = [cities()[key] for name_key in close for key in pool if key[0] == name_key]
+    return [f"{row['CITY']}, {row['STATE_CODE']}" for row in found[:3]]
+
+
+def _split_state(text):
+    """'Austin TX' / 'Salt Lake City Utah' / 'Chicago, IL 60606' -> (city, 'ST'), or (text, None)."""
+    words = text.replace(",", " ").split()
+    for size in (3, 2, 1):  # Longest state name first ("new hampshire", "district of columbia").
+        if len(words) > size:
+            state = state_codes().get(_state_key(" ".join(words[-size:])))
+            if state:
+                return " ".join(words[:-size]), state
+    return text, None
+
+
+def _numbers(text):
+    try:
+        return [float(part) for part in re.split(r"[,\s]+", text.strip()) if part]
+    except ValueError:
+        return None
+
+
+def location(value):
+    """Resolve a US location offline (no network calls).
+
+    Accepts 'City, ST', 'City, State', 'City ST', 'City, ST 60606', 'City, ST, USA',
+    'lat, lon', and a city name alone when only one state has it. Extra leading
+    parts ('233 S Wacker Dr, Chicago, IL') resolve to the city; street-level
+    geocoding of such addresses happens in ``planner.geocoding``.
+    """
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Start and finish are required. {LOCATION_HELP}")
+    if len(value) > 200:
+        raise ValueError("Location is too long (200 characters max).")
+
+    numbers = _numbers(value)
+    if numbers is not None and len(numbers) == 2:
+        return _point(numbers[0], numbers[1], "coordinates")
+
+    parts = [part.strip() for part in value.split(",") if part.strip()]
+    while len(parts) > 1 and _state_key(parts[-1]) in COUNTRY_NAMES:
+        parts.pop()
+    alias = INPUT_ALIASES.get(normalize(parts[0])) if len(parts) == 1 else None
+    if alias:
+        parts = list(alias)
+
+    if len(parts) >= 2:
+        city, state = parts[-2], state_codes().get(_state_key(parts[-1]))
+        if state is None:  # e.g. 'Chicago IL, USA' left as one part plus noise
+            city, state = _split_state(", ".join(parts))
+    else:
+        city, state = _split_state(parts[0])
+
+    if state:
+        row = find_city(city, state)
+        if row is None:
+            hint = _suggest(city, state)
+            raise ValueError(
+                f"Unknown US city: '{value}'."
+                + (f" Did you mean {' or '.join(hint)}?" if hint else f" {LOCATION_HELP}")
+            )
+        return _city_point(row)
+
+    states = _cities_by_name().get(normalize(city), [])
+    if len(states) == 1:
+        return _city_point(cities()[(normalize(city), states[0])])
+    if states:
+        options = "; ".join(f"{cities()[(normalize(city), st)]['CITY']}, {st}" for st in states[:6])
+        raise ValueError(
+            f"'{value}' exists in {len(states)} states ({options}{'; ...' if len(states) > 6 else ''}). "
+            "Please add the state."
+        )
+    hint = _suggest(city)
+    raise ValueError(
+        f"Could not find '{value}' in the USA."
+        + (f" Did you mean {' or '.join(hint)}?" if hint else f" {LOCATION_HELP}")
+    )
 
 
 def _price(text):

@@ -3,12 +3,14 @@
   "start": {
     "name": "Chicago, IL",
     "latitude": 41.885847,
-    "longitude": -87.618123
+    "longitude": -87.618123,
+    "matched": "city"
   },
   "finish": {
     "name": "Los Angeles, CA",
     "latitude": 33.973093,
-    "longitude": -118.247896
+    "longitude": -118.247896,
+    "matched": "city"
   },
   "distance_miles": 2024.4,
   "duration_hours": 35.58,
@@ -7605,7 +7607,8 @@
       "routing": 0.0,
       "matching": 0.1,
       "optimize": 0.2,
-      "total": 0.4
-    }
+      "total": 0.5
+    },
+    "geocoding_calls": 0
   }
 }

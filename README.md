@@ -35,11 +35,11 @@ Python 3.13+. No API keys, database or migrations needed.
 ```sh
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python manage.py test               # 41 offline tests
+python manage.py test               # 47 offline tests
 python manage.py runserver          # http://127.0.0.1:8000
 ```
 
-Postman: import [`docs/postman_collection.json`](docs/postman_collection.json). It has 7 requests with built-in checks: cold and cached runs, GET, coordinates, a short trip, and error cases.
+Postman: import [`docs/postman_collection.json`](docs/postman_collection.json). It has 8 requests with built-in checks: cold and cached runs, GET, coordinates, street addresses, a short trip, and error cases.
 
 Other commands:
 - `python manage.py demo_route`: one cold and one cached live request, with timings.
@@ -50,7 +50,7 @@ Other commands:
 
 | Requirement | Implementation |
 |---|---|
-| Start and finish within the USA | `"City, ST"`, `"City, State"` or `"lat, lon"`, resolved offline. Coordinates outside the US are rejected. |
+| Start and finish within the USA | Cities in any common format (`Chicago, IL`, `Chicago IL`, `Chicago, Illinois, USA`, `NYC`), coordinates, or street addresses. Cities and coordinates resolve offline; addresses use the free US Census geocoder. Typos and ambiguous names get suggestions. [Details](#locations) |
 | Map of the route | `map` is GeoJSON (route, start, finish, numbered stops). `map_url` opens an interactive Leaflet map. |
 | Optimal, cost-effective fuel stops | An exact minimum-cost plan. It matches a general linear-programming solver on 100 random trips. |
 | 500-mile range, multiple fuel-ups | The tank never exceeds 50 gallons. Each purchase is sized for the stretch ahead. |
@@ -101,7 +101,7 @@ Live measurements, run in this order on a fresh server:
 | Dallas, TX → Atlanta, GA | 784 | $217.52 | 3 | 421 ms | 0.3 ms | 16 / 5 KB |
 | Chicago, IL → Milwaukee, WI | 89 | $27.33 | 1 | 209 ms | 0.6 ms | 4 / 1 KB |
 
-For a new route, everything except OSRM's computation takes **12–20 ms**. After a restart, a route already on disk is served in about 5 ms with no routing call. Times are server-side (`metadata.timing_ms`).
+Street addresses add a Census geocoder lookup on first use (both ends in parallel). White House → 233 S Wacker Dr, Chicago took 2.1 s cold and **4 ms** repeated. For a new route, everything except OSRM's computation takes **12–20 ms**. After a restart, a route already on disk is served in about 5 ms with no routing call. Times are server-side (`metadata.timing_ms`).
 
 What makes it fast, with the measured effect of each:
 
@@ -123,9 +123,9 @@ What makes it fast, with the measured effect of each:
 - **Repeated route: 0 calls.** This holds after a restart and in other worker processes too, because the cache is on disk. "No route" answers are cached as well.
 - **Simultaneous requests for the same new route: 1 call in total.** The others wait for it and share the result. The test suite fires 8 such requests and checks there is 1 call.
 - **Opening `map_url`: 0 calls.** The map page reuses the cached route.
-- **No geocoding calls.** Cities resolve from the bundled offline dataset.
+- **No geocoding calls for cities or coordinates.** They resolve from the bundled offline dataset. A street address costs one call to the Census geocoder the first time it is seen (both ends in parallel), and is cached after that. So the worst case is 2 geocoding calls plus 1 routing call.
 
-Every response reports `metadata.routing_calls` (0, 1 or 2) and `metadata.route_source` (`loaded`, `memory`, `disk` or `shared`).
+Every response reports `metadata.routing_calls` (0, 1 or 2), `metadata.geocoding_calls` (0–2) and `metadata.route_source` (`loaded`, `memory`, `disk` or `shared`).
 
 ## API
 
@@ -133,7 +133,7 @@ Every response reports `metadata.routing_calls` (0, 1 or 2) and `metadata.route_
 
 | Field | Type | Default | Notes |
 |---|---|---|---|
-| `start`, `finish` | string | required | `"Chicago, IL"`, `"St. Louis, Missouri"` or `"41.88, -87.63"` |
+| `start`, `finish` | string | required | A city, coordinates or a street address. See [Locations](#locations). |
 | `initial_fuel_gallons` | number 0–50 | `0` | Fuel already in the tank. The default empty tank makes `total_cost_usd` the full trip cost. |
 | `corridor_miles` | number 0.1–25 | `5` | How far from the route a station may be. [Why 5](#fuel-price-data) |
 
@@ -148,12 +148,29 @@ Response fields:
 
 | Status | `code` | When |
 |---|---|---|
-| 400 | `invalid_request` | Unknown city, bad number, unknown field, or start equals finish |
+| 400 | `invalid_request` | Unknown or ambiguous place (with suggestions), bad number, unknown field, or start equals finish |
 | 405 | — | Method other than GET or POST |
 | 415 | `unsupported_media_type` | POST without `application/json` |
 | 422 | `no_route` | No road connects the points (e.g. Hawaii to the mainland) |
 | 422 | `insufficient_station_coverage` | A stretch of more than 500 miles with no station |
 | 503 | `routing_unavailable` | Both routing servers failed |
+
+### Locations
+
+| Input | Example | Resolved | Calls |
+|---|---|---|---|
+| City, state code or name | `Chicago, IL` · `Chicago IL` · `chicago, illinois` · `Chicago, IL 60606` · `Boston, MA, USA` | city coordinates | 0 |
+| Common names and abbreviations | `NYC` · `New York City, NY` · `St. Louis MO` · `Ft. Worth, TX` | city coordinates | 0 |
+| City alone, when only one state has it | `Albuquerque` | city coordinates | 0 |
+| Coordinates | `41.88, -87.63` or `41.88 -87.63` (US only) | exact | 0 |
+| Street address (starts with a house number) | `233 S Wacker Dr, Chicago, IL 60606` | exact, via the [US Census geocoder](https://geocoding.geo.census.gov/) (free, no key) | 1 the first time, then cached |
+
+Every resolved location carries `matched`: `city`, `coordinates` or `address`.
+- **Address fallback.** If the geocoder doesn't know an address or is down, its city is used and `matched` says so, so the request still succeeds.
+- **Helpful errors.**
+  - Ambiguous names list the options: *"'Kansas City' exists in 2 states (Kansas City, KS; Kansas City, MO). Please add the state."*
+  - Typos get suggestions: *"Unknown US city: 'Chicgo, IL'. Did you mean Chicago, IL?"*
+- **Why the Census geocoder:** it's official and keyless, and it handles US street addresses. Nominatim would need a contact email and limits to 1 request per second. Landmarks such as "Times Square" aren't in it; those resolve to their city.
 
 ## How the fuel plan is computed
 
@@ -219,7 +236,8 @@ cities (offline) ─► OSRM route (1 call, cached) ─► stations along the ro
 | `OSRM_URLS` | `https://router.project-osrm.org,https://routing.openstreetmap.de/routed-car` (primary, then mirror) |
 | `OSRM_HEDGE_AFTER_SECONDS` | `1.5` |
 | `OSRM_KEEP_WARM_SECONDS` | `900` (keep connections warm for 15 min after the last request; `0` turns it off) |
-| `ROUTE_CACHE_DIR` / `ROUTE_CACHE_SECONDS` | `.cache/routes` / 7 days |
+| `ROUTE_CACHE_DIR` / `ROUTE_CACHE_SECONDS` | `.cache/routes` / 7 days (routes and geocoded addresses) |
+| `GEOCODER_URL` | US Census one-line address geocoder |
 | `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` | development key (set it in production), `0`, `localhost,127.0.0.1,testserver` |
 
 ## Project layout
@@ -230,13 +248,14 @@ planner/
   data.py               offline city lookup, CSV loading and cleaning, station KD-tree
   geo.py                vectorized polyline decoding, haversine, 3-D coordinates, Douglas-Peucker
   routing.py            OSRM client: pooled connections, hedging, fallback, keep-warm
+  geocoding.py          street addresses via the US Census geocoder (cached, with city fallback)
   cache.py              two-level cache (memory + disk) with single-flight loading
   optimizer.py          stations along the route, first fill, optimal purchases, small-stop merge
   services.py           plan_trip(): runs the steps above and builds the response
   views.py              input validation, HTTP API, map page
   templates/            Leaflet map page
   management/commands/  demo_route, audit_fuel_data
-  tests/                41 offline tests: LP check, brute-force and reference-implementation checks, concurrency
+  tests/                47 offline tests: LP check, brute-force and reference-implementation checks, concurrency
 scripts/                routing provider benchmark
 docs/                   Postman collection, example response, Loom outline
 ```
