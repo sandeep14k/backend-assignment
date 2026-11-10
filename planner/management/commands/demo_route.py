@@ -27,5 +27,7 @@ class Command(BaseCommand):
                 f"{label:>6}: {data['distance_miles']} mi, ${data['total_cost_usd']}, "
                 f"{len(data['fuel_stops'])} stops, {meta['routing_calls']} routing call(s), {meta['timing_ms']['total']} ms"
             )
-        (settings.BASE_DIR / "docs/example-response.json").write_text(json.dumps(data, indent=2) + "\n")
+        (settings.BASE_DIR / "docs/example-response.json").write_text(
+            json.dumps(data, indent=2) + "\n"
+        )
         self.stdout.write("Saved docs/example-response.json")

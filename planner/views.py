@@ -21,7 +21,10 @@ class UnsupportedMediaType(Exception):
     pass
 
 
-NUMBER_LIMITS = {"initial_fuel_gallons": (0.0, CAPACITY_GALLONS, 0.0), "corridor_miles": (0.1, 25.0, 5.0)}
+NUMBER_LIMITS = {
+    "initial_fuel_gallons": (0.0, CAPACITY_GALLONS, 0.0),
+    "corridor_miles": (0.1, 25.0, 5.0),
+}
 
 
 def _number(data, name):
@@ -32,8 +35,15 @@ def _number(data, name):
             value = float(value)
         except ValueError:
             pass
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not minimum <= value <= maximum:
-        raise ValueError(f"{name} must be a number between {minimum:g} and {maximum:g}.")
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        or not minimum <= value <= maximum
+    ):
+        raise ValueError(
+            f"{name} must be a number between {minimum:g} and {maximum:g}."
+        )
     return float(value)
 
 
@@ -49,11 +59,22 @@ def _parse(request):
             raise ValueError("Request body must be a JSON object.")
     unknown = set(data) - FIELDS
     if unknown:
-        raise ValueError(f"Unknown fields: {', '.join(sorted(unknown))}. Allowed: {', '.join(sorted(FIELDS))}.")
+        raise ValueError(
+            f"Unknown fields: {', '.join(sorted(unknown))}. Allowed: {', '.join(sorted(FIELDS))}."
+        )
     start, finish = location(data.get("start")), location(data.get("finish"))
-    if (start["latitude"], start["longitude"]) == (finish["latitude"], finish["longitude"]):
+    if (start["latitude"], start["longitude"]) == (
+        finish["latitude"],
+        finish["longitude"],
+    ):
         raise ValueError("Start and finish must be different places.")
-    return data, start, finish, _number(data, "initial_fuel_gallons"), _number(data, "corridor_miles")
+    return (
+        data,
+        start,
+        finish,
+        _number(data, "initial_fuel_gallons"),
+        _number(data, "corridor_miles"),
+    )
 
 
 def _error(message, status, code):
@@ -76,8 +97,14 @@ def route(request):
     except RoutingError as exc:
         return _error(str(exc), 503, "routing_unavailable")
 
-    query = {k: data[k] for k in ("start", "finish", "initial_fuel_gallons", "corridor_miles") if k in data}
-    result["metadata"]["timing_ms"]["total"] = round((time.perf_counter() - started) * 1000, 1)
+    query = {
+        k: data[k]
+        for k in ("start", "finish", "initial_fuel_gallons", "corridor_miles")
+        if k in data
+    }
+    result["metadata"]["timing_ms"]["total"] = round(
+        (time.perf_counter() - started) * 1000, 1
+    )
     map_url = request.build_absolute_uri(f"{reverse('map')}?{urlencode(query)}")
     return JsonResponse({"map_url": map_url, **result})
 

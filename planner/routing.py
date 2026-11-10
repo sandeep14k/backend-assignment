@@ -9,6 +9,7 @@ call 0.5-4 s slower, so segment lengths are computed locally instead.
 Call budget: one request per uncached route. If the primary server fails, one
 retry goes to an independent OSRM mirror, so never more than two calls.
 """
+
 import hashlib
 import logging
 
@@ -54,7 +55,10 @@ def segment_miles(coordinates):
     """Great-circle length of each consecutive segment of [lon, lat] points."""
     lon, lat = np.radians(coordinates[:, 0]), np.radians(coordinates[:, 1])
     dlat, dlon = np.diff(lat), np.diff(lon)
-    a = np.sin(dlat / 2) ** 2 + np.cos(lat[:-1]) * np.cos(lat[1:]) * np.sin(dlon / 2) ** 2
+    a = (
+        np.sin(dlat / 2) ** 2
+        + np.cos(lat[:-1]) * np.cos(lat[1:]) * np.sin(dlon / 2) ** 2
+    )
     return 2 * EARTH_RADIUS_MILES * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
 
 
@@ -76,14 +80,17 @@ def simplify(coordinates, tolerance_miles=0.03):
         if last - first < 2:
             continue
         a, b = points[first], points[last]
-        inner = points[first + 1:last]
+        inner = points[first + 1 : last]
         direction = b - a
         length = np.hypot(*direction)
         if length == 0:
             distances = np.hypot(*(inner - a).T)
         else:
             relative = inner - a
-            distances = np.abs(direction[0] * relative[:, 1] - direction[1] * relative[:, 0]) / length
+            distances = (
+                np.abs(direction[0] * relative[:, 1] - direction[1] * relative[:, 0])
+                / length
+            )
         farthest = int(distances.argmax())
         if distances[farthest] > tolerance_miles:
             split = first + 1 + farthest
@@ -95,7 +102,12 @@ def simplify(coordinates, tolerance_miles=0.03):
 def _request(base_url, coordinates):
     response = requests.get(
         f"{base_url}/route/v1/driving/{coordinates}",
-        params={"overview": "full", "geometries": "polyline6", "steps": "false", "alternatives": "false"},
+        params={
+            "overview": "full",
+            "geometries": "polyline6",
+            "steps": "false",
+            "alternatives": "false",
+        },
         timeout=(3, 15),
     )
     response.raise_for_status()
@@ -107,7 +119,7 @@ def _request(base_url, coordinates):
 
 def fetch_route(start, finish):
     """Return ``(route, routing_calls)``; ``routing_calls`` is 0 on a cache hit."""
-    coordinates = f'{start["longitude"]:.6f},{start["latitude"]:.6f};{finish["longitude"]:.6f},{finish["latitude"]:.6f}'
+    coordinates = f"{start['longitude']:.6f},{start['latitude']:.6f};{finish['longitude']:.6f},{finish['latitude']:.6f}"
     key = "route:v2:" + hashlib.sha256(coordinates.encode()).hexdigest()
     cached = cache.get(key)
     if cached is not None:

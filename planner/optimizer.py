@@ -2,6 +2,7 @@
 
 Vehicle model (from the brief): 500-mile range at 10 MPG, i.e. a 50-gallon tank.
 """
+
 from decimal import ROUND_HALF_UP, Decimal
 
 import numpy as np
@@ -36,12 +37,17 @@ def candidates(route, stations, corridor_miles=5.0, points=None):
     if len(coordinates) < 2 or not stations:
         return []
     if points is None:
-        points = np.array([[s["longitude"], s["latitude"]] for s in stations], dtype=float)
+        points = np.array(
+            [[s["longitude"], s["latitude"]] for s in stations], dtype=float
+        )
     scale = _planar_scale(coordinates[:, 1])
     route_xy, station_xy = coordinates * scale, points * scale
 
     # Cheap pre-filter: ignore stations outside the route's padded bounding box.
-    low, high = route_xy.min(axis=0) - corridor_miles, route_xy.max(axis=0) + corridor_miles
+    low, high = (
+        route_xy.min(axis=0) - corridor_miles,
+        route_xy.max(axis=0) + corridor_miles,
+    )
     nearby = np.flatnonzero(((station_xy >= low) & (station_xy <= high)).all(axis=1))
     if not len(nearby):
         return []
@@ -49,23 +55,38 @@ def candidates(route, stations, corridor_miles=5.0, points=None):
 
     _, nearest = cKDTree(route_xy).query(station_xy, k=min(8, len(route_xy)))
     nearest = np.asarray(nearest).reshape(len(station_xy), -1)
-    segment = np.clip(np.concatenate([nearest, nearest - 1], axis=1), 0, len(route_xy) - 2)
+    segment = np.clip(
+        np.concatenate([nearest, nearest - 1], axis=1), 0, len(route_xy) - 2
+    )
     a, b = route_xy[segment], route_xy[segment + 1]
     direction = b - a
-    length_sq = np.maximum((direction ** 2).sum(axis=2), 1e-20)
-    fraction = np.clip(((station_xy[:, None, :] - a) * direction).sum(axis=2) / length_sq, 0, 1)
-    offset = np.linalg.norm(a + fraction[:, :, None] * direction - station_xy[:, None, :], axis=2)
+    length_sq = np.maximum((direction**2).sum(axis=2), 1e-20)
+    fraction = np.clip(
+        ((station_xy[:, None, :] - a) * direction).sum(axis=2) / length_sq, 0, 1
+    )
+    offset = np.linalg.norm(
+        a + fraction[:, :, None] * direction - station_xy[:, None, :], axis=2
+    )
     best = offset.argmin(axis=1)
 
     rows = np.arange(len(station_xy))
     best_offset = offset[rows, best]
     best_segment = segment[rows, best]
     cumulative = np.concatenate([[0.0], np.cumsum(route["segment_miles"])])
-    mile = cumulative[best_segment] + fraction[rows, best] * np.asarray(route["segment_miles"])[best_segment]
+    mile = (
+        cumulative[best_segment]
+        + fraction[rows, best] * np.asarray(route["segment_miles"])[best_segment]
+    )
 
     found = [
-        {**stations[nearby[i]], "route_mile": float(mile[i]), "offset_miles": round(float(best_offset[i]), 3)}
-        for i in np.flatnonzero((best_offset <= corridor_miles) & (mile < route["distance_miles"] - EPSILON))
+        {
+            **stations[nearby[i]],
+            "route_mile": float(mile[i]),
+            "offset_miles": round(float(best_offset[i]), 3),
+        }
+        for i in np.flatnonzero(
+            (best_offset <= corridor_miles) & (mile < route["distance_miles"] - EPSILON)
+        )
     ]
     found.sort(key=lambda s: (s["route_mile"], Decimal(s["price_per_gallon"]), s["id"]))
     unique = []
@@ -84,15 +105,23 @@ def origin_station(start, stations, points):
     if not stations:
         return None
     scale = _planar_scale([start["latitude"]])
-    distance = np.linalg.norm((points - [start["longitude"], start["latitude"]]) * scale, axis=1)
+    distance = np.linalg.norm(
+        (points - [start["longitude"], start["latitude"]]) * scale, axis=1
+    )
     close = np.flatnonzero(distance <= ORIGIN_RADIUS_MILES)
     if len(close):
-        index = min(close, key=lambda i: (Decimal(stations[i]["price_per_gallon"]), distance[i]))
+        index = min(
+            close, key=lambda i: (Decimal(stations[i]["price_per_gallon"]), distance[i])
+        )
     else:
         index = int(distance.argmin())
         if distance[index] > ORIGIN_FALLBACK_MILES:
             return None
-    return {**stations[index], "route_mile": 0.0, "offset_miles": round(float(distance[index]), 3)}
+    return {
+        **stations[index],
+        "route_mile": 0.0,
+        "offset_miles": round(float(distance[index]), 3),
+    }
 
 
 def money(value):
@@ -126,8 +155,15 @@ def _cheapest_purchases(nodes, prices, distance_miles, initial_gallons):
         position = node["route_mile"]
         if i == len(nodes) - 1:
             break
-        target_mile = nodes[next_cheaper[i]]["route_mile"] if next_cheaper[i] is not None else position + RANGE_MILES
-        purchase = min(CAPACITY_GALLONS, (min(target_mile, distance_miles) - position) / MPG) - fuel
+        target_mile = (
+            nodes[next_cheaper[i]]["route_mile"]
+            if next_cheaper[i] is not None
+            else position + RANGE_MILES
+        )
+        purchase = (
+            min(CAPACITY_GALLONS, (min(target_mile, distance_miles) - position) / MPG)
+            - fuel
+        )
         if purchase > EPSILON:
             purchases[i] = purchase
             fuel += purchase
@@ -135,7 +171,14 @@ def _cheapest_purchases(nodes, prices, distance_miles, initial_gallons):
 
 
 def _cost(purchases, prices):
-    return sum((Decimal(str(gallons)) * price for gallons, price in zip(purchases, prices) if gallons > EPSILON), Decimal(0))
+    return sum(
+        (
+            Decimal(str(gallons)) * price
+            for gallons, price in zip(purchases, prices)
+            if gallons > EPSILON
+        ),
+        Decimal(0),
+    )
 
 
 def _arrival_fuel(nodes, purchases, initial_gallons):
@@ -169,7 +212,11 @@ def _merge_small_purchases(nodes, purchases, prices, initial_gallons, min_gallon
         previous = max((j for j in stops if j < i), default=None)
         following = min((j for j in stops if j > i), default=None)
         options = []
-        if previous is not None and arrivals[previous] + purchases[previous] + gallons <= CAPACITY_GALLONS + EPSILON:
+        if (
+            previous is not None
+            and arrivals[previous] + purchases[previous] + gallons
+            <= CAPACITY_GALLONS + EPSILON
+        ):
             options.append((prices[previous], previous))
         if following is not None and arrivals[following] - gallons >= -EPSILON:
             options.append((prices[following], following))
@@ -198,24 +245,36 @@ def optimize(stations, distance_miles, initial_gallons=0.0, min_stop_gallons=0.0
     prices = [Decimal(node["price_per_gallon"]) for node in nodes]
     purchases = _cheapest_purchases(nodes, prices, distance_miles, initial_gallons)
     optimal_cost = _cost(purchases, prices)
-    merged = _merge_small_purchases(nodes, purchases, prices, initial_gallons, min_stop_gallons) if min_stop_gallons else 0
+    merged = (
+        _merge_small_purchases(
+            nodes, purchases, prices, initial_gallons, min_stop_gallons
+        )
+        if min_stop_gallons
+        else 0
+    )
 
     stops, fuel, total = [], float(initial_gallons), Decimal(0)
-    for node, previous, purchase, price in zip(nodes, [None, *nodes], purchases, prices):
-        fuel -= (node["route_mile"] - (previous["route_mile"] if previous else 0.0)) / MPG
+    for node, previous, purchase, price in zip(
+        nodes, [None, *nodes], purchases, prices
+    ):
+        fuel -= (
+            node["route_mile"] - (previous["route_mile"] if previous else 0.0)
+        ) / MPG
         fuel = max(fuel, 0.0)
         if purchase <= EPSILON:
             continue
         cost = Decimal(str(purchase)) * price
         total += cost
-        stops.append({
-            **node,
-            "route_mile": round(node["route_mile"], 3),
-            "gallons_on_arrival": round(fuel, 3),
-            "gallons_purchased": round(purchase, 3),
-            "gallons_on_departure": round(fuel + purchase, 3),
-            "cost_usd": money(cost),
-        })
+        stops.append(
+            {
+                **node,
+                "route_mile": round(node["route_mile"], 3),
+                "gallons_on_arrival": round(fuel, 3),
+                "gallons_purchased": round(purchase, 3),
+                "gallons_on_departure": round(fuel + purchase, 3),
+                "cost_usd": money(cost),
+            }
+        )
         fuel += purchase
 
     # Total = sum of the rounded receipts, so the numbers shown always add up.
@@ -229,6 +288,8 @@ def optimize(stations, distance_miles, initial_gallons=0.0, min_stop_gallons=0.0
         "fuel_stops": stops,
         "fuel_consumed_gallons": round(distance_miles / MPG, 3),
         "fuel_purchased_gallons": round(purchased, 3),
-        "average_price_per_gallon": money(receipts / Decimal(str(purchased))) if purchased else None,
+        "average_price_per_gallon": money(receipts / Decimal(str(purchased)))
+        if purchased
+        else None,
         "remaining_gallons": round(fuel, 3),
     }

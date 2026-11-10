@@ -5,7 +5,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "development-only-fuel-planner")
 DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",")
+ALLOWED_HOSTS = os.environ.get(
+    "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver"
+).split(",")
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -17,7 +19,9 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates", "APP_DIRS": True}]
+TEMPLATES = [
+    {"BACKEND": "django.template.backends.django.DjangoTemplates", "APP_DIRS": True}
+]
 
 # No models: the app only reads the bundled CSV files.
 DATABASES = {}
@@ -36,7 +40,8 @@ CACHES = {
 OSRM_URLS = [
     url.strip()
     for url in os.environ.get(
-        "OSRM_URLS", "https://router.project-osrm.org,https://routing.openstreetmap.de/routed-car"
+        "OSRM_URLS",
+        "https://router.project-osrm.org,https://routing.openstreetmap.de/routed-car",
     ).split(",")
     if url.strip()
 ]
