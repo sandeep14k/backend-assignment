@@ -31,6 +31,7 @@ STOP_FIELDS = (
     "gallons_purchased",
     "gallons_on_departure",
     "cost_usd",
+    "reason",
 )
 
 

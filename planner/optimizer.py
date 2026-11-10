@@ -108,9 +108,13 @@ def _next_cheaper(prices):
 
 
 def _cheapest_purchases(nodes, prices, distance_miles, initial_gallons):
-    """Gallons bought at each node under the greedy rule described in ``optimize``."""
+    """Gallons bought at each node under the greedy rule in ``optimize``, and why.
+
+    Returns ``(purchases, decisions)``; ``decisions[i]`` is ``("cheaper", j)``
+    (buy just enough to reach cheaper node j), ``("finish", None)`` or ``("fill", None)``.
+    """
     next_cheaper = _next_cheaper(prices)
-    purchases = [0.0] * len(nodes)
+    purchases, decisions = [0.0] * len(nodes), [None] * len(nodes)
     fuel, position = float(initial_gallons), 0.0
     for i, node in enumerate(nodes):
         gap = node["route_mile"] - position
@@ -123,12 +127,19 @@ def _cheapest_purchases(nodes, prices, distance_miles, initial_gallons):
         position = node["route_mile"]
         if i == len(nodes) - 1:
             break
-        target_mile = nodes[next_cheaper[i]]["route_mile"] if next_cheaper[i] is not None else position + RANGE_MILES
+        cheaper = next_cheaper[i]  # Always exists: the destination is a free "station".
+        if nodes[cheaper]["route_mile"] - position <= RANGE_MILES:
+            target_mile, decision = (
+                nodes[cheaper]["route_mile"],
+                ("finish", None) if cheaper == len(nodes) - 1 else ("cheaper", cheaper),
+            )
+        else:
+            target_mile, decision = position + RANGE_MILES, ("fill", None)
         purchase = min(CAPACITY_GALLONS, (min(target_mile, distance_miles) - position) / MPG) - fuel
         if purchase > EPSILON:
-            purchases[i] = purchase
+            purchases[i], decisions[i] = purchase, decision
             fuel += purchase
-    return purchases
+    return purchases, decisions
 
 
 def _cost(purchases, prices):
@@ -157,9 +168,9 @@ def _merge_small_purchases(nodes, purchases, prices, initial_gallons, min_gallon
         (tank levels between the stops rise, peaking at that departure);
       * buy it at the next stop instead, if the tank can reach it without the fuel
         (levels between the stops fall, lowest on arrival at the next stop).
-    Mutates ``purchases``; returns how many stops were removed.
+    Mutates ``purchases``; returns the moves made as ``(from_index, to_index, gallons)``.
     """
-    merged = 0
+    moves = []
     for i in range(len(nodes) - 1):
         gallons = purchases[i]
         if not EPSILON < gallons < min_gallons:
@@ -177,8 +188,51 @@ def _merge_small_purchases(nodes, purchases, prices, initial_gallons, min_gallon
             _, target = min(options)
             purchases[target] += gallons
             purchases[i] = 0.0
-            merged += 1
-    return merged
+            moves.append((i, target, gallons))
+    return moves
+
+
+def _reason(index, nodes, decision, moves):
+    """One sentence explaining a stop, e.g. 'Bought just enough to reach X at mile 578, cheaper at $2.899.'"""
+    kind, target = decision
+    if kind == "cheaper":
+        node = nodes[target]
+        place = f" ({node['city']}, {node['state']})" if "city" in node else ""
+        text = (
+            f"Bought just enough to reach {node.get('name', 'station ' + str(node.get('id')))}{place} at mile "
+            f"{node['route_mile']:.0f}, which is cheaper at ${Decimal(node['price_per_gallon']):.3f}/gal."
+        )
+    elif kind == "finish":
+        text = "No cheaper station before the destination, so bought just enough to finish."
+    else:
+        text = f"No cheaper station within the next {RANGE_MILES:.0f} miles, so filled the tank."
+    if index == 0 and nodes[0]["route_mile"] == 0:
+        text = f"First fill near the start. {text}"
+    for source, _, gallons in (move for move in moves if move[1] == index):
+        mile = nodes[source]["route_mile"]
+        text += f" Includes {gallons:.1f} gal that would otherwise need a separate stop at mile {mile:.0f}."
+    return text
+
+
+def _price_blind_plan(nodes, prices, initial_gallons):
+    """Baseline for comparison: a driver who ignores prices.
+
+    Same route, same stations, same start. They stop only when the next station
+    (or the destination) is out of reach, and then fill the tank, or buy just
+    enough to finish if the destination is within range.
+    """
+    cost, stops, fuel, position = Decimal(0), 0, float(initial_gallons), 0.0
+    distance = nodes[-1]["route_mile"]
+    for i, node in enumerate(nodes[:-1]):
+        fuel -= (node["route_mile"] - position) / MPG
+        position = node["route_mile"]
+        gap = nodes[i + 1]["route_mile"] - position
+        if fuel <= EPSILON or gap / MPG > fuel + EPSILON:  # Empty, or cannot reach the next station.
+            purchase = min(CAPACITY_GALLONS, (distance - position) / MPG) - fuel
+            cost += Decimal(money(Decimal(str(purchase)) * prices[i]))
+            stops += 1
+            fuel += purchase
+    return cost, stops
 
 
 def optimize(stations, distance_miles, initial_gallons=0.0, min_stop_gallons=0.0):
@@ -191,19 +245,23 @@ def optimize(stations, distance_miles, initial_gallons=0.0, min_stop_gallons=0.0
     gallon needed before the next refill is cheapest right here.
     The destination is modelled as a free "station" so we never overbuy.
 
-    ``min_stop_gallons`` then folds tiny top-ups into the previous stop (see
+    ``min_stop_gallons`` then folds tiny top-ups into a neighbouring stop (see
     ``_merge_small_purchases``); the extra cost is reported, typically cents.
+    Each stop carries a one-sentence ``reason``, and ``savings`` compares the
+    plan with a price-blind driver on the same route.
     """
     nodes = [*stations, {"route_mile": distance_miles, "price_per_gallon": "0"}]
     prices = [Decimal(node["price_per_gallon"]) for node in nodes]
-    purchases = _cheapest_purchases(nodes, prices, distance_miles, initial_gallons)
+    purchases, decisions = _cheapest_purchases(nodes, prices, distance_miles, initial_gallons)
     optimal_cost = _cost(purchases, prices)
-    merged = (
-        _merge_small_purchases(nodes, purchases, prices, initial_gallons, min_stop_gallons) if min_stop_gallons else 0
+    moves = (
+        _merge_small_purchases(nodes, purchases, prices, initial_gallons, min_stop_gallons) if min_stop_gallons else []
     )
 
     stops, fuel, total = [], float(initial_gallons), Decimal(0)
-    for node, previous, purchase, price in zip(nodes, [None, *nodes[:-1]], purchases, prices, strict=True):
+    for index, (node, previous, purchase, price) in enumerate(
+        zip(nodes, [None, *nodes[:-1]], purchases, prices, strict=True)
+    ):
         fuel -= (node["route_mile"] - (previous["route_mile"] if previous else 0.0)) / MPG
         fuel = max(fuel, 0.0)
         if purchase <= EPSILON:
@@ -218,6 +276,7 @@ def optimize(stations, distance_miles, initial_gallons=0.0, min_stop_gallons=0.0
                 "gallons_purchased": round(purchase, 3),
                 "gallons_on_departure": round(fuel + purchase, 3),
                 "cost_usd": money(cost),
+                "reason": _reason(index, nodes, decisions[index], moves),
             }
         )
         fuel += purchase
@@ -225,10 +284,19 @@ def optimize(stations, distance_miles, initial_gallons=0.0, min_stop_gallons=0.0
     # Total = sum of the rounded receipts, so the numbers shown always add up.
     receipts = sum((Decimal(stop["cost_usd"]) for stop in stops), Decimal(0))
     purchased = sum(stop["gallons_purchased"] for stop in stops)
+    blind_cost, blind_stops = _price_blind_plan(nodes, prices, initial_gallons)
     return {
         "total_cost_usd": money(receipts),
+        "savings": {
+            "compared_to": "A price-blind driver on the same route: stops only when the next station is out "
+            "of reach, then fills the tank.",
+            "price_blind_cost_usd": money(blind_cost),
+            "price_blind_stops": blind_stops,
+            "savings_usd": money(blind_cost - receipts),
+            "savings_percent": float(round((blind_cost - receipts) / blind_cost * 100, 1)) if blind_cost else 0.0,
+        },
         "unrounded_total_cost_usd": str(total.quantize(Decimal("0.000001"))),
-        "small_stops_merged": merged,
+        "small_stops_merged": len(moves),
         "merge_extra_cost_usd": money(total - optimal_cost),
         "fuel_stops": stops,
         "fuel_consumed_gallons": round(distance_miles / MPG, 3),

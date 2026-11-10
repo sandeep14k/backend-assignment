@@ -58,6 +58,8 @@ class APITests(SimpleTestCase):
         self.assertEqual(kinds[:3], ["route", "start", "finish"])
         self.assertEqual(kinds.count("fuel_stop"), len(data["fuel_stops"]))
         self.assertEqual(data["metadata"]["routing_calls"], 1)
+        self.assertTrue(all(stop["reason"] for stop in data["fuel_stops"]))
+        self.assertGreaterEqual(float(data["savings"]["savings_usd"]), 0)
         total = sum(float(s["cost_usd"]) for s in data["fuel_stops"])
         self.assertAlmostEqual(total, float(data["total_cost_usd"]), places=2)
 

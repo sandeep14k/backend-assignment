@@ -13,11 +13,14 @@ curl -X POST http://127.0.0.1:8000/api/route/ \
   "map_url": "http://127.0.0.1:8000/map/?start=Chicago%2C+IL&finish=Los+Angeles%2C+CA",
   "distance_miles": 2024.4,
   "total_cost_usd": "621.00",
+  "savings": {"price_blind_cost_usd": "671.11", "savings_usd": "50.11", "savings_percent": 7.5},
   "fuel_stops": [
     {"name": "Gulf", "city": "Bensenville", "state": "IL", "route_mile": 0.0,
-     "price_per_gallon": "3.07900000", "gallons_purchased": 32.318, "cost_usd": "99.51"},
-    {"name": "KWIK STAR #932", "city": "Altoona", "state": "IA", "route_mile": 323.2,
-     "price_per_gallon": "2.95900000", "gallons_purchased": 16.2, "cost_usd": "47.98"}
+     "price_per_gallon": "3.07900000", "gallons_purchased": 32.318, "cost_usd": "99.51",
+     "reason": "First fill near the start. Bought just enough to reach KWIK STAR #932 (Altoona, IA) at mile 323, which is cheaper at $2.959/gal."},
+    {"name": "Henderson Fuel Mart", "city": "Henderson", "state": "NE", "route_mile": 578.3,
+     "price_per_gallon": "2.89900000", "gallons_purchased": 50.0, "cost_usd": "144.95",
+     "reason": "No cheaper station within the next 500 miles, so filled the tank."}
     // ... 9 stops in total
   ],
   "map": {"type": "FeatureCollection", "features": ["route line, start, finish, numbered fuel stops"]},
@@ -35,7 +38,7 @@ Python 3.13+. No API keys, database or migrations needed.
 ```sh
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python manage.py test               # 47 offline tests
+python manage.py test               # 50 offline tests
 python manage.py runserver          # http://127.0.0.1:8000
 ```
 
@@ -139,7 +142,8 @@ Every response reports `metadata.routing_calls` (0, 1 or 2), `metadata.geocoding
 
 Response fields:
 - `total_cost_usd`: total cost of the fuel bought.
-- `fuel_stops`: per-stop station, price, route mile, distance from the road, gallons on arrival / bought / on departure, and cost.
+- `savings`: the cost for a price-blind driver on the same route, and how much the plan saves (see below).
+- `fuel_stops`: per-stop station, price, route mile, distance from the road, gallons on arrival / bought / on departure, cost, and `reason` (why the plan stops there).
 - `fuel_consumed_gallons`, `fuel_purchased_gallons` and `average_price_per_gallon`.
 - `small_stops_merged` and `merge_extra_cost_usd` (explained below).
 - `map` (GeoJSON) and `map_url`.
@@ -191,7 +195,21 @@ cities (offline) ─► OSRM route (1 call, cached) ─► stations along the ro
 4. **Small top-ups.** The exact optimum sometimes buys 0.4 gallons at a station 10 miles after the previous one, to save a fraction of a cent.
    - Any purchase under 5 gallons moves to the previous stop (if the tank has room) or the next one (if the tank can reach it without that fuel), whichever is cheaper.
    - Chicago → LA goes from 13 stops to 9 for $0.67 more. The extra cost is reported as `merge_extra_cost_usd`.
-5. **Money.** Prices and receipts use `Decimal`, and each receipt is rounded half-up to cents. The total is the sum of the receipts, so the numbers always add up.
+5. **Why each stop.** Every stop carries a one-sentence `reason` from the optimizer's own decision:
+   - *"Bought just enough to reach X at mile 578, which is cheaper at $2.899/gal."*
+   - *"No cheaper station within the next 500 miles, so filled the tank."*
+   - *"…bought just enough to finish."*
+   - If a small top-up was moved there, the reason says so.
+6. **Savings.** The plan is compared with a **price-blind driver**: same route, same stations, same start, but they stop only when the next station is out of reach and then fill the tank.
+
+   | Route | Plan | Price-blind | Saved |
+   |---|---|---|---|
+   | Chicago → LA | $621.00 (9 stops) | $671.11 (5 stops) | **$50.11 (7.5%)** |
+   | New York → Miami | $377.35 (5 stops) | $436.41 (3 stops) | **$59.06 (13.5%)** |
+   | Seattle → Boston | $978.66 (12 stops) | $1,052.95 (7 stops) | **$74.29 (7.1%)** |
+
+   The plan makes more stops, because buying "just enough to reach the cheaper station" is what saves the money. That's the trade-off the brief asks for ("optimal mostly means cost effective").
+7. **Money.** Prices and receipts use `Decimal`, and each receipt is rounded half-up to cents. The total is the sum of the receipts, so the numbers always add up.
 
 ## Fuel price data
 
@@ -255,7 +273,7 @@ planner/
   views.py              input validation, HTTP API, map page
   templates/            Leaflet map page
   management/commands/  demo_route, audit_fuel_data
-  tests/                47 offline tests: LP check, brute-force and reference-implementation checks, concurrency
+  tests/                50 offline tests: LP check, brute-force and reference-implementation checks, concurrency
 scripts/                routing provider benchmark
 docs/                   Postman collection, example response, Loom outline
 ```

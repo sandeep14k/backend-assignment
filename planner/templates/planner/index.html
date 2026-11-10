@@ -30,6 +30,10 @@
   th, td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
   th { font-size:12px; color:var(--muted); font-weight:600; }
   td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .card.save { border-color:#9fd3b8; background:#eefaf3; }
+  .card.save b { color:#185d46; }
+  td.why { white-space:normal; min-width:280px; font-size:13px; color:var(--muted); }
+  p.why { margin:6px 0 0; max-width:260px; font-size:12px; color:#5a6d65; }
   .note { font-size:13px; color:var(--muted); margin-top:12px; }
   .pin { background:var(--fuel); color:#fff; border:2px solid #fff; border-radius:50%; width:24px; height:24px; display:grid; place-items:center; font:700 12px system-ui; box-shadow:0 1px 4px #0005; }
   [hidden] { display:none !important; }
@@ -85,15 +89,16 @@ function popup(feature, target) {
   const box = document.createElement("div");
   if (p.kind === "fuel_stop") {
     box.append(el("strong", `${p.stop_number}. ${p.name}`), el("div", `${p.city}, ${p.state} · mile ${p.route_mile.toFixed(0)}`),
-      el("div", `${p.gallons_purchased.toFixed(1)} gal × $${Number(p.price_per_gallon).toFixed(3)}/gal = $${p.cost_usd}`));
+      el("div", `${p.gallons_purchased.toFixed(1)} gal × $${Number(p.price_per_gallon).toFixed(3)}/gal = $${p.cost_usd}`),
+      el("p", p.reason, "why"));
   } else {
     box.append(el("strong", p.kind === "start" ? "Start" : "Finish"), el("div", p.name));
   }
   target.bindPopup(box);
 }
 
-function card(value, label) {
-  const node = el("div", undefined, "card");
+function card(value, label, extra) {
+  const node = el("div", undefined, extra ? `card ${extra}` : "card");
   node.append(el("b", value), el("span", label));
   return node;
 }
@@ -105,6 +110,7 @@ function render(data) {
   const t = data.metadata.timing_ms;
   $("cards").replaceChildren(
     card(`$${data.total_cost_usd}`, "total fuel cost"),
+    card(`$${data.savings.savings_usd}`, `saved (${data.savings.savings_percent}%) vs price-blind $${data.savings.price_blind_cost_usd}`, "save"),
     card(`${Math.round(data.distance_miles).toLocaleString()} mi`, `${data.duration_hours.toFixed(1)} h driving`),
     card(String(data.fuel_stops.length), "fuel stops"),
     card(`${data.fuel_purchased_gallons.toFixed(1)} gal`, data.average_price_per_gallon ? `avg $${data.average_price_per_gallon}/gal` : "purchased"),
@@ -114,13 +120,13 @@ function render(data) {
 
   const table = $("stops");
   const head = el("tr");
-  ["#", "Station", "Location", "Route mile", "Price/gal", "Gallons", "Cost"].forEach((h) => head.append(el("th", h)));
+  ["#", "Station", "Location", "Route mile", "Price/gal", "Gallons", "Cost", "Why here"].forEach((h) => head.append(el("th", h)));
   table.replaceChildren(head);
   data.fuel_stops.forEach((s, i) => {
     const row = el("tr");
     row.append(el("td", String(i + 1)), el("td", s.name), el("td", `${s.city}, ${s.state}`),
       el("td", s.route_mile.toFixed(0), "num"), el("td", `$${Number(s.price_per_gallon).toFixed(3)}`, "num"),
-      el("td", s.gallons_purchased.toFixed(1), "num"), el("td", `$${s.cost_usd}`, "num"));
+      el("td", s.gallons_purchased.toFixed(1), "num"), el("td", `$${s.cost_usd}`, "num"), el("td", s.reason, "why"));
     table.append(row);
   });
   table.hidden = data.fuel_stops.length === 0;

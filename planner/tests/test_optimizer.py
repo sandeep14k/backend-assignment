@@ -61,6 +61,30 @@ class OptimizerTests(SimpleTestCase):
         self.assertEqual([s["gallons_purchased"] for s in plan["fuel_stops"]], [50, 1])  # nowhere to move it
         self.assertEqual(plan["small_stops_merged"], 0)
 
+    def test_every_stop_explains_itself(self):
+        stations = [station(0, 3, "a"), station(300, "2.5", "b"), station(700, 4, "c")]
+        reasons = [s["reason"] for s in optimize(stations, 1100)["fuel_stops"]]
+        self.assertTrue(reasons[0].startswith("First fill near the start. Bought just enough to reach station b"))
+        self.assertIn("filled the tank", reasons[1])  # Nothing cheaper than $2.50 within 500 miles.
+        self.assertIn("just enough to finish", reasons[2])
+        merged = optimize(
+            [station(0, 3, "a"), station(400, "2.99", "b"), station(420, "2.98", "c")], 900, min_stop_gallons=5
+        )
+        self.assertIn("would otherwise need a separate stop at mile 400", merged["fuel_stops"][0]["reason"])
+
+    def test_savings_against_price_blind_driver(self):
+        # Price-blind: stops only when forced (miles 0 and 450), paying $4 at 450. The plan buys more at $2.
+        plan = optimize([station(0, 2, "a"), station(300, 3, "b"), station(450, 4, "c")], 900)
+        self.assertEqual(plan["savings"]["price_blind_cost_usd"], "260.00")  # 50 x $2 + 40 x $4
+        self.assertEqual(plan["total_cost_usd"], "230.00")  # 50 x $2 + 30 x $3 (fill at b) + 10 x $4 (finish)
+        self.assertEqual(plan["savings"]["savings_usd"], "30.00")
+        self.assertEqual(plan["savings"]["price_blind_stops"], 2)
+
+    def test_identical_choices_save_nothing(self):
+        # Two stations at the start: an empty tank must fill at the first one, as the plan does.
+        plan = optimize([station(0, 3, "a"), station(0.0, 4, "b")], 80)
+        self.assertEqual(plan["savings"]["savings_usd"], "0.00")
+
     def test_merged_plans_stay_feasible(self):
         rng = random.Random(11)
         for _ in range(200):
