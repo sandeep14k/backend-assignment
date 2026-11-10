@@ -1,18 +1,31 @@
 import json
-from pathlib import Path
+
+from django.conf import settings
+from django.core.cache import cache
 from django.core.management.base import BaseCommand, CommandError
 from django.test import Client
 
+
 class Command(BaseCommand):
-    help = 'Exercise the real routing provider twice and save a Postman-style demo response.'
+    help = "Call the live routing provider twice (cold, then cached) and save docs/example-response.json."
+
+    def add_arguments(self, parser):
+        parser.add_argument("--start", default="Chicago, IL")
+        parser.add_argument("--finish", default="Los Angeles, CA")
+
     def handle(self, *args, **options):
+        cache.clear()
         client = Client()
-        payload = {'start': 'Chicago, IL', 'finish': 'Los Angeles, CA'}
-        for attempt in range(2):
-            response = client.post('/api/route/', json.dumps(payload), content_type='application/json')
+        body = json.dumps({"start": options["start"], "finish": options["finish"]})
+        for label in ("cold", "cached"):
+            response = client.post("/api/route/", body, content_type="application/json")
             data = response.json()
             if response.status_code != 200:
-                raise CommandError(f'{response.status_code}: {data}')
-            Path('docs/example-response.json').write_text(json.dumps(data, indent=2))
-            self.stdout.write(json.dumps({k: data[k] for k in ['distance_miles', 'total_cost_usd', 'metadata']}))
-            self.stdout.write(f"Fuel stops: {len(data['fuel_stops'])}")
+                raise CommandError(f"{response.status_code}: {data}")
+            meta = data["metadata"]
+            self.stdout.write(
+                f"{label:>6}: {data['distance_miles']} mi, ${data['total_cost_usd']}, "
+                f"{len(data['fuel_stops'])} stops, {meta['routing_calls']} routing call(s), {meta['timing_ms']['total']} ms"
+            )
+        (settings.BASE_DIR / "docs/example-response.json").write_text(json.dumps(data, indent=2) + "\n")
+        self.stdout.write("Saved docs/example-response.json")

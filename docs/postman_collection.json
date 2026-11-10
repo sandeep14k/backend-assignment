@@ -1,6 +1,7 @@
 {
   "info": {
     "name": "Fuel Route Planner",
+    "description": "Run top to bottom on a fresh server. Open map_url from any response to see the route.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -11,7 +12,7 @@
   ],
   "item": [
     {
-      "name": "Cross-country route",
+      "name": "1. Chicago -> Los Angeles (cold: 1 routing call)",
       "request": {
         "method": "POST",
         "header": [
@@ -37,15 +38,140 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Expected status\", () => pm.response.to.have.status(200));",
-              "pm.test(\"JSON response\", () => pm.response.to.be.json);"
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "const d = pm.response.json();",
+              "pm.test(\"total cost equals sum of receipts\", () => { const s = d.fuel_stops.reduce((a, x) => a + Number(x.cost_usd), 0); pm.expect(s).to.be.closeTo(Number(d.total_cost_usd), 0.001); });",
+              "pm.test(\"tank never exceeds 50 gallons\", () => d.fuel_stops.forEach(x => pm.expect(x.gallons_on_departure).to.be.at.most(50.001)));",
+              "pm.test(\"at most 2 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(2));",
+              "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);"
             ]
           }
         }
       ]
     },
     {
-      "name": "Short route",
+      "name": "2. Same trip again (cached: 0 routing calls)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": \"Chicago, IL\",\n  \"finish\": \"Los Angeles, CA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/api/route/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "const d = pm.response.json();",
+              "pm.test(\"total cost equals sum of receipts\", () => { const s = d.fuel_stops.reduce((a, x) => a + Number(x.cost_usd), 0); pm.expect(s).to.be.closeTo(Number(d.total_cost_usd), 0.001); });",
+              "pm.test(\"tank never exceeds 50 gallons\", () => d.fuel_stops.forEach(x => pm.expect(x.gallons_on_departure).to.be.at.most(50.001)));",
+              "pm.test(\"at most 2 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(2));",
+              "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
+              "pm.test(\"served from cache\", () => pm.expect(d.metadata.routing_calls).to.eql(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. GET with full state names",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/route/?start=St. Louis, Missouri&finish=Denver, Colorado",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "route",
+            ""
+          ],
+          "query": [
+            {
+              "key": "start",
+              "value": "St. Louis, Missouri"
+            },
+            {
+              "key": "finish",
+              "value": "Denver, Colorado"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "const d = pm.response.json();",
+              "pm.test(\"total cost equals sum of receipts\", () => { const s = d.fuel_stops.reduce((a, x) => a + Number(x.cost_usd), 0); pm.expect(s).to.be.closeTo(Number(d.total_cost_usd), 0.001); });",
+              "pm.test(\"tank never exceeds 50 gallons\", () => d.fuel_stops.forEach(x => pm.expect(x.gallons_on_departure).to.be.at.most(50.001)));",
+              "pm.test(\"at most 2 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(2));",
+              "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Coordinates + half tank",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": \"40.7128, -74.0060\",\n  \"finish\": \"25.7617, -80.1918\",\n  \"initial_fuel_gallons\": 25\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/api/route/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "const d = pm.response.json();",
+              "pm.test(\"total cost equals sum of receipts\", () => { const s = d.fuel_stops.reduce((a, x) => a + Number(x.cost_usd), 0); pm.expect(s).to.be.closeTo(Number(d.total_cost_usd), 0.001); });",
+              "pm.test(\"tank never exceeds 50 gallons\", () => d.fuel_stops.forEach(x => pm.expect(x.gallons_on_departure).to.be.at.most(50.001)));",
+              "pm.test(\"at most 2 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(2));",
+              "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Short trip (one fill at start)",
       "request": {
         "method": "POST",
         "header": [
@@ -71,15 +197,20 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Expected status\", () => pm.response.to.have.status(200));",
-              "pm.test(\"JSON response\", () => pm.response.to.be.json);"
+              "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+              "const d = pm.response.json();",
+              "pm.test(\"total cost equals sum of receipts\", () => { const s = d.fuel_stops.reduce((a, x) => a + Number(x.cost_usd), 0); pm.expect(s).to.be.closeTo(Number(d.total_cost_usd), 0.001); });",
+              "pm.test(\"tank never exceeds 50 gallons\", () => d.fuel_stops.forEach(x => pm.expect(x.gallons_on_departure).to.be.at.most(50.001)));",
+              "pm.test(\"at most 2 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(2));",
+              "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
+              "pm.test(\"one stop\", () => pm.expect(d.fuel_stops.length).to.eql(1));"
             ]
           }
         }
       ]
     },
     {
-      "name": "Invalid input",
+      "name": "6. Invalid location -> 400",
       "request": {
         "method": "POST",
         "header": [
@@ -105,8 +236,41 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Expected status\", () => pm.response.to.have.status(400));",
-              "pm.test(\"JSON response\", () => pm.response.to.be.json);"
+              "pm.test(\"400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"error code\", () => pm.expect(pm.response.json().code).to.eql(\"invalid_request\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Unknown field -> 400",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": \"Chicago, IL\",\n  \"finish\": \"Denver, CO\",\n  \"mpg\": 20\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/api/route/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"400\", () => pm.response.to.have.status(400));"
             ]
           }
         }
