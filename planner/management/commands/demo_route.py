@@ -1,13 +1,16 @@
 import json
 
 from django.conf import settings
-from django.core.cache import cache
 from django.core.management.base import BaseCommand, CommandError
 from django.test import Client
 
+from planner import cache
+from planner.data import warm
+from planner.routing import _warm_connections
+
 
 class Command(BaseCommand):
-    help = "Call the live routing provider twice (cold, then cached) and save docs/example-response.json."
+    help = "Clear the route cache, call the live API twice (cold, then cached), save docs/example-response.json."
 
     def add_arguments(self, parser):
         parser.add_argument("--start", default="Chicago, IL")
@@ -15,6 +18,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         cache.clear()
+        warm()  # Same startup work the server does (config/wsgi.py),
+        _warm_connections()  # including an open connection to the routing servers.
         client = Client()
         body = json.dumps({"start": options["start"], "finish": options["finish"]})
         for label in ("cold", "cached"):

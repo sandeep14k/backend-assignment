@@ -12,8 +12,8 @@
   },
   "distance_miles": 2024.4,
   "duration_hours": 35.58,
-  "total_cost_usd": "621.04",
-  "unrounded_total_cost_usd": "621.024631",
+  "total_cost_usd": "621.00",
+  "unrounded_total_cost_usd": "621.005750",
   "small_stops_merged": 4,
   "merge_extra_cost_usd": "0.67",
   "fuel_stops": [
@@ -28,11 +28,11 @@
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "3.07900000",
       "route_mile": 0.0,
-      "offset_miles": 16.975,
+      "offset_miles": 16.95,
       "gallons_on_arrival": 0.0,
-      "gallons_purchased": 32.318,
-      "gallons_on_departure": 32.318,
-      "cost_usd": "99.51"
+      "gallons_purchased": 32.345,
+      "gallons_on_departure": 32.345,
+      "cost_usd": "99.59"
     },
     {
       "id": "70333",
@@ -44,12 +44,12 @@
       "longitude": -93.472415,
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "2.95900000",
-      "route_mile": 323.177,
-      "offset_miles": 1.11,
+      "route_mile": 323.453,
+      "offset_miles": 1.116,
       "gallons_on_arrival": 0.0,
-      "gallons_purchased": 16.215,
-      "gallons_on_departure": 16.215,
-      "cost_usd": "47.98"
+      "gallons_purchased": 16.217,
+      "gallons_on_departure": 16.217,
+      "cost_usd": "47.99"
     },
     {
       "id": "69840",
@@ -61,12 +61,12 @@
       "longitude": -96.245837,
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "2.92066666",
-      "route_mile": 485.331,
-      "offset_miles": 1.95,
+      "route_mile": 485.628,
+      "offset_miles": 1.928,
       "gallons_on_arrival": 0.0,
-      "gallons_purchased": 9.25,
-      "gallons_on_departure": 9.25,
-      "cost_usd": "27.02"
+      "gallons_purchased": 9.263,
+      "gallons_on_departure": 9.263,
+      "cost_usd": "27.05"
     },
     {
       "id": "52548",
@@ -78,8 +78,8 @@
       "longitude": -97.797865,
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "2.89900000",
-      "route_mile": 577.829,
-      "offset_miles": 2.752,
+      "route_mile": 578.254,
+      "offset_miles": 2.753,
       "gallons_on_arrival": 0.0,
       "gallons_purchased": 50.0,
       "gallons_on_departure": 50.0,
@@ -95,12 +95,12 @@
       "longitude": -99.527824,
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "2.89900000",
-      "route_mile": 670.716,
-      "offset_miles": 4.096,
-      "gallons_on_arrival": 40.711,
-      "gallons_purchased": 9.289,
+      "route_mile": 671.209,
+      "offset_miles": 4.101,
+      "gallons_on_arrival": 40.704,
+      "gallons_purchased": 9.296,
       "gallons_on_departure": 50.0,
-      "cost_usd": "26.93"
+      "cost_usd": "26.95"
     },
     {
       "id": "69085",
@@ -112,12 +112,12 @@
       "longitude": -101.710742,
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "3.01400000",
-      "route_mile": 793.334,
-      "offset_miles": 0.849,
-      "gallons_on_arrival": 37.738,
-      "gallons_purchased": 12.262,
+      "route_mile": 793.914,
+      "offset_miles": 0.843,
+      "gallons_on_arrival": 37.73,
+      "gallons_purchased": 12.27,
       "gallons_on_departure": 50.0,
-      "cost_usd": "36.96"
+      "cost_usd": "36.98"
     },
     {
       "id": "73101",
@@ -129,12 +129,12 @@
       "longitude": -104.446366,
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "3.14900000",
-      "route_mile": 963.347,
-      "offset_miles": 3.357,
-      "gallons_on_arrival": 32.999,
-      "gallons_purchased": 17.001,
+      "route_mile": 964.155,
+      "offset_miles": 3.34,
+      "gallons_on_arrival": 32.976,
+      "gallons_purchased": 17.024,
       "gallons_on_departure": 50.0,
-      "cost_usd": "53.54"
+      "cost_usd": "53.61"
     },
     {
       "id": "71712",
@@ -146,12 +146,12 @@
       "longitude": -110.159817,
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "3.28233333",
-      "route_mile": 1344.805,
-      "offset_miles": 0.951,
-      "gallons_on_arrival": 11.854,
-      "gallons_purchased": 38.146,
+      "route_mile": 1344.921,
+      "offset_miles": 0.953,
+      "gallons_on_arrival": 11.923,
+      "gallons_purchased": 38.077,
       "gallons_on_departure": 50.0,
-      "cost_usd": "125.21"
+      "cost_usd": "124.98"
     },
     {
       "id": "72965",
@@ -163,12 +163,12 @@
       "longitude": -114.851389,
       "coordinate_precision": "city_centroid",
       "price_per_gallon": "3.28233333",
-      "route_mile": 1722.764,
-      "offset_miles": 0.116,
-      "gallons_on_arrival": 12.204,
-      "gallons_purchased": 17.957,
-      "gallons_on_departure": 30.161,
-      "cost_usd": "58.94"
+      "route_mile": 1722.65,
+      "offset_miles": 0.146,
+      "gallons_on_arrival": 12.227,
+      "gallons_purchased": 17.946,
+      "gallons_on_departure": 30.173,
+      "cost_usd": "58.90"
     }
   ],
   "fuel_consumed_gallons": 202.438,
@@ -293,10 +293,6 @@
             [
               -88.01676,
               41.83174
-            ],
-            [
-              -88.01959,
-              41.8299
             ],
             [
               -88.02196,
@@ -671,8 +667,12 @@
               41.54102
             ],
             [
-              -90.31182,
-              41.53401
+              -90.30807,
+              41.53461
+            ],
+            [
+              -90.3121,
+              41.534
             ],
             [
               -90.32768,
@@ -879,40 +879,36 @@
               41.69393
             ],
             [
-              -91.7186,
-              41.69537
+              -91.71721,
+              41.69538
             ],
             [
-              -91.73951,
-              41.69479
+              -91.7377,
+              41.69492
             ],
             [
-              -91.78072,
-              41.68762
+              -91.7812,
+              41.68761
             ],
             [
-              -91.87802,
-              41.68736
+              -91.87632,
+              41.68735
             ],
             [
               -91.93754,
               41.68808
             ],
             [
-              -91.9582,
+              -91.95723,
               41.68707
             ],
             [
-              -92.04834,
-              41.68734
+              -92.0461,
+              41.68731
             ],
             [
-              -92.14494,
-              41.69585
-            ],
-            [
-              -92.18195,
-              41.69631
+              -92.15047,
+              41.69597
             ],
             [
               -92.2399,
@@ -1013,10 +1009,6 @@
             [
               -93.20783,
               41.69996
-            ],
-            [
-              -93.21201,
-              41.69956
             ],
             [
               -93.26959,
@@ -1255,8 +1247,8 @@
               41.49773
             ],
             [
-              -95.40312,
-              41.49778
+              -95.40706,
+              41.4978
             ],
             [
               -95.49268,
@@ -1271,12 +1263,12 @@
               41.49807
             ],
             [
-              -95.57962,
-              41.49888
+              -95.58001,
+              41.49883
             ],
             [
-              -95.58318,
-              41.49777
+              -95.58345,
+              41.49762
             ],
             [
               -95.58532,
@@ -1587,24 +1579,28 @@
               40.86471
             ],
             [
-              -96.71818,
-              40.86053
+              -96.71758,
+              40.86103
             ],
             [
               -96.74245,
               40.83632
             ],
             [
-              -96.75468,
-              40.81902
+              -96.75495,
+              40.81876
             ],
             [
-              -96.7589,
-              40.81665
+              -96.75854,
+              40.81676
             ],
             [
-              -96.76954,
-              40.81583
+              -96.76498,
+              40.81582
+            ],
+            [
+              -96.77816,
+              40.81651
             ],
             [
               -96.82951,
@@ -1627,7 +1623,7 @@
               40.82192
             ],
             [
-              -97.032,
+              -97.03236,
               40.82109
             ],
             [
@@ -1663,10 +1659,6 @@
               40.82125
             ],
             [
-              -97.90117,
-              40.82127
-            ],
-            [
               -97.91856,
               40.82076
             ],
@@ -1683,20 +1675,20 @@
               40.82212
             ],
             [
-              -98.22667,
-              40.82117
+              -98.22848,
+              40.82116
             ],
             [
-              -98.2887,
-              40.82124
+              -98.30709,
+              40.82131
             ],
             [
-              -98.31362,
-              40.82157
+              -98.31888,
+              40.82216
             ],
             [
-              -98.3354,
-              40.82546
+              -98.33401,
+              40.82523
             ],
             [
               -98.34106,
@@ -1715,12 +1707,12 @@
               40.82016
             ],
             [
-              -98.39937,
-              40.82324
+              -98.39862,
+              40.82308
             ],
             [
-              -98.40494,
-              40.82356
+              -98.40406,
+              40.82361
             ],
             [
               -98.40956,
@@ -1819,8 +1811,8 @@
               40.6711
             ],
             [
-              -99.01851,
-              40.67002
+              -99.01795,
+              40.67006
             ],
             [
               -99.08619,
@@ -1903,40 +1895,52 @@
               40.70052
             ],
             [
-              -99.66364,
-              40.70777
+              -99.66186,
+              40.70738
             ],
             [
               -99.67255,
               40.71043
             ],
             [
-              -99.6794,
-              40.71336
+              -99.68224,
+              40.71484
             ],
             [
               -99.7104,
               40.73182
             ],
             [
-              -99.71956,
-              40.73624
+              -99.71828,
+              40.73572
             ],
             [
-              -99.72946,
-              40.73934
+              -99.72836,
+              40.73906
             ],
             [
-              -99.77626,
-              40.75035
+              -99.77224,
+              40.74919
             ],
             [
-              -99.82799,
-              40.77137
+              -99.78137,
+              40.75219
             ],
             [
-              -99.9004,
-              40.8109
+              -99.83158,
+              40.77306
+            ],
+            [
+              -99.86342,
+              40.79031
+            ],
+            [
+              -99.88511,
+              40.80302
+            ],
+            [
+              -99.90251,
+              40.81182
             ],
             [
               -99.93863,
@@ -1951,8 +1955,8 @@
               40.85286
             ],
             [
-              -100.03373,
-              40.86586
+              -100.03435,
+              40.86611
             ],
             [
               -100.08235,
@@ -1963,16 +1967,12 @@
               40.8879
             ],
             [
-              -100.17245,
-              40.91672
+              -100.17169,
+              40.91639
             ],
             [
               -100.18977,
               40.92787
-            ],
-            [
-              -100.24982,
-              40.953
             ],
             [
               -100.27916,
@@ -1987,8 +1987,8 @@
               40.98444
             ],
             [
-              -100.30913,
-              40.98831
+              -100.30839,
+              40.98803
             ],
             [
               -100.33267,
@@ -2015,44 +2015,36 @@
               41.04975
             ],
             [
-              -100.53768,
-              41.05343
+              -100.53394,
+              41.05276
             ],
             [
-              -100.54763,
-              41.05616
+              -100.54464,
+              41.05518
             ],
             [
               -100.5955,
               41.07356
             ],
             [
-              -100.61072,
-              41.08213
-            ],
-            [
-              -100.61557,
-              41.08404
+              -100.6137,
+              41.08346
             ],
             [
               -100.61999,
               41.08489
             ],
             [
-              -100.63644,
-              41.08572
+              -100.63723,
+              41.08589
             ],
             [
               -100.65421,
               41.09233
             ],
             [
-              -100.66299,
-              41.09476
-            ],
-            [
-              -100.73719,
-              41.10731
+              -100.66414,
+              41.09499
             ],
             [
               -100.77326,
@@ -2067,16 +2059,12 @@
               41.1212
             ],
             [
-              -100.93883,
-              41.13343
+              -100.94718,
+              41.13477
             ],
             [
-              -100.94884,
-              41.13494
-            ],
-            [
-              -101.08324,
-              41.14069
+              -101.08075,
+              41.14066
             ],
             [
               -101.13817,
@@ -2115,16 +2103,16 @@
               41.10776
             ],
             [
-              -101.43945,
-              41.10927
+              -101.43358,
+              41.10941
             ],
             [
-              -101.44755,
-              41.10841
+              -101.44168,
+              41.10913
             ],
             [
-              -101.4632,
-              41.10498
+              -101.46429,
+              41.1048
             ],
             [
               -101.47136,
@@ -2163,8 +2151,8 @@
               41.11545
             ],
             [
-              -101.73322,
-              41.11472
+              -101.73242,
+              41.11482
             ],
             [
               -101.74631,
@@ -2243,16 +2231,16 @@
               40.98558
             ],
             [
-              -102.24044,
-              40.97367
+              -102.23939,
+              40.97422
             ],
             [
               -102.26058,
               40.95782
             ],
             [
-              -102.3016,
-              40.93789
+              -102.30293,
+              40.93744
             ],
             [
               -102.3399,
@@ -2339,8 +2327,8 @@
               40.39786
             ],
             [
-              -103.57399,
-              40.27499
+              -103.57301,
+              40.27534
             ],
             [
               -103.58769,
@@ -2663,8 +2651,8 @@
               39.69655
             ],
             [
-              -105.20944,
-              39.69559
+              -105.20969,
+              39.69554
             ],
             [
               -105.21932,
@@ -2879,12 +2867,8 @@
               39.76658
             ],
             [
-              -105.62866,
-              39.76602
-            ],
-            [
-              -105.63352,
-              39.76439
+              -105.62843,
+              39.76606
             ],
             [
               -105.65314,
@@ -4375,12 +4359,12 @@
               39.10821
             ],
             [
-              -108.44016,
-              39.10722
+              -108.44069,
+              39.1071
             ],
             [
-              -108.4503,
-              39.10292
+              -108.44991,
+              39.10306
             ],
             [
               -108.45378,
@@ -4763,8 +4747,8 @@
               38.99134
             ],
             [
-              -110.18403,
-              38.99168
+              -110.18344,
+              38.99173
             ],
             [
               -110.22609,
@@ -5471,16 +5455,12 @@
               38.93111
             ],
             [
-              -111.85218,
-              38.93383
+              -111.85254,
+              38.93386
             ],
             [
-              -111.86091,
-              38.93312
-            ],
-            [
-              -111.86513,
-              38.93157
+              -111.86155,
+              38.93295
             ],
             [
               -111.86901,
@@ -6495,6 +6475,10 @@
               36.60446
             ],
             [
+              -114.65313,
+              36.58375
+            ],
+            [
               -114.65633,
               36.58069
             ],
@@ -6511,8 +6495,8 @@
               36.47341
             ],
             [
-              -114.8256,
-              36.4693
+              -114.82628,
+              36.46874
             ],
             [
               -114.85498,
@@ -6555,8 +6539,8 @@
               36.26312
             ],
             [
-              -115.11512,
-              36.22954
+              -115.11571,
+              36.22895
             ],
             [
               -115.13665,
@@ -6613,6 +6597,10 @@
             [
               -115.18416,
               35.94425
+            ],
+            [
+              -115.20859,
+              35.90874
             ],
             [
               -115.22444,
@@ -6915,6 +6903,10 @@
               34.64662
             ],
             [
+              -117.23081,
+              34.62758
+            ],
+            [
               -117.26196,
               34.58815
             ],
@@ -6953,6 +6945,10 @@
             [
               -117.44072,
               34.35339
+            ],
+            [
+              -117.45014,
+              34.3464
             ],
             [
               -117.45258,
@@ -7340,11 +7336,11 @@
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "3.07900000",
           "route_mile": 0.0,
-          "offset_miles": 16.975,
+          "offset_miles": 16.95,
           "gallons_on_arrival": 0.0,
-          "gallons_purchased": 32.318,
-          "gallons_on_departure": 32.318,
-          "cost_usd": "99.51"
+          "gallons_purchased": 32.345,
+          "gallons_on_departure": 32.345,
+          "cost_usd": "99.59"
         },
         "geometry": {
           "type": "Point",
@@ -7368,12 +7364,12 @@
           "longitude": -93.472415,
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "2.95900000",
-          "route_mile": 323.177,
-          "offset_miles": 1.11,
+          "route_mile": 323.453,
+          "offset_miles": 1.116,
           "gallons_on_arrival": 0.0,
-          "gallons_purchased": 16.215,
-          "gallons_on_departure": 16.215,
-          "cost_usd": "47.98"
+          "gallons_purchased": 16.217,
+          "gallons_on_departure": 16.217,
+          "cost_usd": "47.99"
         },
         "geometry": {
           "type": "Point",
@@ -7397,12 +7393,12 @@
           "longitude": -96.245837,
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "2.92066666",
-          "route_mile": 485.331,
-          "offset_miles": 1.95,
+          "route_mile": 485.628,
+          "offset_miles": 1.928,
           "gallons_on_arrival": 0.0,
-          "gallons_purchased": 9.25,
-          "gallons_on_departure": 9.25,
-          "cost_usd": "27.02"
+          "gallons_purchased": 9.263,
+          "gallons_on_departure": 9.263,
+          "cost_usd": "27.05"
         },
         "geometry": {
           "type": "Point",
@@ -7426,8 +7422,8 @@
           "longitude": -97.797865,
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "2.89900000",
-          "route_mile": 577.829,
-          "offset_miles": 2.752,
+          "route_mile": 578.254,
+          "offset_miles": 2.753,
           "gallons_on_arrival": 0.0,
           "gallons_purchased": 50.0,
           "gallons_on_departure": 50.0,
@@ -7455,12 +7451,12 @@
           "longitude": -99.527824,
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "2.89900000",
-          "route_mile": 670.716,
-          "offset_miles": 4.096,
-          "gallons_on_arrival": 40.711,
-          "gallons_purchased": 9.289,
+          "route_mile": 671.209,
+          "offset_miles": 4.101,
+          "gallons_on_arrival": 40.704,
+          "gallons_purchased": 9.296,
           "gallons_on_departure": 50.0,
-          "cost_usd": "26.93"
+          "cost_usd": "26.95"
         },
         "geometry": {
           "type": "Point",
@@ -7484,12 +7480,12 @@
           "longitude": -101.710742,
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "3.01400000",
-          "route_mile": 793.334,
-          "offset_miles": 0.849,
-          "gallons_on_arrival": 37.738,
-          "gallons_purchased": 12.262,
+          "route_mile": 793.914,
+          "offset_miles": 0.843,
+          "gallons_on_arrival": 37.73,
+          "gallons_purchased": 12.27,
           "gallons_on_departure": 50.0,
-          "cost_usd": "36.96"
+          "cost_usd": "36.98"
         },
         "geometry": {
           "type": "Point",
@@ -7513,12 +7509,12 @@
           "longitude": -104.446366,
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "3.14900000",
-          "route_mile": 963.347,
-          "offset_miles": 3.357,
-          "gallons_on_arrival": 32.999,
-          "gallons_purchased": 17.001,
+          "route_mile": 964.155,
+          "offset_miles": 3.34,
+          "gallons_on_arrival": 32.976,
+          "gallons_purchased": 17.024,
           "gallons_on_departure": 50.0,
-          "cost_usd": "53.54"
+          "cost_usd": "53.61"
         },
         "geometry": {
           "type": "Point",
@@ -7542,12 +7538,12 @@
           "longitude": -110.159817,
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "3.28233333",
-          "route_mile": 1344.805,
-          "offset_miles": 0.951,
-          "gallons_on_arrival": 11.854,
-          "gallons_purchased": 38.146,
+          "route_mile": 1344.921,
+          "offset_miles": 0.953,
+          "gallons_on_arrival": 11.923,
+          "gallons_purchased": 38.077,
           "gallons_on_departure": 50.0,
-          "cost_usd": "125.21"
+          "cost_usd": "124.98"
         },
         "geometry": {
           "type": "Point",
@@ -7571,12 +7567,12 @@
           "longitude": -114.851389,
           "coordinate_precision": "city_centroid",
           "price_per_gallon": "3.28233333",
-          "route_mile": 1722.764,
-          "offset_miles": 0.116,
-          "gallons_on_arrival": 12.204,
-          "gallons_purchased": 17.957,
-          "gallons_on_departure": 30.161,
-          "cost_usd": "58.94"
+          "route_mile": 1722.65,
+          "offset_miles": 0.146,
+          "gallons_on_arrival": 12.227,
+          "gallons_purchased": 17.946,
+          "gallons_on_departure": 30.173,
+          "cost_usd": "58.90"
         },
         "geometry": {
           "type": "Point",
@@ -7594,7 +7590,7 @@
     "tank_capacity_gallons": 50.0,
     "initial_fuel_gallons": 0.0,
     "corridor_miles": 5.0,
-    "first_fill": "A non-full tank is first filled at the cheapest station within 25 miles of the start.",
+    "first_fill": "A non-full tank is first filled at the cheapest station within 25 miles of the start (the nearest within 100 miles if none).",
     "small_stops": "Top-ups under 5 gallons move to the previous or next stop when feasible; the extra cost is reported as merge_extra_cost_usd.",
     "station_locations": "Station positions are their city's coordinates (the price file has no coordinates).",
     "prices": "Retail prices from the supplied CSV."
@@ -7602,13 +7598,14 @@
   "metadata": {
     "routing_calls": 0,
     "route_cache_hit": true,
+    "route_source": "memory",
     "candidate_stations": 97,
     "stations_without_coordinates": 112,
     "timing_ms": {
-      "routing": 0.4,
-      "matching": 0.2,
+      "routing": 0.0,
+      "matching": 0.1,
       "optimize": 0.2,
-      "total": 0.9
+      "total": 0.4
     }
   }
 }
