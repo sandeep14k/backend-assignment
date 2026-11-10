@@ -1,85 +1,161 @@
-# Fuel Route API
+# Fuel Route Planner API
 
-Django 6.1.3 API for US city-to-city driving routes, fuel purchase planning, and an interactive route map. Python 3.13+ required. The supplied assessment fuel-price CSV is included unchanged.
-
-## Run
-
-```sh
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python manage.py check
-python manage.py test
-python manage.py runserver
-```
-
-Open http://127.0.0.1:8000 for the map. No API key or database migration is required. Internet access is required for routing, Leaflet assets, and map tiles. Tests run offline.
-
-## API
+A Django API that takes a start and finish anywhere in the USA and returns the driving route on a map, the cheapest places to buy fuel along it, and the total fuel cost. Vehicle: 500-mile range, 10 MPG (50-gallon tank). Fuel prices come from the supplied CSV.
 
 ```sh
 curl -X POST http://127.0.0.1:8000/api/route/ \
   -H 'Content-Type: application/json' \
-  -d '{"start":"Chicago, IL","finish":"Los Angeles, CA"}'
+  -d '{"start": "Chicago, IL", "finish": "Los Angeles, CA"}'
 ```
 
-Inputs use `City, ST`; lookup is offline and restricted to the US city dataset. Optional `initial_fuel_gallons` (0–50, default 50) and `corridor_miles` (0.1–25, default 5). City lookup ignores punctuation and case. Unknown fields are rejected. Identical start and finish is rejected.
+```jsonc
+{
+  "map_url": "http://127.0.0.1:8000/map/?start=Chicago%2C+IL&finish=Los+Angeles%2C+CA",
+  "distance_miles": 2024.4,
+  "total_cost_usd": "621.04",
+  "fuel_stops": [
+    {"name": "Gulf", "city": "Bensenville", "state": "IL", "route_mile": 0.0,
+     "price_per_gallon": "3.07900000", "gallons_purchased": 32.318, "cost_usd": "99.51"},
+    {"name": "KWIK STAR #932", "city": "Altoona", "state": "IA", "route_mile": 323.177,
+     "price_per_gallon": "2.95900000", "gallons_purchased": 16.215, "cost_usd": "47.98"}
+    // ... 9 stops in total
+  ],
+  "map": {"type": "FeatureCollection", "features": ["route line, start, finish, numbered fuel stops"]},
+  "metadata": {"routing_calls": 1, "timing_ms": {"routing": 1066.6, "matching": 40.1, "optimize": 0.5, "total": 1107.2}}
+}
+```
 
-The response contains distance, duration, GeoJSON route and fuel-stop markers, station identities and CSV prices, route mileage, purchase quantities, arrival/departure tank levels, per-stop receipts, total USD, and cache/timing metadata. The root page renders this GeoJSON using Leaflet/OpenStreetMap. JSON itself is usable directly in other GIS clients.
+Open `map_url` in a browser to see the route with numbered fuel stops. The full response is in [`docs/example-response.json`](docs/example-response.json).
 
-Status codes: 400 invalid input; 405 unsupported method; 415 wrong content type; 422 insufficient fuel/station coverage; 503 routing provider unavailable. Health check: `GET /health/`.
+## Quick start
 
-## Cost model and important accuracy limits
-
-* Range: 500 miles; efficiency: 10 MPG; capacity: 50 US gallons.
-* **The default starting tank is full. `total_cost_usd` is money spent on fuel purchased during the trip, excluding the unknown cost of starting fuel.** A trip shorter than 500 miles can therefore cost $0 in new purchases. Consumption is reported separately. Lower the initial fuel input to model a partially full tank; an empty tank requires a candidate station at the start.
-* **The source CSV has no coordinates. The included fallback places stations at city centroids, not actual pumps. Recommendations are estimates, not a verified navigable itinerary.** Station address and coordinate precision are returned. Unmatched cities are excluded and counted. The city file itself can contain imperfect coordinates.
-* To replace estimates, create `data/station_coordinates.csv` with columns `id,latitude,longitude`, using the CSV's OPIS Truckstop ID and independently verified WGS84 pump coordinates. Restart the server after updates. A header-only template is included. No fabricated exact station positions are supplied.
-* Candidate stations lie within the configured straight-line corridor of the route. Projection examines eight nearest geometry vertices and adjacent segments; complex loops or sparse geometry can cause approximate placement. Coordinates are projected in a local planar approximation. Straight-line proximity does not guarantee road access, travel direction compatibility, or a short driving detour.
-* Optimality applies to purchase cost on the **fixed candidate sequence with zero detour fuel**. This does not optimize over alternative roads or account for detour costs. Verified pump coordinates and routing through selected pumps are necessary for navigation-grade results. That extension requires an additional routing call and rechecking range after detours.
-* Routes between US endpoints may cross Canada; no US-only-route constraint is claimed. Unconnected regions return a provider error or infeasibility. Static CSV prices are USD per US gallon and are not live prices.
-* Duplicate OPIS IDs retain the first row. Co-located candidates retain the lowest price. Prices and monetary arithmetic use `Decimal`; optimization distances use floating point. Each receipt is rounded half up to cents; the total sums those receipts so displayed amounts reconcile.
-
-## Routing and speed
-
-One OSRM request provides the complete route geometry and per-segment road distances. There are no per-station network calls or request-time geocoding calls. OSRM route data is cached for 24 hours, so repeated endpoint pairs make zero routing calls even if initial fuel or corridor changes. The city and station inventories are loaded once per process. Spatial matching uses NumPy and a SciPy KD-tree; the fuel optimizer is linear in the number of ordered candidates, after sorting.
-
-OSRM's public demo server is suitable for a small assessment demonstration; it has no availability guarantee and is not a production hosting service. Set `OSRM_URL` to a self-hosted compatible OSRM instance for sustained use. Connect/read timeouts are 4/20 seconds; retries are deliberately omitted to bound external calls. Cache is in-process, bounded to 128 entries: separate workers have separate caches, and simultaneous cold requests can duplicate upstream work. Use a shared cache and distributed per-route lock for larger deployments. No public exposure protections such as application rate limiting are included.
-
-Map tiles and Leaflet assets are browser requests, separate from the API's single routing request. The public OSM tile service should only be used in accordance with its usage policy.
-
-## Verification and demo
+Python 3.13+. No API keys, database or migrations needed.
 
 ```sh
-python manage.py test -v 2
-python manage.py demo_route
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py test          # 27 offline tests
+python manage.py runserver     # http://127.0.0.1:8000
 ```
 
-Observed live Chicago–Los Angeles result: 2,024.379 route miles, 96 candidate stations, 10 fuel purchases, and $468.62 purchased during the trip. Cold request: 5,386 ms and one routing call; cached request: 151 ms and zero routing calls. These are local observations, not latency guarantees. The station loader excluded 123 unique IDs whose cities could not be matched. See the saved response for the complete assumptions.
+Import [`docs/postman_collection.json`](docs/postman_collection.json) into Postman. It has 7 requests with built-in checks: cold and cached runs, GET, coordinates, a short trip, and error cases. `python manage.py demo_route` calls the live routing service twice and prints the timings.
 
-The live command makes two requests in the same process, prints timing and cache metadata, and saves `docs/example-response.json`. The second request should report zero routing calls. Tests cover range boundaries, partial fuel purchases, insufficient coverage, monetary rounding, route projection, malformed input, API errors, provider caching, and dataset loading. Seventy-five generated optimizer cases are compared to an independent linear-programming solution.
+## How the brief is met
 
-Import `docs/postman_collection.json` into Postman; its `base_url` variable defaults to localhost. The recording outline is in `docs/LOOM_SCRIPT.md`.
+| Requirement | Implementation |
+|---|---|
+| Start and finish within the USA | `"City, ST"`, `"City, State"` or `"lat, lon"`, resolved offline from a bundled city list of 29,880 rows. Coordinates outside the US are rejected. |
+| Map of the route | `map` is a GeoJSON FeatureCollection (route, start, finish, stops). `map_url` opens an interactive Leaflet map. |
+| Optimal, cost-effective fuel stops | An exact minimum-cost purchase plan along the route. It is checked against an independent linear-programming solver on 100 random cases. |
+| 500-mile range, multiple fuel-ups | The tank never exceeds 50 gallons. Each purchase is sized for the next stretch, not just "fill up". |
+| Total money spent at 10 MPG | `total_cost_usd` covers all fuel for the trip, starting from an empty tank. It is the sum of the per-stop receipts. |
+| Free map/routing API | [OSRM](https://project-osrm.org/) (OpenStreetMap data) for routing; Leaflet and OpenStreetMap tiles for the map. No keys. |
+| Quick | About 1 s for a cross-country request, almost all of it the routing call. Under 1 ms when cached. |
+| Few routing calls (1 ideal) | One call per new route; 0 for repeated routes. A mirror is tried only if the primary fails, so at most 2. |
+| Latest stable Django | Django 6.1.3. |
 
-## Structure
+## API
 
-* `planner/data.py`: offline city lookup, station loading/deduplication, verified-coordinate overrides.
-* `planner/routing.py`: OSRM adapter, timeouts, geometry validation and route cache.
-* `planner/optimizer.py`: corridor matching and minimum-cost fuel purchase algorithm.
-* `planner/views.py`: request validation, JSON API, map page.
-* `planner/tests.py`: offline regression tests and independent optimization oracle.
+`POST /api/route/` with a JSON body, or `GET /api/route/?start=...&finish=...` with the same fields.
 
-The greedy rule is: at each station, retain enough fuel to reach the first strictly cheaper station within 500 miles. If none is reachable, fill up to capacity or buy only enough to finish. Buying extra before a reachable cheaper station cannot improve cost; when no cheaper station is reachable, shifting a later expensive purchase to the current station cannot increase cost. A monotonic stack finds the next cheaper station in O(n). Consecutive reachability is checked and infeasible trips fail rather than invent stops or exceed tank capacity.
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `start`, `finish` | string | required | `"Chicago, IL"`, `"St. Louis, Missouri"` or `"41.88, -87.63"` |
+| `initial_fuel_gallons` | number 0–50 | `0` | Fuel already in the tank. The default empty tank makes `total_cost_usd` the full trip cost. |
+| `corridor_miles` | number 0.1–25 | `5` | How far from the route a station may be. |
 
-## Configuration and submission
+Response fields:
+- `total_cost_usd`: total cost of the fuel bought.
+- `fuel_stops`: per-stop station, price, route mile, gallons on arrival / bought / on departure, and cost.
+- `fuel_consumed_gallons`, `fuel_purchased_gallons` and `average_price_per_gallon`.
+- `small_stops_merged` and `merge_extra_cost_usd` (explained below).
+- `map`: GeoJSON of the route, start, finish and stops.
+- `map_url`: link to the interactive map.
+- `assumptions`: the vehicle and pricing settings used.
+- `metadata`: routing calls, whether the route came from the cache, and per-step timings.
 
-Environment variables: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG` (default 0), `DJANGO_ALLOWED_HOSTS` (comma-separated), `OSRM_URL`. For deployment set a secret key, restrict hosts, use HTTPS and a production WSGI server; Django's development server is for local demonstration.
+| Status | `code` | When |
+|---|---|---|
+| 400 | `invalid_request` | Unknown city, bad number, unknown field, or start equals finish |
+| 405 | — | Method other than GET or POST |
+| 415 | `unsupported_media_type` | POST without `application/json` |
+| 422 | `insufficient_station_coverage` | A stretch of more than 500 miles with no station |
+| 503 | `routing_unavailable` | Both routing servers failed |
 
-The workspace initially inherited a Git repository rooted outside this project. No changes are made to that parent repository. To publish, create a dedicated repository from this directory, review the files, and push it to your own GitHub account. Record the walkthrough in Loom and submit the repository URL and video URL. Those external deliverables are not created by this project.
+## How it works
 
-## Sources
+```
+request ─► resolve cities offline ─► 1 OSRM call (cached 24 h) ─► stations along the route ─► optimizer ─► JSON + GeoJSON
+```
 
-* [Django official releases](https://www.djangoproject.com/download/) — 6.1.3 was listed as stable when built on November 11, 2026.
-* [OSRM HTTP API](https://project-osrm.org/docs/v5.24.0/api/) and [demo server usage policy](https://github.com/Project-OSRM/osrm-backend/wiki/Api-usage-policy).
-* [US Cities Database](https://github.com/kelvins/US-Cities-Database) — bundled offline city coordinates under the MIT license; see `data/CITIES-LICENSE`.
-* [OpenStreetMap attribution](https://www.openstreetmap.org/copyright) and [tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
+1. **Routing** (`planner/routing.py`): one OSRM request with compact `polyline6` geometry. I benchmarked the options:
+   - Asking OSRM for per-segment distances made the call 0.5–4 s slower and the payload 4× bigger. Segment lengths are computed locally with the haversine formula instead, then scaled to OSRM's road distance.
+   - Valhalla's public server rejects routes over 1,500 km.
+   - OpenRouteService, Mapbox and GraphHopper need API keys.
+
+   The geometry sent to clients is simplified with Douglas–Peucker (2,000 km route: 22,700 → 1,800 points, ~50 KB). The optimizer always uses the full route.
+2. **Stations on the route** (`planner/optimizer.py: candidates`): every station in the route's bounding box is snapped to its nearest route segment. A KD-tree finds the nearby points and the projection is vectorized with NumPy. Each station gets a route mile and a distance from the road. The result is cached per route.
+3. **First fill**: the tank starts empty, so the trip begins at the cheapest station within 25 miles of the start (or the nearest one within 100 miles if there is none).
+4. **Optimizer** (`optimize`): an exact greedy algorithm that runs in O(n):
+   - *If a cheaper station is within range, buy just enough to reach it. Otherwise fill the tank, or buy just enough to finish.*
+   - Why this is optimal: fuel bought before a reachable cheaper station could have been bought there for less. When nothing cheaper is reachable, every gallon needed before the next fill is cheapest here.
+   - A monotonic stack finds each station's next cheaper station.
+   - The tests compare the result with SciPy's linear-programming solver on 100 random routes.
+5. **Small top-ups**: the exact optimum sometimes buys 0.4 gallons at a station 10 miles past the last one, to save a fraction of a cent. Any purchase under 5 gallons is moved to the previous stop (if the tank has room) or the next stop (if the tank can reach it without that fuel), whichever is cheaper. Chicago → LA goes from 14 stops to 9 for $0.67 more. The extra cost is reported as `merge_extra_cost_usd`.
+6. **Money**: prices and receipts use `Decimal`, and each receipt is rounded half-up to cents. `total_cost_usd` is the sum of the receipts, so the numbers always add up.
+
+## Performance
+
+Measured locally against the public OSRM server:
+
+| Route | Miles | Fuel cost | Stops | Cold | Cached |
+|---|---|---|---|---|---|
+| Chicago, IL → Los Angeles, CA | 2,024 | $621.04 | 9 | 1.1–2.2 s | 0.9 ms |
+| New York, NY → Miami, FL | 1,280 | $377.35 | 5 | 1.1–1.3 s | < 1 ms |
+| Seattle, WA → Boston, MA | 3,039 | $978.70 | 12 | 1.4–1.5 s | < 1 ms |
+| Dallas, TX → Atlanta, GA | 784 | $217.52 | 3 | 0.9 s | < 1 ms |
+| Chicago, IL → Milwaukee, WI | 89 | $27.33 | 1 | 0.6 s | < 1 ms |
+
+When not cached, over 95% of the time is the OSRM round trip. The rest (station matching and the optimizer) takes under 45 ms. Datasets load once when the server starts (~70 ms). Responses are gzip-compressed (Chicago → LA is about 17 KB on the wire).
+
+## Data handling
+
+- **Station locations:** the price CSV has addresses but no coordinates. Each station is placed at its city's coordinates from the bundled [US Cities Database](https://github.com/kelvins/US-Cities-Database) (MIT, see `data/CITIES-LICENSE`). Verified pump coordinates can be added to `data/station_coordinates.csv` (`id,latitude,longitude`), and they override the city position.
+- **Unmatched stations:** 112 stations can't be placed. They are all in Canada, which no US route reaches.
+- **Duplicate listings:** 597 truck stops appear several times with different prices. They get the mean of their listed prices.
+- **Cities in several counties:** these resolve to the county the city is actually in. For example, Orlando is not placed in Brevard County.
+- **Abbreviations:** "St.", "Ft." and "Mt." match "Saint", "Fort" and "Mount".
+
+## Limitations
+
+- **Approximate station positions.** A station may be up to `corridor_miles` from the road. The detour to reach it is not routed and its fuel is not counted. Pump coordinates plus one extra routing call through the chosen stops would fix this.
+- **Fixed route.** The optimizer picks stops along OSRM's fastest route; it doesn't look at other roads with cheaper fuel.
+- **Static prices** from the supplied CSV.
+- **Public OSRM server.** It has no uptime guarantee; set `OSRM_URLS` to a self-hosted OSRM for production.
+- **Per-process cache.** The cache is in memory; use Redis to share it across workers.
+
+## Configuration
+
+| Variable | Default |
+|---|---|
+| `OSRM_URLS` | `https://router.project-osrm.org,https://routing.openstreetmap.de/routed-car` (primary, fallback) |
+| `DJANGO_SECRET_KEY` | development key: set it in production |
+| `DJANGO_DEBUG` | `0` |
+| `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1,testserver` |
+
+## Project layout
+
+```
+config/            Django settings, URLs, WSGI (loads datasets at startup)
+planner/
+  data.py          offline city lookup, station loading and cleaning
+  routing.py       OSRM client, polyline decoding, simplification, cache, mirror fallback
+  optimizer.py     stations along the route, first fill, optimal purchases, small-stop merge
+  services.py      plan_trip(): runs the steps above and builds the response
+  views.py         input validation, HTTP API, map page
+  templates/       Leaflet map page
+  tests.py         27 offline tests, including the linear-programming check
+docs/              Postman collection, example response, Loom outline
+```
+
+Development: `pip install -r requirements-dev.txt`, then `ruff check . && ruff format --check . && python manage.py test`. GitHub Actions runs the same checks on every push.

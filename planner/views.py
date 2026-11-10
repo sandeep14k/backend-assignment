@@ -1,3 +1,4 @@
+import contextlib
 import json
 import math
 import time
@@ -30,20 +31,16 @@ NUMBER_LIMITS = {
 def _number(data, name):
     minimum, maximum, default = NUMBER_LIMITS[name]
     value = data.get(name, default)
-    if isinstance(value, str):
-        try:
+    if isinstance(value, str):  # Query-string values arrive as text.
+        with contextlib.suppress(ValueError):
             value = float(value)
-        except ValueError:
-            pass
     if (
         isinstance(value, bool)
         or not isinstance(value, (int, float))
         or not math.isfinite(value)
         or not minimum <= value <= maximum
     ):
-        raise ValueError(
-            f"{name} must be a number between {minimum:g} and {maximum:g}."
-        )
+        raise ValueError(f"{name} must be a number between {minimum:g} and {maximum:g}.")
     return float(value)
 
 
@@ -59,9 +56,7 @@ def _parse(request):
             raise ValueError("Request body must be a JSON object.")
     unknown = set(data) - FIELDS
     if unknown:
-        raise ValueError(
-            f"Unknown fields: {', '.join(sorted(unknown))}. Allowed: {', '.join(sorted(FIELDS))}."
-        )
+        raise ValueError(f"Unknown fields: {', '.join(sorted(unknown))}. Allowed: {', '.join(sorted(FIELDS))}.")
     start, finish = location(data.get("start")), location(data.get("finish"))
     if (start["latitude"], start["longitude"]) == (
         finish["latitude"],
@@ -97,14 +92,8 @@ def route(request):
     except RoutingError as exc:
         return _error(str(exc), 503, "routing_unavailable")
 
-    query = {
-        k: data[k]
-        for k in ("start", "finish", "initial_fuel_gallons", "corridor_miles")
-        if k in data
-    }
-    result["metadata"]["timing_ms"]["total"] = round(
-        (time.perf_counter() - started) * 1000, 1
-    )
+    query = {k: data[k] for k in ("start", "finish", "initial_fuel_gallons", "corridor_miles") if k in data}
+    result["metadata"]["timing_ms"]["total"] = round((time.perf_counter() - started) * 1000, 1)
     map_url = request.build_absolute_uri(f"{reverse('map')}?{urlencode(query)}")
     return JsonResponse({"map_url": map_url, **result})
 

@@ -59,9 +59,7 @@ def _geojson(route, start, finish, stops):
                     "coordinates": route["display_coordinates"],
                 },
             },
-            _point(
-                start["longitude"], start["latitude"], kind="start", name=start["name"]
-            ),
+            _point(start["longitude"], start["latitude"], kind="start", name=start["name"]),
             _point(
                 finish["longitude"],
                 finish["latitude"],
@@ -96,24 +94,16 @@ def plan_trip(start, finish, initial_gallons, corridor_miles):
     if on_route is None:
         on_route = candidates(route, inventory, corridor_miles, points)
         cache.set(key, on_route, CACHE_SECONDS)
-    origin = (
-        origin_station(start, inventory, points)
-        if initial_gallons < CAPACITY_GALLONS
-        else None
-    )
+    origin = origin_station(start, inventory, points) if initial_gallons < CAPACITY_GALLONS else None
     if origin:
         on_route = [origin] + [s for s in on_route if s["id"] != origin["id"]]
     matching_ms = _elapsed_ms(step)
 
     step = time.perf_counter()
-    plan = optimize(
-        on_route, route["distance_miles"], initial_gallons, MIN_STOP_GALLONS
-    )
+    plan = optimize(on_route, route["distance_miles"], initial_gallons, MIN_STOP_GALLONS)
     optimize_ms = _elapsed_ms(step)
 
-    plan["fuel_stops"] = [
-        {field: stop[field] for field in STOP_FIELDS} for stop in plan["fuel_stops"]
-    ]
+    plan["fuel_stops"] = [{field: stop[field] for field in STOP_FIELDS} for stop in plan["fuel_stops"]]
     return {
         "start": start,
         "finish": finish,
@@ -127,8 +117,11 @@ def plan_trip(start, finish, initial_gallons, corridor_miles):
             "tank_capacity_gallons": CAPACITY_GALLONS,
             "initial_fuel_gallons": initial_gallons,
             "corridor_miles": corridor_miles,
-            "first_fill": "With a non-full tank, the first fill is at the cheapest station within 25 miles of the start.",
-            "small_stops": f"Top-ups under {MIN_STOP_GALLONS:g} gallons move to the previous or next stop when feasible; the extra cost is merge_extra_cost_usd.",
+            "first_fill": "A non-full tank is first filled at the cheapest station within 25 miles of the start.",
+            "small_stops": (
+                f"Top-ups under {MIN_STOP_GALLONS:g} gallons move to the previous or next stop when feasible; "
+                "the extra cost is reported as merge_extra_cost_usd."
+            ),
             "station_locations": "Station positions are their city's coordinates (the price file has no coordinates).",
             "prices": "Retail prices from the supplied CSV.",
         },

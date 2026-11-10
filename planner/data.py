@@ -18,9 +18,7 @@ US_BOUNDS = [
     (51.0, 71.6, -180.0, -129.0),
     (18.5, 22.5, -160.5, -154.5),
 ]
-LOCATION_HELP = (
-    "Use 'City, ST' (e.g. 'Chicago, IL'), 'City, State' or 'latitude, longitude'."
-)
+LOCATION_HELP = "Use 'City, ST' (e.g. 'Chicago, IL'), 'City, State' or 'latitude, longitude'."
 ABBREVIATIONS = {"st": "saint", "ste": "sainte", "ft": "fort", "mt": "mount"}
 
 # The city file has one row per (city, county). For cities whose rows sit far
@@ -51,10 +49,7 @@ CITY_ALIASES = {
 
 def normalize(value):
     """Case/punctuation-insensitive city key; 'St. Louis' and 'Saint Louis' match."""
-    return "".join(
-        ABBREVIATIONS.get(word, word)
-        for word in re.findall(r"[a-z0-9]+", value.lower())
-    )
+    return "".join(ABBREVIATIONS.get(word, word) for word in re.findall(r"[a-z0-9]+", value.lower()))
 
 
 def _state_key(value):
@@ -65,11 +60,7 @@ def _choose_row(rows):
     """Pick one row for a city listed under several counties."""
     city, state = rows[0]["CITY"], rows[0]["STATE_CODE"]
     preferred = PRIMARY_COUNTY.get((city, state))
-    own_county = [
-        r
-        for r in rows
-        if r["COUNTY"] == preferred or r["COUNTY"].removesuffix(" City") == city
-    ]
+    own_county = [r for r in rows if r["COUNTY"] == preferred or r["COUNTY"].removesuffix(" City") == city]
     if own_county:
         return own_county[0]
     if len(rows) >= 3:  # The row closest to all others (medoid).
@@ -90,9 +81,7 @@ def cities():
     grouped = {}
     with (settings.BASE_DIR / "data/us_cities.csv").open(encoding="utf-8") as source:
         for row in csv.DictReader(source):
-            grouped.setdefault((normalize(row["CITY"]), row["STATE_CODE"]), []).append(
-                row
-            )
+            grouped.setdefault((normalize(row["CITY"]), row["STATE_CODE"]), []).append(row)
     return {key: _choose_row(rows) for key, rows in grouped.items()}
 
 
@@ -174,15 +163,10 @@ def stations():
     path = settings.BASE_DIR / "data/station_coordinates.csv"
     if path.exists():
         with path.open(encoding="utf-8") as source:
-            overrides = {
-                r["id"].strip(): (float(r["latitude"]), float(r["longitude"]))
-                for r in csv.DictReader(source)
-            }
+            overrides = {r["id"].strip(): (float(r["latitude"]), float(r["longitude"])) for r in csv.DictReader(source)}
 
     by_id, prices, unlocated = {}, {}, set()
-    with (settings.BASE_DIR / "fuel-prices-for-be-assessment.csv").open(
-        encoding="utf-8-sig"
-    ) as source:
+    with (settings.BASE_DIR / "fuel-prices-for-be-assessment.csv").open(encoding="utf-8-sig") as source:
         for row in csv.DictReader(source):
             station_id = row["OPIS Truckstop ID"].strip()
             price = _price(row["Retail Price"])
@@ -214,18 +198,14 @@ def stations():
             }
     for station_id, station in by_id.items():
         listed = prices[station_id]
-        station["price_per_gallon"] = str(
-            (sum(listed) / len(listed)).quantize(Decimal("0.00000001"))
-        )
+        station["price_per_gallon"] = str((sum(listed) / len(listed)).quantize(Decimal("0.00000001")))
     return list(by_id.values()), len(unlocated)
 
 
 @lru_cache(maxsize=1)
 def station_points():
     """Station [lon, lat] array aligned with ``stations()[0]``."""
-    return np.array(
-        [[s["longitude"], s["latitude"]] for s in stations()[0]], dtype=float
-    )
+    return np.array([[s["longitude"], s["latitude"]] for s in stations()[0]], dtype=float)
 
 
 def warm():

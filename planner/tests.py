@@ -28,7 +28,7 @@ def encode(points, precision=6):
     out, previous = [], (0, 0)
     for lon, lat in points:
         current = (round(lat * 10**precision), round(lon * 10**precision))
-        for value, last in zip(current, previous):
+        for value, last in zip(current, previous, strict=True):
             delta = value - last
             delta = ~(delta << 1) if delta < 0 else delta << 1
             while delta >= 0x20:
@@ -42,9 +42,7 @@ def encode(points, precision=6):
 def osrm_payload(points, meters, seconds=3600):
     return {
         "code": "Ok",
-        "routes": [
-            {"geometry": encode(points), "distance": meters, "duration": seconds}
-        ],
+        "routes": [{"geometry": encode(points), "distance": meters, "duration": seconds}],
     }
 
 
@@ -62,9 +60,7 @@ def fake_route(miles, points=((-87.6, 41.9), (-86.6, 41.9))):
 
 class OptimizerTests(SimpleTestCase):
     def test_full_tank_short_trip_buys_nothing(self):
-        self.assertEqual(
-            optimize([], 400, initial_gallons=50)["total_cost_usd"], "0.00"
-        )
+        self.assertEqual(optimize([], 400, initial_gallons=50)["total_cost_usd"], "0.00")
 
     def test_empty_tank_buys_exactly_trip_fuel(self):
         plan = optimize([station(0, 3)], 400)
@@ -107,21 +103,15 @@ class OptimizerTests(SimpleTestCase):
         exact = optimize(stations, 900)
         self.assertEqual([s["id"] for s in exact["fuel_stops"]], ["a", "b", "c"])
         merged = optimize(stations, 900, min_stop_gallons=5)
-        self.assertEqual(
-            [s["id"] for s in merged["fuel_stops"]], ["a", "c"]
-        )  # b's 2 gal bought at a
+        self.assertEqual([s["id"] for s in merged["fuel_stops"]], ["a", "c"])  # b's 2 gal bought at a
         self.assertEqual(merged["small_stops_merged"], 1)
         self.assertEqual(merged["fuel_purchased_gallons"], 90)
         self.assertEqual(merged["merge_extra_cost_usd"], "0.02")  # 2 gal x $0.01
-        self.assertTrue(
-            all(s["gallons_on_departure"] <= 50 for s in merged["fuel_stops"])
-        )
+        self.assertTrue(all(s["gallons_on_departure"] <= 50 for s in merged["fuel_stops"]))
 
     def test_merge_never_overfills_tank(self):
         # a fills to 50; b's 1-gallon top-up cannot move to a (tank already full), so it stays.
-        plan = optimize(
-            [station(0, "2.9", "a"), station(10, 3, "b")], 510, min_stop_gallons=5
-        )
+        plan = optimize([station(0, "2.9", "a"), station(10, 3, "b")], 510, min_stop_gallons=5)
         self.assertEqual([s["gallons_purchased"] for s in plan["fuel_stops"]], [50, 1])
         self.assertEqual(plan["small_stops_merged"], 0)
 
@@ -130,10 +120,7 @@ class OptimizerTests(SimpleTestCase):
         for _ in range(200):
             miles = sorted(rng.uniform(0, 1500) for _ in range(25))
             miles[0] = 0.0
-            nodes = [
-                station(m, round(rng.uniform(2.8, 3.4), 3), str(i))
-                for i, m in enumerate(miles)
-            ]
+            nodes = [station(m, round(rng.uniform(2.8, 3.4), 3), str(i)) for i, m in enumerate(miles)]
             try:
                 plan = optimize(nodes, miles[-1] + 200, min_stop_gallons=5)
             except InfeasibleRoute:
@@ -141,9 +128,7 @@ class OptimizerTests(SimpleTestCase):
             fuel, position = 0.0, 0.0
             for stop in plan["fuel_stops"]:
                 fuel -= (stop["route_mile"] - position) / 10
-                self.assertGreaterEqual(
-                    fuel, -0.02
-                )  # receipts are rounded to 0.001 gal
+                self.assertGreaterEqual(fuel, -0.02)  # receipts are rounded to 0.001 gal
                 fuel += stop["gallons_purchased"]
                 self.assertLessEqual(fuel, 50.02)
                 position = stop["route_mile"]
@@ -165,21 +150,15 @@ class OptimizerTests(SimpleTestCase):
                 next_mile = miles[i + 1] if i + 1 < len(miles) else distance
                 rows.extend([prefix, [-x for x in prefix]])
                 bounds.extend([50 - initial + mile / 10, initial - next_mile / 10])
-            oracle = linprog(
-                prices, A_ub=rows, b_ub=bounds, bounds=(0, None), method="highs"
-            )
+            oracle = linprog(prices, A_ub=rows, b_ub=bounds, bounds=(0, None), method="highs")
             self.assertTrue(oracle.success)
             plan = optimize(
-                [station(m, p, str(i)) for i, (m, p) in enumerate(zip(miles, prices))],
+                [station(m, p, str(i)) for i, (m, p) in enumerate(zip(miles, prices, strict=True))],
                 distance,
                 initial,
             )
-            self.assertAlmostEqual(
-                float(plan["unrounded_total_cost_usd"]), oracle.fun, places=5
-            )
-            self.assertTrue(
-                all(s["gallons_on_departure"] <= 50.001 for s in plan["fuel_stops"])
-            )
+            self.assertAlmostEqual(float(plan["unrounded_total_cost_usd"]), oracle.fun, places=5)
+            self.assertTrue(all(s["gallons_on_departure"] <= 50.001 for s in plan["fuel_stops"]))
 
 
 class GeometryTests(SimpleTestCase):
@@ -197,9 +176,7 @@ class GeometryTests(SimpleTestCase):
         points = [(-87.629798, 41.878114), (-118.243685, 34.052234)]
         decoded = decode_polyline(encode(points))
         np.testing.assert_allclose(decoded, points, atol=1e-6)
-        self.assertAlmostEqual(
-            segment_miles(decoded)[0], 1745, delta=5
-        )  # Chicago-LA great circle
+        self.assertAlmostEqual(segment_miles(decoded)[0], 1745, delta=5)  # Chicago-LA great circle
 
     def test_simplify_keeps_endpoints_and_drops_collinear_points(self):
         line = np.array([[-90 + i / 1000, 40.0] for i in range(1001)])
@@ -216,9 +193,7 @@ class GeometryTests(SimpleTestCase):
         ]
         points = np.array([[-90.0, 40.0], [-90.2, 40.0], [-92.0, 40.0]])
         self.assertEqual(origin_station(start, fuel, points)["id"], "cheap")
-        self.assertIsNone(
-            origin_station(start, fuel[2:], points[2:])
-        )  # ~106 miles away
+        self.assertIsNone(origin_station(start, fuel[2:], points[2:]))  # ~106 miles away
 
 
 class DataTests(SimpleTestCase):
@@ -231,18 +206,14 @@ class DataTests(SimpleTestCase):
         self.assertEqual(by_id["7"]["price_per_gallon"], "3.00733333")
 
     def test_duplicate_city_rows_resolve_to_the_city_itself(self):
-        self.assertAlmostEqual(
-            location("Orlando, FL")["longitude"], -81.38, delta=0.15
-        )  # not Brevard County
+        self.assertAlmostEqual(location("Orlando, FL")["longitude"], -81.38, delta=0.15)  # not Brevard County
         self.assertAlmostEqual(location("Denver, CO")["latitude"], 39.74, delta=0.1)
         self.assertEqual(location("Henrico, VA")["name"], "Richmond, VA")
 
     def test_location_formats(self):
         self.assertEqual(location("Chicago, IL")["name"], "Chicago, IL")
         self.assertEqual(location("chicago , illinois")["name"], "Chicago, IL")
-        self.assertEqual(
-            location("St. Louis, MO")["name"], location("st louis, mo")["name"]
-        )
+        self.assertEqual(location("St. Louis, MO")["name"], location("st louis, mo")["name"])
         self.assertAlmostEqual(location("41.88, -87.63")["latitude"], 41.88)
         for bad in ["Paris, FR", "48.85, 2.35", "Chicago", "", None, 5]:
             with self.assertRaises(ValueError):
@@ -257,9 +228,7 @@ class RoutingTests(SimpleTestCase):
 
     @patch("planner.routing.requests.get")
     def test_one_call_then_cache(self, get):
-        get.return_value.json.return_value = osrm_payload(
-            [(-87.6, 41.9), (-87.9, 43.0)], 148000
-        )
+        get.return_value.json.return_value = osrm_payload([(-87.6, 41.9), (-87.9, 43.0)], 148000)
         route, calls = fetch_route(self.start, self.finish)
         self.assertEqual(calls, 1)
         self.assertAlmostEqual(route["segment_miles"].sum(), 148000 / 1609.344)
@@ -272,9 +241,7 @@ class RoutingTests(SimpleTestCase):
         good = osrm_payload([(-87.6, 41.9), (-87.9, 43.0)], 148000)
         get.side_effect = [
             requests.ConnectionError("down"),
-            type(
-                "R", (), {"raise_for_status": lambda s: None, "json": lambda s: good}
-            )(),
+            type("R", (), {"raise_for_status": lambda s: None, "json": lambda s: good})(),
         ]
         self.assertEqual(fetch_route(self.start, self.finish)[1], 2)
         self.assertTrue(get.call_args_list[1].args[0].startswith("https://mirror.test"))
@@ -295,9 +262,7 @@ class RoutingTests(SimpleTestCase):
 
 class APITests(SimpleTestCase):
     def post(self, body):
-        return self.client.post(
-            "/api/route/", json.dumps(body), content_type="application/json"
-        )
+        return self.client.post("/api/route/", json.dumps(body), content_type="application/json")
 
     def test_invalid_inputs(self):
         base = {"start": "Chicago, IL", "finish": "New York, NY"}
@@ -315,9 +280,7 @@ class APITests(SimpleTestCase):
             self.assertEqual(response.status_code, 400, body)
             self.assertEqual(response.json()["code"], "invalid_request")
         self.assertEqual(
-            self.client.post(
-                "/api/route/", "{", content_type="application/json"
-            ).status_code,
+            self.client.post("/api/route/", "{", content_type="application/json").status_code,
             400,
         )
         self.assertEqual(self.client.put("/api/route/").status_code, 405)
@@ -347,7 +310,7 @@ class APITests(SimpleTestCase):
                 "price_per_gallon": str(3 + (i % 3) / 10),
                 "coordinate_precision": "city_centroid",
             }
-            for i, (lon, lat) in enumerate(zip(lons, lats))
+            for i, (lon, lat) in enumerate(zip(lons, lats, strict=True))
         ]
         inventory.return_value, points.return_value = (
             (fuel, 0),
@@ -356,12 +319,8 @@ class APITests(SimpleTestCase):
         response = self.post({"start": "Chicago, IL", "finish": "Los Angeles, CA"})
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertTrue(
-            data["map_url"].startswith("http://testserver/map/?start=Chicago")
-        )
-        self.assertEqual(
-            data["fuel_purchased_gallons"], 180
-        )  # empty tank: buys every gallon used
+        self.assertTrue(data["map_url"].startswith("http://testserver/map/?start=Chicago"))
+        self.assertEqual(data["fuel_purchased_gallons"], 180)  # empty tank: buys every gallon used
         self.assertEqual(data["fuel_stops"][0]["route_mile"], 0)
         self.assertGreaterEqual(len(data["fuel_stops"]), 4)
         kinds = [f["properties"]["kind"] for f in data["map"]["features"]]
@@ -402,7 +361,5 @@ class APITests(SimpleTestCase):
         self.assertEqual(response.status_code, 422)
 
     def test_map_page_and_health(self):
-        self.assertContains(
-            self.client.get("/map/?start=Chicago%2C+IL&finish=Denver%2C+CO"), "leaflet"
-        )
+        self.assertContains(self.client.get("/map/?start=Chicago%2C+IL&finish=Denver%2C+CO"), "leaflet")
         self.assertEqual(self.client.get("/health/").json(), {"status": "ok"})

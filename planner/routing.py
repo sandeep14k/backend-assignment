@@ -55,10 +55,7 @@ def segment_miles(coordinates):
     """Great-circle length of each consecutive segment of [lon, lat] points."""
     lon, lat = np.radians(coordinates[:, 0]), np.radians(coordinates[:, 1])
     dlat, dlon = np.diff(lat), np.diff(lon)
-    a = (
-        np.sin(dlat / 2) ** 2
-        + np.cos(lat[:-1]) * np.cos(lat[1:]) * np.sin(dlon / 2) ** 2
-    )
+    a = np.sin(dlat / 2) ** 2 + np.cos(lat[:-1]) * np.cos(lat[1:]) * np.sin(dlon / 2) ** 2
     return 2 * EARTH_RADIUS_MILES * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
 
 
@@ -87,10 +84,7 @@ def simplify(coordinates, tolerance_miles=0.03):
             distances = np.hypot(*(inner - a).T)
         else:
             relative = inner - a
-            distances = (
-                np.abs(direction[0] * relative[:, 1] - direction[1] * relative[:, 0])
-                / length
-            )
+            distances = np.abs(direction[0] * relative[:, 1] - direction[1] * relative[:, 0]) / length
         farthest = int(distances.argmax())
         if distances[farthest] > tolerance_miles:
             split = first + 1 + farthest
