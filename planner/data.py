@@ -6,11 +6,15 @@ handling never geocodes over the network.
 
 import csv
 import re
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 
 import numpy as np
 from django.conf import settings
+from scipy.spatial import cKDTree
+
+from planner.geo import to_xyz
 
 # Generous bounding boxes for the contiguous US, Alaska and Hawaii.
 US_BOUNDS = [
@@ -18,6 +22,7 @@ US_BOUNDS = [
     (51.0, 71.6, -180.0, -129.0),
     (18.5, 22.5, -160.5, -154.5),
 ]
+CANADIAN_PROVINCES = {"AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"}
 LOCATION_HELP = "Use 'City, ST' (e.g. 'Chicago, IL'), 'City, State' or 'latitude, longitude'."
 ABBREVIATIONS = {"st": "saint", "ste": "sainte", "ft": "fort", "mt": "mount"}
 
@@ -176,6 +181,9 @@ def stations():
                 prices[station_id].append(price)
                 continue
             city_name, state = row["City"].strip(), row["State"].strip().upper()
+            if state in CANADIAN_PROVINCES:  # Not reachable on a US route.
+                unlocated.add(station_id)
+                continue
             city = find_city(city_name, state)
             if station_id in overrides:
                 (latitude, longitude), precision = overrides[station_id], "verified"
@@ -183,7 +191,7 @@ def stations():
                 latitude, longitude = float(city["LATITUDE"]), float(city["LONGITUDE"])
                 precision = "city_centroid"
             else:
-                unlocated.add(station_id)  # Canadian rows; never on a US route.
+                unlocated.add(station_id)  # US town missing from the city file (none at present).
                 continue
             prices[station_id] = [price]
             by_id[station_id] = {
@@ -202,13 +210,27 @@ def stations():
     return list(by_id.values()), len(unlocated)
 
 
+@dataclass(frozen=True)
+class StationIndex:
+    """Stations plus a KD-tree over their 3-D positions, for corridor and nearest queries."""
+
+    stations: list
+    xyz: np.ndarray
+    tree: cKDTree
+    prices: list
+
+    @classmethod
+    def build(cls, stations):
+        xyz = to_xyz([[s["longitude"], s["latitude"]] for s in stations]) if stations else np.empty((0, 3))
+        return cls(stations, xyz, cKDTree(xyz), [Decimal(s["price_per_gallon"]) for s in stations])
+
+
 @lru_cache(maxsize=1)
-def station_points():
-    """Station [lon, lat] array aligned with ``stations()[0]``."""
-    return np.array([[s["longitude"], s["latitude"]] for s in stations()[0]], dtype=float)
+def station_index():
+    return StationIndex.build(stations()[0])
 
 
 def warm():
-    """Load all datasets so the first request does not pay the ~70 ms cost."""
+    """Load datasets and build the station KD-tree at startup (~100 ms), not on the first request."""
     state_codes()
-    station_points()
+    station_index()

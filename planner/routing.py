@@ -1,158 +1,190 @@
-"""Routing via the free, keyless OSRM HTTP API.
+"""Routing via the free, keyless OSRM HTTP API (see README "Choosing the routing API").
 
-Why OSRM: no API key (reviewers can run the project immediately), no route
-length cap (Valhalla's public server rejects routes over 1,500 km), and ~1 s
-for a coast-to-coast route when requesting compact ``polyline6`` geometry.
-Requesting per-segment ``annotations`` makes the payload ~4x larger and the
-call 0.5-4 s slower, so segment lengths are computed locally instead.
+One uncached route = one HTTP request to OSRM. Everything that makes that fast:
 
-Call budget: one request per uncached route. If the primary server fails, one
-retry goes to an independent OSRM mirror, so never more than two calls.
+* **Warm HTTPS connections.** A new TLS connection to the public servers costs
+  ~0.5-1 s; a route over a reused one ~0.2-0.5 s. One shared ``requests.Session``
+  pools connections, and ``start_connection_warmer()`` keeps them open while
+  the API is in use (``HEAD /``, not a routing request).
+* **Compact response.** ``overview=full&geometries=polyline6`` without
+  ``annotations``/``steps``/``hints``: 4-7x less data than GeoJSON with
+  per-segment annotations. Segment lengths are computed locally instead.
+* **Hedged request.** If the primary has not answered within
+  ``OSRM_HEDGE_AFTER_SECONDS``, the same request goes to an independent mirror
+  and the first answer wins. A primary failure goes to the mirror at once.
+  Either way, at most two routing calls.
+* **Caching.** Routes (and "no route" answers) are cached in memory and on disk
+  (``planner.cache``), and concurrent requests for the same new route share one call.
 """
 
 import hashlib
 import logging
+import threading
+import time
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
 import numpy as np
 import requests
 from django.conf import settings
-from django.core.cache import cache
+from requests.adapters import HTTPAdapter
+
+from planner import cache
+from planner.geo import METERS_PER_MILE, decode_polyline, segment_miles, simplify
 
 logger = logging.getLogger(__name__)
 
-METERS_PER_MILE = 1609.344
-EARTH_RADIUS_MILES = 3958.7613
-CACHE_SECONDS = 24 * 60 * 60
+_session = requests.Session()
+_session.headers["User-Agent"] = "fuel-route-planner/1.0 (+Django; assessment project)"
+_session.mount("https://", HTTPAdapter(pool_connections=4, pool_maxsize=32, max_retries=0))
+_executor = ThreadPoolExecutor(max_workers=16, thread_name_prefix="osrm")
+_last_activity = time.monotonic()  # Startup counts as activity.
 
 
 class RoutingError(Exception):
     pass
 
 
-def decode_polyline(encoded, precision=6):
-    """Decode a Google-encoded polyline into an (n, 2) array of [lon, lat]."""
-    coordinates, index, lat, lon = [], 0, 0, 0
-    length = len(encoded)
-    while index < length:
-        deltas = []
-        for _ in range(2):
-            shift = result = 0
-            while True:
-                byte = ord(encoded[index]) - 63
-                index += 1
-                result |= (byte & 0x1F) << shift
-                shift += 5
-                if byte < 0x20:
-                    break
-            deltas.append(~(result >> 1) if result & 1 else result >> 1)
-        lat += deltas[0]
-        lon += deltas[1]
-        coordinates.append((lon, lat))
-    return np.asarray(coordinates, dtype=float) / 10**precision
-
-
-def segment_miles(coordinates):
-    """Great-circle length of each consecutive segment of [lon, lat] points."""
-    lon, lat = np.radians(coordinates[:, 0]), np.radians(coordinates[:, 1])
-    dlat, dlon = np.diff(lat), np.diff(lon)
-    a = np.sin(dlat / 2) ** 2 + np.cos(lat[:-1]) * np.cos(lat[1:]) * np.sin(dlon / 2) ** 2
-    return 2 * EARTH_RADIUS_MILES * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
-
-
-def simplify(coordinates, tolerance_miles=0.03):
-    """Douglas-Peucker simplification for the response geometry (~50 m tolerance).
-
-    Optimization always uses the full-resolution route; this only shrinks the
-    payload the client has to download and draw.
-    """
-    if len(coordinates) < 3:
-        return coordinates
-    scale = np.array([69.172 * np.cos(np.radians(coordinates[:, 1].mean())), 69.0])
-    points = coordinates * scale
-    keep = np.zeros(len(points), dtype=bool)
-    keep[[0, -1]] = True
-    stack = [(0, len(points) - 1)]
-    while stack:
-        first, last = stack.pop()
-        if last - first < 2:
-            continue
-        a, b = points[first], points[last]
-        inner = points[first + 1 : last]
-        direction = b - a
-        length = np.hypot(*direction)
-        if length == 0:
-            distances = np.hypot(*(inner - a).T)
-        else:
-            relative = inner - a
-            distances = np.abs(direction[0] * relative[:, 1] - direction[1] * relative[:, 0]) / length
-        farthest = int(distances.argmax())
-        if distances[farthest] > tolerance_miles:
-            split = first + 1 + farthest
-            keep[split] = True
-            stack.extend([(first, split), (split, last)])
-    return coordinates[keep]
+class NoRoute(RoutingError):
+    """The provider answered definitively that the points are not connected by road."""
 
 
 def _request(base_url, coordinates):
-    response = requests.get(
+    response = _session.get(
         f"{base_url}/route/v1/driving/{coordinates}",
         params={
             "overview": "full",
             "geometries": "polyline6",
             "steps": "false",
             "alternatives": "false",
+            "generate_hints": "false",
         },
-        timeout=(3, 15),
+        timeout=(settings.OSRM_CONNECT_TIMEOUT, settings.OSRM_READ_TIMEOUT),
     )
+    is_json = response.headers.get("content-type", "").startswith("application/json")
+    if response.status_code == 400 and is_json and response.json().get("code") in {"NoRoute", "NoSegment"}:
+        raise NoRoute("No drivable route between these locations.")
     response.raise_for_status()
     payload = response.json()
-    if payload.get("code") != "Ok" or not payload.get("routes"):
-        raise RoutingError("No drivable route found between these locations.")
+    if payload.get("code") in {"NoRoute", "NoSegment"} or (payload.get("code") == "Ok" and not payload.get("routes")):
+        raise NoRoute("No drivable route between these locations.")
+    if payload.get("code") != "Ok":
+        raise ValueError(f"Unexpected OSRM response code {payload.get('code')!r}")
     return payload["routes"][0]
 
 
-def fetch_route(start, finish):
-    """Return ``(route, routing_calls)``; ``routing_calls`` is 0 on a cache hit."""
-    coordinates = f"{start['longitude']:.6f},{start['latitude']:.6f};{finish['longitude']:.6f},{finish['latitude']:.6f}"
-    key = "route:v2:" + hashlib.sha256(coordinates.encode()).hexdigest()
-    cached = cache.get(key)
-    if cached is not None:
-        return cached, 0
+def _call_providers(coordinates):
+    """Return ``(raw_route, calls)`` from the fastest healthy provider; at most two calls."""
+    urls = list(settings.OSRM_URLS)
+    pending, calls, errors = set(), 0, []
 
-    calls, raw = 0, None
-    for base_url in settings.OSRM_URLS:
+    def launch():
+        nonlocal calls
+        url = urls.pop(0)
         calls += 1
-        try:
-            raw = _request(base_url, coordinates)
-            break
-        except RoutingError:
-            raise  # A definitive "no route" answer; another mirror will agree.
-        except (requests.RequestException, ValueError) as exc:
-            logger.warning("Routing provider %s failed: %s", base_url, exc)
-    if raw is None:
-        raise RoutingError("Routing service unavailable; please retry shortly.")
+        future = _executor.submit(_request, url, coordinates)
+        future.url = url
+        pending.add(future)
 
+    launch()
+    while pending:
+        hedge = settings.OSRM_HEDGE_AFTER_SECONDS if urls else None
+        done, _ = wait(pending, timeout=hedge, return_when=FIRST_COMPLETED)
+        if not done:  # Primary is slow: hedge with the mirror.
+            logger.info("Routing provider slow after %ss; hedging", hedge)
+            launch()
+            continue
+        for future in done:
+            pending.discard(future)
+            try:
+                return future.result(), calls
+            except NoRoute:
+                raise
+            except (requests.RequestException, ValueError, KeyError, IndexError) as exc:
+                logger.warning("Routing provider %s failed: %s", future.url, exc)
+                errors.append(exc)
+        if not pending and urls:  # Primary failed fast: fall back immediately.
+            launch()
+    raise RoutingError("Routing service unavailable; please retry shortly.")
+
+
+def _build_route(raw):
     try:
         points = decode_polyline(raw["geometry"])
         distance_miles = raw["distance"] / METERS_PER_MILE
-        duration_seconds = raw["duration"]
-    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        duration_seconds = float(raw["duration"])
+    except (KeyError, TypeError, ValueError) as exc:
         raise RoutingError("Routing provider returned invalid data.") from exc
     if len(points) < 2:
         raise RoutingError("Routing provider returned an empty route.")
 
-    segments = segment_miles(points)
-    # Rescale so cumulative mileage agrees exactly with the provider's road distance.
-    total = segments.sum()
-    if total > 0:
-        segments *= distance_miles / total
-    route = {
-        "cache_key": key,
-        "coordinates": points,
+    # Planning runs on the ~50 m Douglas-Peucker simplification: 10-20x fewer
+    # vertices than OSRM's full geometry, at an error far below the precision
+    # of station positions. Segment lengths are rescaled so cumulative mileage
+    # matches OSRM's road distance exactly.
+    simplified = simplify(points)
+    segments = segment_miles(simplified)
+    if segments.sum() > 0:
+        segments *= distance_miles / segments.sum()
+    return {
+        "coordinates": simplified,
         "segment_miles": segments,
         "distance_miles": distance_miles,
         "duration_seconds": duration_seconds,
-        "display_coordinates": np.round(simplify(points), 5).tolist(),
+        "display_coordinates": np.round(simplified, 5).tolist(),
     }
-    cache.set(key, route, CACHE_SECONDS)
-    return route, calls
+
+
+def fetch_route(start, finish):
+    """Return ``(route, routing_calls, cache_source)``.
+
+    ``routing_calls`` counts HTTP requests made to the routing provider by this
+    call: 0 when served from cache, 1 normally, 2 only if the mirror was used.
+    """
+    coordinates = f"{start['longitude']:.5f},{start['latitude']:.5f};{finish['longitude']:.5f},{finish['latitude']:.5f}"
+    key = "route:v3:" + hashlib.sha256(coordinates.encode()).hexdigest()[:32]
+    calls = 0
+    global _last_activity
+    _last_activity = time.monotonic()
+
+    def load():
+        nonlocal calls
+        try:
+            raw, calls = _call_providers(coordinates)
+        except NoRoute as exc:
+            return {"no_route": str(exc)}  # Cached too: the answer will not change.
+        return {"cache_key": key, **_build_route(raw)}
+
+    route, source = cache.get_or_load(key, load)
+    if "no_route" in route:
+        raise NoRoute(route["no_route"])
+    return route, calls, source
+
+
+def _warm_connections():
+    for url in settings.OSRM_URLS:
+        try:
+            _session.head(f"{url}/", timeout=(settings.OSRM_CONNECT_TIMEOUT, 5))
+        except requests.RequestException as exc:
+            logger.info("Connection warm-up to %s failed: %s", url, exc)
+
+
+def start_connection_warmer():
+    """Keep HTTPS connections to the routing servers open while the API is in use.
+
+    A new TLS connection to the public servers costs ~0.5-1 s, and they close
+    idle connections after 1-2 minutes. While the API has been used in the last
+    ``OSRM_KEEP_WARM_SECONDS`` (and right after startup), this sends ``HEAD /``
+    to each server every ``OSRM_KEEPALIVE_INTERVAL`` seconds. That is not a
+    routing request: OSRM answers it immediately without computing anything.
+    When the API is idle it stops, so an unused server generates no traffic.
+    """
+    if settings.OSRM_KEEP_WARM_SECONDS <= 0:
+        return
+
+    def run():
+        while True:
+            if time.monotonic() - _last_activity <= settings.OSRM_KEEP_WARM_SECONDS:
+                _warm_connections()
+            time.sleep(settings.OSRM_KEEPALIVE_INTERVAL)
+
+    threading.Thread(target=run, name="osrm-keep-warm", daemon=True).start()

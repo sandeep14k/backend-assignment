@@ -12,7 +12,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 
 from planner.data import location
 from planner.optimizer import CAPACITY_GALLONS, InfeasibleRoute
-from planner.routing import RoutingError
+from planner.routing import NoRoute, RoutingError
 from planner.services import plan_trip
 
 FIELDS = {"start", "finish", "initial_fuel_gallons", "corridor_miles"}
@@ -89,6 +89,8 @@ def route(request):
         return _error(str(exc), 400, "invalid_request")
     except InfeasibleRoute as exc:
         return _error(str(exc), 422, "insufficient_station_coverage")
+    except NoRoute as exc:
+        return _error(str(exc), 422, "no_route")
     except RoutingError as exc:
         return _error(str(exc), 503, "routing_unavailable")
 

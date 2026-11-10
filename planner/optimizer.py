@@ -4,9 +4,11 @@ Vehicle model (from the brief): 500-mile range at 10 MPG, i.e. a 50-gallon tank.
 """
 
 from decimal import ROUND_HALF_UP, Decimal
+from itertools import chain
 
 import numpy as np
-from scipy.spatial import cKDTree
+
+from planner.geo import to_xyz
 
 RANGE_MILES = 500.0
 MPG = 10.0
@@ -21,90 +23,73 @@ class InfeasibleRoute(Exception):
     pass
 
 
-def _planar_scale(latitudes):
-    """Miles per degree of [lon, lat] near the given latitudes (local flat-earth approximation)."""
-    return np.array([69.172 * np.cos(np.radians(np.mean(latitudes))), 69.0])
+def candidates(route, index, corridor_miles=5.0):
+    """Stations within ``corridor_miles`` of the route, each with the route mile where it is reached.
 
-
-def candidates(route, stations, corridor_miles=5.0, points=None):
-    """Stations within ``corridor_miles`` of the route, with the route mile where each is reached.
-
-    Each station is projected onto the closest of the segments adjacent to its
-    eight nearest route vertices (KD-tree lookup, fully vectorized). Result is
-    ordered by route mile; stations at the same mile keep only the cheapest.
+    Exact search, no nearest-vertex shortcut: for every route segment, the
+    station KD-tree (built once at startup) returns all stations within
+    ``corridor + half the segment length`` of its midpoint, a superset of those
+    within the corridor of the segment. Each (segment, station) pair is then
+    projected onto the segment in one vectorized pass, and every station keeps
+    its closest segment. Sorted by route mile; co-located stations keep the cheapest.
     """
     coordinates = np.asarray(route["coordinates"], dtype=float)
-    if len(coordinates) < 2 or not stations:
+    if len(coordinates) < 2 or not index.stations:
         return []
-    if points is None:
-        points = np.array([[s["longitude"], s["latitude"]] for s in stations], dtype=float)
-    scale = _planar_scale(coordinates[:, 1])
-    route_xy, station_xy = coordinates * scale, points * scale
-
-    # Cheap pre-filter: ignore stations outside the route's padded bounding box.
-    low, high = (
-        route_xy.min(axis=0) - corridor_miles,
-        route_xy.max(axis=0) + corridor_miles,
-    )
-    nearby = np.flatnonzero(((station_xy >= low) & (station_xy <= high)).all(axis=1))
-    if not len(nearby):
+    xyz = to_xyz(coordinates)
+    a, direction = xyz[:-1], np.diff(xyz, axis=0)
+    half_length = np.linalg.norm(direction, axis=1) / 2
+    hits = index.tree.query_ball_point(a + direction / 2, r=corridor_miles + half_length)
+    counts = np.fromiter((len(h) for h in hits), dtype=np.int64, count=len(hits))
+    if not counts.sum():
         return []
-    station_xy = station_xy[nearby]
+    segment = np.repeat(np.arange(len(hits)), counts)
+    station = np.fromiter(chain.from_iterable(hits), dtype=np.int64, count=int(counts.sum()))
 
-    _, nearest = cKDTree(route_xy).query(station_xy, k=min(8, len(route_xy)))
-    nearest = np.asarray(nearest).reshape(len(station_xy), -1)
-    segment = np.clip(np.concatenate([nearest, nearest - 1], axis=1), 0, len(route_xy) - 2)
-    a, b = route_xy[segment], route_xy[segment + 1]
-    direction = b - a
-    length_sq = np.maximum((direction**2).sum(axis=2), 1e-20)
-    fraction = np.clip(((station_xy[:, None, :] - a) * direction).sum(axis=2) / length_sq, 0, 1)
-    offset = np.linalg.norm(a + fraction[:, :, None] * direction - station_xy[:, None, :], axis=2)
-    best = offset.argmin(axis=1)
+    seg_dir, relative = direction[segment], index.xyz[station] - a[segment]
+    fraction = np.clip((relative * seg_dir).sum(axis=1) / np.maximum((seg_dir**2).sum(axis=1), 1e-12), 0, 1)
+    offset = np.linalg.norm(relative - fraction[:, None] * seg_dir, axis=1)
 
-    rows = np.arange(len(station_xy))
-    best_offset = offset[rows, best]
-    best_segment = segment[rows, best]
-    cumulative = np.concatenate([[0.0], np.cumsum(route["segment_miles"])])
-    mile = cumulative[best_segment] + fraction[rows, best] * np.asarray(route["segment_miles"])[best_segment]
+    order = np.lexsort((offset, station))  # By station, then closest segment first.
+    first = np.concatenate(([True], station[order][1:] != station[order][:-1]))
+    best = order[first]
+    best = best[offset[best] <= corridor_miles]
 
+    segment_miles = np.asarray(route["segment_miles"])
+    cumulative = np.concatenate(([0.0], np.cumsum(segment_miles)))
+    miles = cumulative[segment[best]] + fraction[best] * segment_miles[segment[best]]
     found = [
-        {
-            **stations[nearby[i]],
-            "route_mile": float(mile[i]),
-            "offset_miles": round(float(best_offset[i]), 3),
-        }
-        for i in np.flatnonzero((best_offset <= corridor_miles) & (mile < route["distance_miles"] - EPSILON))
+        {**index.stations[station[i]], "route_mile": float(mile), "offset_miles": round(float(offset[i]), 3)}
+        for i, mile in zip(best, miles, strict=True)
+        if mile < route["distance_miles"] - EPSILON
     ]
     found.sort(key=lambda s: (s["route_mile"], Decimal(s["price_per_gallon"]), s["id"]))
     unique = []
-    for station in found:
-        if not unique or station["route_mile"] - unique[-1]["route_mile"] > EPSILON:
-            unique.append(station)
+    for item in found:
+        if not unique or item["route_mile"] - unique[-1]["route_mile"] > EPSILON:
+            unique.append(item)
     return unique
 
 
-def origin_station(start, stations, points):
+def origin_station(start, index):
     """The station where the trip's first fill happens (route mile 0).
 
     The cheapest station within 25 miles of the start; failing that, the nearest
-    station within 100 miles. ``offset_miles`` reports the straight-line distance.
+    station within 100 miles. ``offset_miles`` is the straight-line distance.
     """
-    if not stations:
+    if not index.stations:
         return None
-    scale = _planar_scale([start["latitude"]])
-    distance = np.linalg.norm((points - [start["longitude"], start["latitude"]]) * scale, axis=1)
-    close = np.flatnonzero(distance <= ORIGIN_RADIUS_MILES)
-    if len(close):
-        index = min(close, key=lambda i: (Decimal(stations[i]["price_per_gallon"]), distance[i]))
+    point = to_xyz([[start["longitude"], start["latitude"]]])[0]
+    close = index.tree.query_ball_point(point, ORIGIN_RADIUS_MILES)
+    if close:
+        distances = np.linalg.norm(index.xyz[close] - point, axis=1)
+        choice = min(range(len(close)), key=lambda i: (index.prices[close[i]], distances[i]))
+        station, distance = close[choice], distances[choice]
     else:
-        index = int(distance.argmin())
-        if distance[index] > ORIGIN_FALLBACK_MILES:
+        distance, station = index.tree.query(point, distance_upper_bound=ORIGIN_FALLBACK_MILES)
+        if not np.isfinite(distance):
             return None
-    return {
-        **stations[index],
-        "route_mile": 0.0,
-        "offset_miles": round(float(distance[index]), 3),
-    }
+    return {**index.stations[int(station)], "route_mile": 0.0, "offset_miles": round(float(distance), 3)}
 
 
 def money(value):
