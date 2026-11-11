@@ -4,15 +4,7 @@ import time
 
 from planner import cache
 from planner.data import station_index, stations
-from planner.optimizer import (
-    CAPACITY_GALLONS,
-    MIN_STOP_GALLONS,
-    MPG,
-    RANGE_MILES,
-    candidates,
-    optimize,
-    origin_station,
-)
+from planner.optimizer import CAPACITY_GALLONS, MPG, RANGE_MILES, ROAD_FACTOR, candidates, optimize
 from planner.routing import fetch_route
 
 STOP_FIELDS = (
@@ -30,6 +22,7 @@ STOP_FIELDS = (
     "gallons_on_arrival",
     "gallons_purchased",
     "gallons_on_departure",
+    "detour_miles",
     "cost_usd",
     "reason",
 )
@@ -80,7 +73,7 @@ def _geojson(route, start, finish, stops):
     }
 
 
-def plan_trip(start, finish, initial_gallons, corridor_miles):
+def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, min_stop_gallons=5.0):
     """Plan the cheapest fuel purchases between two resolved locations."""
     started = time.perf_counter()
     route, routing_calls, route_source = fetch_route(start, finish)
@@ -92,13 +85,10 @@ def plan_trip(start, finish, initial_gallons, corridor_miles):
         f"{route['cache_key']}:corridor:{corridor_miles:g}",
         lambda: candidates(route, index, corridor_miles),
     )
-    origin = origin_station(start, index) if initial_gallons < CAPACITY_GALLONS else None
-    if origin:
-        on_route = [origin] + [s for s in on_route if s["id"] != origin["id"]]
     matching_ms = _elapsed_ms(step)
 
     step = time.perf_counter()
-    plan = optimize(on_route, route["distance_miles"], initial_gallons, MIN_STOP_GALLONS)
+    plan = optimize(on_route, route["distance_miles"], initial_fuel_gallons, min_stop_gallons)
     optimize_ms = _elapsed_ms(step)
 
     plan["fuel_stops"] = [{field: stop[field] for field in STOP_FIELDS} for stop in plan["fuel_stops"]]
@@ -113,14 +103,13 @@ def plan_trip(start, finish, initial_gallons, corridor_miles):
             "range_miles": RANGE_MILES,
             "mpg": MPG,
             "tank_capacity_gallons": CAPACITY_GALLONS,
-            "initial_fuel_gallons": initial_gallons,
+            "initial_fuel_gallons": initial_fuel_gallons,
             "corridor_miles": corridor_miles,
-            "first_fill": "A non-full tank is first filled at the cheapest station within 25 miles of the start "
-            "(the nearest within 100 miles if none).",
-            "small_stops": (
-                f"Top-ups under {MIN_STOP_GALLONS:g} gallons move to the previous or next stop when feasible; "
-                "the extra cost is reported as merge_extra_cost_usd."
-            ),
+            "min_stop_gallons": min_stop_gallons,
+            "starting_fuel": "Omitted initial_fuel_gallons: the vehicle starts with just enough fuel to reach the "
+            "first station on the route, and that fuel is valued at the station's price and included in the total.",
+            "detours": f"Reaching an off-route station costs {ROAD_FACTOR:g}x its straight-line distance each way; "
+            "that fuel is bought at the stop and included. A small reserve keeps the tank between 0 and 50 gallons.",
             "station_locations": "Station positions are their city's coordinates (the price file has no coordinates).",
             "prices": "Retail prices from the supplied CSV.",
         },

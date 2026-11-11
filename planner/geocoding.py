@@ -57,7 +57,7 @@ def resolve(value):
     """Return ``(location, geocoding_calls)`` for one user-supplied location."""
     if not (isinstance(value, str) and STREET_ADDRESS.match(value)):
         return location(value), 0
-    key = "geocode:v1:" + hashlib.sha256(" ".join(value.lower().split()).encode()).hexdigest()[:32]
+    key = "geocode:v2:" + hashlib.sha256(" ".join(value.lower().split()).encode()).hexdigest()[:32]
     try:
         found, source = cache.get_or_load(key, lambda: _census(value))
     except GeocoderUnavailable as exc:

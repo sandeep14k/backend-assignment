@@ -11,26 +11,31 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods
 
 from planner.geocoding import resolve_pair
-from planner.optimizer import CAPACITY_GALLONS, InfeasibleRoute
+from planner.optimizer import CAPACITY_GALLONS, MIN_STOP_GALLONS, InfeasibleRoute
 from planner.routing import NoRoute, RoutingError
 from planner.services import plan_trip
 
-FIELDS = {"start", "finish", "initial_fuel_gallons", "corridor_miles"}
+FIELDS = {"start", "finish", "initial_fuel_gallons", "corridor_miles", "min_stop_gallons"}
 
 
 class UnsupportedMediaType(Exception):
     pass
 
 
-NUMBER_LIMITS = {
-    "initial_fuel_gallons": (0.0, CAPACITY_GALLONS, 0.0),
+NUMBER_LIMITS = {  # name: (minimum, maximum, default)
+    "initial_fuel_gallons": (0.0, CAPACITY_GALLONS, None),  # None: just enough to reach the first station
     "corridor_miles": (0.1, 25.0, 5.0),
+    "min_stop_gallons": (0.0, 20.0, MIN_STOP_GALLONS),  # 0 returns the exact optimum unchanged
 }
 
 
 def _number(data, name):
     minimum, maximum, default = NUMBER_LIMITS[name]
     value = data.get(name, default)
+    if value is None or value == "":
+        if default is None:
+            return None
+        value = default
     if isinstance(value, str):  # Query-string values arrive as text.
         with contextlib.suppress(ValueError):
             value = float(value)
@@ -57,11 +62,11 @@ def _parse(request):
     unknown = set(data) - FIELDS
     if unknown:
         raise ValueError(f"Unknown fields: {', '.join(sorted(unknown))}. Allowed: {', '.join(sorted(FIELDS))}.")
-    initial, corridor = _number(data, "initial_fuel_gallons"), _number(data, "corridor_miles")
+    options = {name: _number(data, name) for name in NUMBER_LIMITS}
     start, finish, geocoding_calls = resolve_pair(data.get("start"), data.get("finish"))
     if (start["latitude"], start["longitude"]) == (finish["latitude"], finish["longitude"]):
         raise ValueError("Start and finish must be different places.")
-    return data, start, finish, initial, corridor, geocoding_calls
+    return data, start, finish, options, geocoding_calls
 
 
 def _error(message, status, code):
@@ -73,8 +78,8 @@ def _error(message, status, code):
 def route(request):
     started = time.perf_counter()
     try:
-        data, start, finish, initial, corridor, geocoding_calls = _parse(request)
-        result = plan_trip(start, finish, initial, corridor)
+        data, start, finish, options, geocoding_calls = _parse(request)
+        result = plan_trip(start, finish, **options)
     except UnsupportedMediaType as exc:
         return _error(str(exc), 415, "unsupported_media_type")
     except (ValueError, UnicodeDecodeError) as exc:
@@ -86,7 +91,7 @@ def route(request):
     except RoutingError as exc:
         return _error(str(exc), 503, "routing_unavailable")
 
-    query = {k: data[k] for k in ("start", "finish", "initial_fuel_gallons", "corridor_miles") if k in data}
+    query = {k: data[k] for k in ("start", "finish", *NUMBER_LIMITS) if k in data}
     result["metadata"]["geocoding_calls"] = geocoding_calls
     result["metadata"]["timing_ms"]["total"] = round((time.perf_counter() - started) * 1000, 1)
     map_url = request.build_absolute_uri(f"{reverse('map')}?{urlencode(query)}")

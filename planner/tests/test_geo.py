@@ -6,7 +6,7 @@ import numpy as np
 from django.test import SimpleTestCase
 
 from planner.geo import decode_polyline, segment_miles, simplify, to_xyz
-from planner.optimizer import candidates, origin_station
+from planner.optimizer import candidates
 from planner.tests.helpers import encode, fake_route, index_of, make_station
 
 
@@ -130,10 +130,3 @@ class CandidateTests(SimpleTestCase):
         self.assertAlmostEqual(result[0]["route_mile"], 50, delta=0.1)
         # 0.69 mi along the 40th parallel; measured to the great-circle chord it is ~0.62 mi.
         self.assertAlmostEqual(result[0]["offset_miles"], 0.69, delta=0.1)
-
-    def test_origin_prefers_cheapest_nearby_station(self):
-        start = {"latitude": 40.0, "longitude": -90.0}
-        stations = [make_station("near", -90.0, 40.0, 4), make_station("cheap", -90.2, 40.0, 3)]
-        self.assertEqual(origin_station(start, index_of([*stations, make_station("far", -92, 40, 1)]))["id"], "cheap")
-        self.assertEqual(origin_station(start, index_of([make_station("mid", -90.6, 40, 1)]))["id"], "mid")  # 32 mi
-        self.assertIsNone(origin_station(start, index_of([make_station("far", -92, 40, 1)])))  # 106 mi

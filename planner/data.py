@@ -6,6 +6,7 @@ handling never geocodes over the network.
 
 import csv
 import difflib
+import json
 import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
@@ -15,14 +16,9 @@ import numpy as np
 from django.conf import settings
 from scipy.spatial import cKDTree
 
-from planner.geo import to_xyz
+from planner.geo import Boundary, to_xyz
 
-# Generous bounding boxes for the contiguous US, Alaska and Hawaii.
-US_BOUNDS = [
-    (24.0, 49.6, -125.0, -66.5),
-    (51.0, 71.6, -180.0, -129.0),
-    (18.5, 22.5, -160.5, -154.5),
-]
+US_COASTAL_WATERS_MILES = 25  # Offshore points this close to US land are accepted (islands, piers, harbours).
 CANADIAN_PROVINCES = {"AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"}
 LOCATION_HELP = "Use 'City, ST' (e.g. 'Chicago, IL'), a street address, or 'latitude, longitude'."
 COUNTRY_NAMES = {"usa", "us", "unitedstates", "unitedstatesofamerica", "america"}
@@ -113,8 +109,29 @@ def state_codes():
     return codes
 
 
+@lru_cache(maxsize=1)
+def _boundaries():
+    with (settings.BASE_DIR / "data/us_boundary.json").open(encoding="utf-8") as source:
+        data = json.load(source)
+    return Boundary(data["us"]), Boundary(data["neighbors"])
+
+
 def in_us(latitude, longitude):
-    return any(s <= latitude <= n and w <= longitude <= e for s, n, w, e in US_BOUNDS)
+    """True inside US land (incl. territories), or within 25 miles offshore and not in another country.
+
+    Uses Natural Earth 1:10m borders: every one of the 29,880 bundled US city
+    coordinates except 8 border hamlets passes, and points in Canada, Mexico,
+    Cuba, the Bahamas and the British Virgin Islands (e.g. Windsor, 1 mile from
+    Detroit) are rejected.
+    """
+    if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+        return False
+    us, neighbors = _boundaries()
+    if us.contains(longitude, latitude):
+        return True
+    if neighbors.contains(longitude, latitude):
+        return False
+    return us.distance_miles(longitude, latitude) <= US_COASTAL_WATERS_MILES
 
 
 def _point(latitude, longitude, matched):
@@ -190,6 +207,8 @@ def location(value):
         return _point(numbers[0], numbers[1], "coordinates")
 
     parts = [part.strip() for part in value.split(",") if part.strip()]
+    if not parts:
+        raise ValueError(f"Could not read location '{value}'. {LOCATION_HELP}")
     while len(parts) > 1 and _state_key(parts[-1]) in COUNTRY_NAMES:
         parts.pop()
     alias = INPUT_ALIASES.get(normalize(parts[0])) if len(parts) == 1 else None
@@ -315,3 +334,4 @@ def warm():
     """Load datasets and build the station KD-tree at startup (~100 ms), not on the first request."""
     state_codes()
     station_index()
+    _boundaries()

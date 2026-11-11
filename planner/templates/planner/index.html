@@ -47,7 +47,8 @@
   <form id="form">
     <label>Start <input id="start" name="start" value="Chicago, IL" required></label>
     <label>Finish <input id="finish" name="finish" value="Los Angeles, CA" required></label>
-    <label class="small">Fuel at start (gal) <input id="initial" name="initial_fuel_gallons" type="number" min="0" max="50" step="any" value="0"></label>
+    <label class="small">Fuel at start (gal) <input id="initial" name="initial_fuel_gallons" type="number" min="0" max="50" step="any" placeholder="auto"></label>
+    <label class="small">Corridor (mi) <input id="corridor" name="corridor_miles" type="number" min="0.1" max="25" step="any" placeholder="5"></label>
     <button id="submit">Plan route</button>
   </form>
 
@@ -133,8 +134,13 @@ function render(data) {
 }
 
 async function plan() {
-  const params = new URLSearchParams({ start: $("start").value, finish: $("finish").value });
-  if ($("initial").value !== "") params.set("initial_fuel_gallons", $("initial").value);
+  // Keep every option from the map_url (e.g. min_stop_gallons) so the map shows the same plan as the API.
+  const params = new URLSearchParams(location.search);
+  params.set("start", $("start").value);
+  params.set("finish", $("finish").value);
+  for (const [param, id] of [["initial_fuel_gallons", "initial"], ["corridor_miles", "corridor"]]) {
+    if ($(id).value !== "") params.set(param, $(id).value); else params.delete(param);
+  }
   history.replaceState(null, "", `/map/?${params}`);
   $("submit").disabled = true;
   $("status").className = "";
@@ -159,7 +165,7 @@ async function plan() {
 $("form").addEventListener("submit", (event) => { event.preventDefault(); plan(); });
 
 const query = new URLSearchParams(location.search);
-for (const [param, id] of [["start", "start"], ["finish", "finish"], ["initial_fuel_gallons", "initial"]]) {
+for (const [param, id] of [["start", "start"], ["finish", "finish"], ["initial_fuel_gallons", "initial"], ["corridor_miles", "corridor"]]) {
   if (query.has(param)) $(id).value = query.get(param);
 }
 if (query.has("start") && query.has("finish")) plan();

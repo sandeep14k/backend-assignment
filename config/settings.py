@@ -66,5 +66,8 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "loggers": {"planner": {"handlers": ["console"], "level": "INFO"}},
+    "loggers": {
+        "planner": {"handlers": ["console"], "level": "INFO"},
+        "django.request": {"handlers": ["console"], "level": "ERROR"},  # Tracebacks of any 500.
+    },
 }

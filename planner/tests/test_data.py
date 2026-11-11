@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.test import SimpleTestCase
 
-from planner.data import CANADIAN_PROVINCES, find_city, location, station_index, stations
+from planner.data import CANADIAN_PROVINCES, cities, find_city, location, station_index, stations
 
 
 def csv_rows():
@@ -81,6 +81,41 @@ class LocationTests(SimpleTestCase):
         self.assertEqual(location("41.88 -87.63")["matched"], "coordinates")
         self.assertAlmostEqual(location("41.88, -87.63")["latitude"], 41.88)
 
+    def test_coordinates_must_be_in_the_us_not_just_a_bounding_box(self):
+        inside = {
+            "Detroit": (42.3314, -83.0458),
+            "Key West": (24.5551, -81.78),
+            "San Juan PR": (18.4655, -66.1057),
+            "Honolulu": (21.3069, -157.8583),
+            "El Paso": (31.7619, -106.485),
+            "Anchorage": (61.2181, -149.9003),
+        }
+        outside = {
+            "Toronto": (43.6532, -79.3832),
+            "Windsor ON (1 mi from Detroit)": (42.3149, -83.0364),
+            "Nuevo Laredo": (27.4864, -99.5075),
+            "Tijuana": (32.5149, -117.0382),
+            "Vancouver": (49.2827, -123.1207),
+            "Havana": (23.1136, -82.3666),
+            "Bimini": (25.7270, -79.2970),
+            "Tortola BVI": (18.4207, -64.64),
+        }
+        for name, (lat, lon) in inside.items():
+            self.assertEqual(location(f"{lat}, {lon}")["matched"], "coordinates", name)
+        for name, (lat, lon) in outside.items():
+            with self.assertRaisesMessage(ValueError, "not within the USA", msg=name):
+                location(f"{lat}, {lon}")
+
+    def test_every_bundled_us_city_coordinate_passes_except_border_hamlets(self):
+        from planner.data import in_us
+
+        rejected = {
+            (r["CITY"], r["STATE_CODE"])
+            for r in cities().values()
+            if not in_us(float(r["LATITUDE"]), float(r["LONGITUDE"]))
+        }
+        self.assertLessEqual(len(rejected), 10, rejected)
+
     def test_helpful_errors(self):
         with self.assertRaisesMessage(ValueError, "Did you mean Chicago, IL?"):
             location("Chicgo, IL")
@@ -88,7 +123,7 @@ class LocationTests(SimpleTestCase):
             location("Kansas City")
         with self.assertRaisesMessage(ValueError, "not within the USA"):
             location("48.85, 2.35")
-        for bad in ["Paris, FR", "", None, 5, "x" * 201]:
+        for bad in ["Paris, FR", "", ",,,", " , ", None, 5, "x" * 201]:
             with self.assertRaises(ValueError):
                 location(bad)
 

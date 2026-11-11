@@ -24,6 +24,9 @@ class APITests(SimpleTestCase):
             {**base, "initial_fuel_gallons": 51},
             {**base, "extra": 1},
             {**base, "finish": "chicago, il"},
+            {**base, "start": ",,,"},
+            {**base, "start": "43.6532, -79.3832"},  # Toronto
+            {**base, "min_stop_gallons": 21},
         ]:
             response = post(self.client, body)
             self.assertEqual(response.status_code, 400, body)
@@ -52,8 +55,7 @@ class APITests(SimpleTestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["map_url"].startswith("http://testserver/map/?start=Chicago"))
-        self.assertEqual(data["fuel_purchased_gallons"], 180)  # Empty tank: buys every gallon used.
-        self.assertEqual(data["fuel_stops"][0]["route_mile"], 0)
+        self.assertAlmostEqual(data["fuel_burned_gallons"], 180, delta=1)  # Road fuel plus small detours.
         kinds = [f["properties"]["kind"] for f in data["map"]["features"]]
         self.assertEqual(kinds[:3], ["route", "start", "finish"])
         self.assertEqual(kinds.count("fuel_stop"), len(data["fuel_stops"]))

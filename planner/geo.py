@@ -95,3 +95,30 @@ def simplify(coordinates, tolerance_miles=0.03):
             keep[index[farthest]] = True
             undecided[index[farthest]] = False
     return coordinates[keep]
+
+
+class Boundary:
+    """Point-in-polygon test (even-odd rule) over all rings at once, plus distance to the border."""
+
+    def __init__(self, rings):
+        starts, ends = [], []
+        for ring in rings:
+            ring = np.asarray(ring, dtype=float)
+            starts.append(ring)
+            ends.append(np.roll(ring, -1, axis=0))
+        self.a, self.b = np.concatenate(starts), np.concatenate(ends)
+
+    def contains(self, lon, lat):
+        (ax, ay), (bx, by) = self.a.T, self.b.T
+        crosses = (ay > lat) != (by > lat)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            x_at_lat = ax + (lat - ay) * (bx - ax) / (by - ay)
+        return bool(np.count_nonzero(crosses & (lon < x_at_lat)) % 2)
+
+    def distance_miles(self, lon, lat):
+        """Approximate distance from the point to the nearest border edge."""
+        scale = np.array([69.172 * np.cos(np.radians(lat)), 69.0])
+        a, b, p = self.a * scale, self.b * scale, np.array([lon, lat]) * scale
+        d = b - a
+        t = np.clip(((p - a) * d).sum(axis=1) / np.maximum((d * d).sum(axis=1), 1e-12), 0, 1)
+        return float(np.linalg.norm(a + t[:, None] * d - p, axis=1).min())

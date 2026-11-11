@@ -14,35 +14,81 @@
   },
   "distance_miles": 2024.4,
   "duration_hours": 35.58,
-  "total_cost_usd": "621.00",
+  "total_cost_usd": "632.65",
+  "starting_fuel": null,
   "savings": {
     "compared_to": "A price-blind driver on the same route: stops only when the next station is out of reach, then fills the tank.",
-    "price_blind_cost_usd": "655.11",
+    "price_blind_cost_usd": "661.78",
     "price_blind_stops": 5,
-    "savings_usd": "34.11",
-    "savings_percent": 5.2
+    "savings_usd": "29.13",
+    "savings_percent": 4.4
   },
-  "unrounded_total_cost_usd": "621.005750",
-  "small_stops_merged": 4,
-  "merge_extra_cost_usd": "0.67",
+  "stop_consolidation": {
+    "road_optimal_plan_cost_usd": "648.67",
+    "road_optimal_plan_stops": 18,
+    "stops_removed": 9,
+    "min_stop_gallons": 5.0,
+    "cost_change_usd": "-16.02",
+    "note": "The road-optimal plan is the exact minimum for road fuel (LP-verified). Removing stops saves their detour fuel; tiny top-ups under min_stop_gallons are also folded in for convenience."
+  },
+  "unrounded_total_cost_usd": "632.638017",
   "fuel_stops": [
     {
-      "id": "70180",
-      "name": "Gulf",
-      "address": "SR-83",
-      "city": "Bensenville",
+      "id": "73127",
+      "name": "Gas N Wash",
+      "address": "I-55, EXIT 285",
+      "city": "Chicago",
       "state": "IL",
-      "latitude": 41.9536,
-      "longitude": -87.935,
+      "latitude": 41.885847,
+      "longitude": -87.618123,
       "coordinate_precision": "city_centroid",
-      "price_per_gallon": "3.07900000",
+      "price_per_gallon": "3.39900000",
       "route_mile": 0.0,
-      "offset_miles": 16.95,
-      "gallons_on_arrival": 0.0,
-      "gallons_purchased": 32.345,
-      "gallons_on_departure": 32.345,
-      "cost_usd": "99.59",
-      "reason": "First fill near the start. Bought just enough to reach KWIK STAR #932 (Altoona, IA) at mile 323, which is cheaper at $2.959/gal."
+      "offset_miles": 0.023,
+      "gallons_on_arrival": 0.606,
+      "gallons_purchased": 1.423,
+      "gallons_on_departure": 2.029,
+      "detour_miles": 0.06,
+      "cost_usd": "4.84",
+      "reason": "Bought just enough to reach Speedway #6809 (Franklin Park, IL) at mile 14, which is cheaper at $3.354/gal."
+    },
+    {
+      "id": "72438",
+      "name": "QUIKTRIP #7208",
+      "address": "I-290 EXIT 18A",
+      "city": "Bellwood",
+      "state": "IL",
+      "latitude": 41.882484,
+      "longitude": -87.878557,
+      "coordinate_precision": "city_centroid",
+      "price_per_gallon": "3.18100000",
+      "route_mile": 14.166,
+      "offset_miles": 0.817,
+      "gallons_on_arrival": 0.503,
+      "gallons_purchased": 21.647,
+      "gallons_on_departure": 22.15,
+      "detour_miles": 2.12,
+      "cost_usd": "68.86",
+      "reason": "Bought just enough to reach Kwik Star #1142 (Iowa City, IA) at mile 220, which is cheaper at $3.134/gal. Also buys 0.8 gal here so the stop at mile 220 can be skipped."
+    },
+    {
+      "id": "67422",
+      "name": "KUM & GO #0137",
+      "address": "I-80, EXIT 237",
+      "city": "Tiffin",
+      "state": "IA",
+      "latitude": 41.705833,
+      "longitude": -91.662778,
+      "coordinate_precision": "city_centroid",
+      "price_per_gallon": "3.09900000",
+      "route_mile": 228.508,
+      "offset_miles": 0.822,
+      "gallons_on_arrival": 0.502,
+      "gallons_purchased": 9.708,
+      "gallons_on_departure": 10.211,
+      "detour_miles": 2.14,
+      "cost_usd": "30.09",
+      "reason": "Bought just enough to reach KUM & GO #0032 (Colfax, IA) at mile 312, which is cheaper at $3.082/gal. Also buys 1.2 gal here so the stop at mile 312 can be skipped."
     },
     {
       "id": "70333",
@@ -56,29 +102,12 @@
       "price_per_gallon": "2.95900000",
       "route_mile": 323.453,
       "offset_miles": 1.116,
-      "gallons_on_arrival": 0.0,
-      "gallons_purchased": 16.217,
-      "gallons_on_departure": 16.217,
-      "cost_usd": "47.99",
-      "reason": "Bought just enough to reach QUIKTRIP #598 (Omaha, NE) at mile 467, which is cheaper at $2.927/gal. Includes 1.9 gal that would otherwise need a separate stop at mile 467."
-    },
-    {
-      "id": "69840",
-      "name": "KUM & GO #0370",
-      "address": "I-80, EXIT 439 & SR-370",
-      "city": "Gretna",
-      "state": "NE",
-      "latitude": 41.134458,
-      "longitude": -96.245837,
-      "coordinate_precision": "city_centroid",
-      "price_per_gallon": "2.92066666",
-      "route_mile": 485.628,
-      "offset_miles": 1.928,
-      "gallons_on_arrival": 0.0,
-      "gallons_purchased": 9.263,
-      "gallons_on_departure": 9.263,
-      "cost_usd": "27.05",
-      "reason": "Bought just enough to reach Henderson Fuel Mart (Henderson, NE) at mile 578, which is cheaper at $2.899/gal."
+      "gallons_on_arrival": 0.464,
+      "gallons_purchased": 25.77,
+      "gallons_on_departure": 26.234,
+      "detour_miles": 2.9,
+      "cost_usd": "76.25",
+      "reason": "Bought just enough to reach QUIKTRIP #598 (Omaha, NE) at mile 467, which is cheaper at $2.927/gal. Also buys 11.2 gal here so the stops at miles 467 and 486 can be skipped."
     },
     {
       "id": "52548",
@@ -92,29 +121,12 @@
       "price_per_gallon": "2.89900000",
       "route_mile": 578.254,
       "offset_miles": 2.753,
-      "gallons_on_arrival": 0.0,
-      "gallons_purchased": 50.0,
-      "gallons_on_departure": 50.0,
-      "cost_usd": "144.95",
-      "reason": "No cheaper station within the next 500 miles, so filled the tank."
-    },
-    {
-      "id": "65287",
-      "name": "AM ENERGY",
-      "address": "I-80, EXIT 248",
-      "city": "Overton",
-      "state": "NE",
-      "latitude": 40.751875,
-      "longitude": -99.527824,
-      "coordinate_precision": "city_centroid",
-      "price_per_gallon": "2.89900000",
-      "route_mile": 671.209,
-      "offset_miles": 4.101,
-      "gallons_on_arrival": 40.704,
-      "gallons_purchased": 9.296,
-      "gallons_on_departure": 50.0,
-      "cost_usd": "26.95",
-      "reason": "No cheaper station within the next 500 miles, so filled the tank."
+      "gallons_on_arrival": 0.251,
+      "gallons_purchased": 49.497,
+      "gallons_on_departure": 49.749,
+      "detour_miles": 7.16,
+      "cost_usd": "143.49",
+      "reason": "No cheaper station within range, so filled the tank."
     },
     {
       "id": "69085",
@@ -128,29 +140,31 @@
       "price_per_gallon": "3.01400000",
       "route_mile": 793.914,
       "offset_miles": 0.843,
-      "gallons_on_arrival": 37.73,
-      "gallons_purchased": 12.27,
-      "gallons_on_departure": 50.0,
-      "cost_usd": "36.98",
-      "reason": "No cheaper station within the next 500 miles, so filled the tank. Includes 1.4 gal that would otherwise need a separate stop at mile 685."
+      "gallons_on_arrival": 27.715,
+      "gallons_purchased": 21.785,
+      "gallons_on_departure": 49.5,
+      "detour_miles": 2.19,
+      "cost_usd": "65.66",
+      "reason": "No cheaper station within range, so filled the tank. Also buys 10.7 gal here so the stop at mile 685 can be skipped."
     },
     {
-      "id": "73101",
-      "name": "7-ELEVEN 42279",
-      "address": "I-76, Exit 39",
-      "city": "Keenesburg",
+      "id": "60700",
+      "name": "PWI #502",
+      "address": "I-70/US-40, EXIT 259",
+      "city": "Golden",
       "state": "CO",
-      "latitude": 40.095847,
-      "longitude": -104.446366,
+      "latitude": 39.730548,
+      "longitude": -105.191528,
       "coordinate_precision": "city_centroid",
-      "price_per_gallon": "3.14900000",
-      "route_mile": 964.155,
-      "offset_miles": 3.34,
-      "gallons_on_arrival": 32.976,
-      "gallons_purchased": 17.024,
-      "gallons_on_departure": 50.0,
-      "cost_usd": "53.61",
-      "reason": "No cheaper station within the next 500 miles, so filled the tank. Includes 2.0 gal that would otherwise need a separate stop at mile 814."
+      "price_per_gallon": "3.19900000",
+      "route_mile": 1013.223,
+      "offset_miles": 0.696,
+      "gallons_on_arrival": 27.369,
+      "gallons_purchased": 22.112,
+      "gallons_on_departure": 49.481,
+      "detour_miles": 1.81,
+      "cost_usd": "70.74",
+      "reason": "No cheaper station within range, so filled the tank. Also buys 17.0 gal here so the stop at mile 964 can be skipped."
     },
     {
       "id": "71712",
@@ -164,11 +178,12 @@
       "price_per_gallon": "3.28233333",
       "route_mile": 1344.921,
       "offset_miles": 0.953,
-      "gallons_on_arrival": 11.923,
-      "gallons_purchased": 38.077,
-      "gallons_on_departure": 50.0,
-      "cost_usd": "124.98",
-      "reason": "No cheaper station within the next 500 miles, so filled the tank. Includes 4.9 gal that would otherwise need a separate stop at mile 1013."
+      "gallons_on_arrival": 16.097,
+      "gallons_purchased": 33.418,
+      "gallons_on_departure": 49.515,
+      "detour_miles": 2.48,
+      "cost_usd": "109.69",
+      "reason": "No cheaper station within range, so filled the tank."
     },
     {
       "id": "72965",
@@ -182,17 +197,18 @@
       "price_per_gallon": "3.28233333",
       "route_mile": 1722.65,
       "offset_miles": 0.146,
-      "gallons_on_arrival": 12.227,
-      "gallons_purchased": 17.946,
-      "gallons_on_departure": 30.173,
-      "cost_usd": "58.90",
+      "gallons_on_arrival": 11.599,
+      "gallons_purchased": 19.202,
+      "gallons_on_departure": 30.801,
+      "detour_miles": 0.38,
+      "cost_usd": "63.03",
       "reason": "No cheaper station before the destination, so bought just enough to finish."
     }
   ],
-  "fuel_consumed_gallons": 202.438,
-  "fuel_purchased_gallons": 202.438,
-  "average_price_per_gallon": "3.07",
-  "remaining_gallons": 0.0,
+  "fuel_burned_gallons": 204.562,
+  "fuel_purchased_gallons": 204.562,
+  "average_price_per_gallon": "3.09",
+  "remaining_gallons": 0.609,
   "map": {
     "type": "FeatureCollection",
     "features": [
@@ -7344,28 +7360,29 @@
         "properties": {
           "kind": "fuel_stop",
           "stop_number": 1,
-          "id": "70180",
-          "name": "Gulf",
-          "address": "SR-83",
-          "city": "Bensenville",
+          "id": "73127",
+          "name": "Gas N Wash",
+          "address": "I-55, EXIT 285",
+          "city": "Chicago",
           "state": "IL",
-          "latitude": 41.9536,
-          "longitude": -87.935,
+          "latitude": 41.885847,
+          "longitude": -87.618123,
           "coordinate_precision": "city_centroid",
-          "price_per_gallon": "3.07900000",
+          "price_per_gallon": "3.39900000",
           "route_mile": 0.0,
-          "offset_miles": 16.95,
-          "gallons_on_arrival": 0.0,
-          "gallons_purchased": 32.345,
-          "gallons_on_departure": 32.345,
-          "cost_usd": "99.59",
-          "reason": "First fill near the start. Bought just enough to reach KWIK STAR #932 (Altoona, IA) at mile 323, which is cheaper at $2.959/gal."
+          "offset_miles": 0.023,
+          "gallons_on_arrival": 0.606,
+          "gallons_purchased": 1.423,
+          "gallons_on_departure": 2.029,
+          "detour_miles": 0.06,
+          "cost_usd": "4.84",
+          "reason": "Bought just enough to reach Speedway #6809 (Franklin Park, IL) at mile 14, which is cheaper at $3.354/gal."
         },
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -87.935,
-            41.9536
+            -87.618123,
+            41.885847
           ]
         }
       },
@@ -7374,6 +7391,68 @@
         "properties": {
           "kind": "fuel_stop",
           "stop_number": 2,
+          "id": "72438",
+          "name": "QUIKTRIP #7208",
+          "address": "I-290 EXIT 18A",
+          "city": "Bellwood",
+          "state": "IL",
+          "latitude": 41.882484,
+          "longitude": -87.878557,
+          "coordinate_precision": "city_centroid",
+          "price_per_gallon": "3.18100000",
+          "route_mile": 14.166,
+          "offset_miles": 0.817,
+          "gallons_on_arrival": 0.503,
+          "gallons_purchased": 21.647,
+          "gallons_on_departure": 22.15,
+          "detour_miles": 2.12,
+          "cost_usd": "68.86",
+          "reason": "Bought just enough to reach Kwik Star #1142 (Iowa City, IA) at mile 220, which is cheaper at $3.134/gal. Also buys 0.8 gal here so the stop at mile 220 can be skipped."
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -87.878557,
+            41.882484
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "kind": "fuel_stop",
+          "stop_number": 3,
+          "id": "67422",
+          "name": "KUM & GO #0137",
+          "address": "I-80, EXIT 237",
+          "city": "Tiffin",
+          "state": "IA",
+          "latitude": 41.705833,
+          "longitude": -91.662778,
+          "coordinate_precision": "city_centroid",
+          "price_per_gallon": "3.09900000",
+          "route_mile": 228.508,
+          "offset_miles": 0.822,
+          "gallons_on_arrival": 0.502,
+          "gallons_purchased": 9.708,
+          "gallons_on_departure": 10.211,
+          "detour_miles": 2.14,
+          "cost_usd": "30.09",
+          "reason": "Bought just enough to reach KUM & GO #0032 (Colfax, IA) at mile 312, which is cheaper at $3.082/gal. Also buys 1.2 gal here so the stop at mile 312 can be skipped."
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -91.662778,
+            41.705833
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "kind": "fuel_stop",
+          "stop_number": 4,
           "id": "70333",
           "name": "KWIK STAR #932",
           "address": "I-80, EXIT 143 & CR-S14",
@@ -7385,11 +7464,12 @@
           "price_per_gallon": "2.95900000",
           "route_mile": 323.453,
           "offset_miles": 1.116,
-          "gallons_on_arrival": 0.0,
-          "gallons_purchased": 16.217,
-          "gallons_on_departure": 16.217,
-          "cost_usd": "47.99",
-          "reason": "Bought just enough to reach QUIKTRIP #598 (Omaha, NE) at mile 467, which is cheaper at $2.927/gal. Includes 1.9 gal that would otherwise need a separate stop at mile 467."
+          "gallons_on_arrival": 0.464,
+          "gallons_purchased": 25.77,
+          "gallons_on_departure": 26.234,
+          "detour_miles": 2.9,
+          "cost_usd": "76.25",
+          "reason": "Bought just enough to reach QUIKTRIP #598 (Omaha, NE) at mile 467, which is cheaper at $2.927/gal. Also buys 11.2 gal here so the stops at miles 467 and 486 can be skipped."
         },
         "geometry": {
           "type": "Point",
@@ -7403,37 +7483,7 @@
         "type": "Feature",
         "properties": {
           "kind": "fuel_stop",
-          "stop_number": 3,
-          "id": "69840",
-          "name": "KUM & GO #0370",
-          "address": "I-80, EXIT 439 & SR-370",
-          "city": "Gretna",
-          "state": "NE",
-          "latitude": 41.134458,
-          "longitude": -96.245837,
-          "coordinate_precision": "city_centroid",
-          "price_per_gallon": "2.92066666",
-          "route_mile": 485.628,
-          "offset_miles": 1.928,
-          "gallons_on_arrival": 0.0,
-          "gallons_purchased": 9.263,
-          "gallons_on_departure": 9.263,
-          "cost_usd": "27.05",
-          "reason": "Bought just enough to reach Henderson Fuel Mart (Henderson, NE) at mile 578, which is cheaper at $2.899/gal."
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [
-            -96.245837,
-            41.134458
-          ]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {
-          "kind": "fuel_stop",
-          "stop_number": 4,
+          "stop_number": 5,
           "id": "52548",
           "name": "Henderson Fuel Mart",
           "address": "I-80, EXIT 342",
@@ -7445,47 +7495,18 @@
           "price_per_gallon": "2.89900000",
           "route_mile": 578.254,
           "offset_miles": 2.753,
-          "gallons_on_arrival": 0.0,
-          "gallons_purchased": 50.0,
-          "gallons_on_departure": 50.0,
-          "cost_usd": "144.95",
-          "reason": "No cheaper station within the next 500 miles, so filled the tank."
+          "gallons_on_arrival": 0.251,
+          "gallons_purchased": 49.497,
+          "gallons_on_departure": 49.749,
+          "detour_miles": 7.16,
+          "cost_usd": "143.49",
+          "reason": "No cheaper station within range, so filled the tank."
         },
         "geometry": {
           "type": "Point",
           "coordinates": [
             -97.797865,
             40.781374
-          ]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {
-          "kind": "fuel_stop",
-          "stop_number": 5,
-          "id": "65287",
-          "name": "AM ENERGY",
-          "address": "I-80, EXIT 248",
-          "city": "Overton",
-          "state": "NE",
-          "latitude": 40.751875,
-          "longitude": -99.527824,
-          "coordinate_precision": "city_centroid",
-          "price_per_gallon": "2.89900000",
-          "route_mile": 671.209,
-          "offset_miles": 4.101,
-          "gallons_on_arrival": 40.704,
-          "gallons_purchased": 9.296,
-          "gallons_on_departure": 50.0,
-          "cost_usd": "26.95",
-          "reason": "No cheaper station within the next 500 miles, so filled the tank."
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [
-            -99.527824,
-            40.751875
           ]
         }
       },
@@ -7505,11 +7526,12 @@
           "price_per_gallon": "3.01400000",
           "route_mile": 793.914,
           "offset_miles": 0.843,
-          "gallons_on_arrival": 37.73,
-          "gallons_purchased": 12.27,
-          "gallons_on_departure": 50.0,
-          "cost_usd": "36.98",
-          "reason": "No cheaper station within the next 500 miles, so filled the tank. Includes 1.4 gal that would otherwise need a separate stop at mile 685."
+          "gallons_on_arrival": 27.715,
+          "gallons_purchased": 21.785,
+          "gallons_on_departure": 49.5,
+          "detour_miles": 2.19,
+          "cost_usd": "65.66",
+          "reason": "No cheaper station within range, so filled the tank. Also buys 10.7 gal here so the stop at mile 685 can be skipped."
         },
         "geometry": {
           "type": "Point",
@@ -7524,28 +7546,29 @@
         "properties": {
           "kind": "fuel_stop",
           "stop_number": 7,
-          "id": "73101",
-          "name": "7-ELEVEN 42279",
-          "address": "I-76, Exit 39",
-          "city": "Keenesburg",
+          "id": "60700",
+          "name": "PWI #502",
+          "address": "I-70/US-40, EXIT 259",
+          "city": "Golden",
           "state": "CO",
-          "latitude": 40.095847,
-          "longitude": -104.446366,
+          "latitude": 39.730548,
+          "longitude": -105.191528,
           "coordinate_precision": "city_centroid",
-          "price_per_gallon": "3.14900000",
-          "route_mile": 964.155,
-          "offset_miles": 3.34,
-          "gallons_on_arrival": 32.976,
-          "gallons_purchased": 17.024,
-          "gallons_on_departure": 50.0,
-          "cost_usd": "53.61",
-          "reason": "No cheaper station within the next 500 miles, so filled the tank. Includes 2.0 gal that would otherwise need a separate stop at mile 814."
+          "price_per_gallon": "3.19900000",
+          "route_mile": 1013.223,
+          "offset_miles": 0.696,
+          "gallons_on_arrival": 27.369,
+          "gallons_purchased": 22.112,
+          "gallons_on_departure": 49.481,
+          "detour_miles": 1.81,
+          "cost_usd": "70.74",
+          "reason": "No cheaper station within range, so filled the tank. Also buys 17.0 gal here so the stop at mile 964 can be skipped."
         },
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -104.446366,
-            40.095847
+            -105.191528,
+            39.730548
           ]
         }
       },
@@ -7565,11 +7588,12 @@
           "price_per_gallon": "3.28233333",
           "route_mile": 1344.921,
           "offset_miles": 0.953,
-          "gallons_on_arrival": 11.923,
-          "gallons_purchased": 38.077,
-          "gallons_on_departure": 50.0,
-          "cost_usd": "124.98",
-          "reason": "No cheaper station within the next 500 miles, so filled the tank. Includes 4.9 gal that would otherwise need a separate stop at mile 1013."
+          "gallons_on_arrival": 16.097,
+          "gallons_purchased": 33.418,
+          "gallons_on_departure": 49.515,
+          "detour_miles": 2.48,
+          "cost_usd": "109.69",
+          "reason": "No cheaper station within range, so filled the tank."
         },
         "geometry": {
           "type": "Point",
@@ -7595,10 +7619,11 @@
           "price_per_gallon": "3.28233333",
           "route_mile": 1722.65,
           "offset_miles": 0.146,
-          "gallons_on_arrival": 12.227,
-          "gallons_purchased": 17.946,
-          "gallons_on_departure": 30.173,
-          "cost_usd": "58.90",
+          "gallons_on_arrival": 11.599,
+          "gallons_purchased": 19.202,
+          "gallons_on_departure": 30.801,
+          "detour_miles": 0.38,
+          "cost_usd": "63.03",
           "reason": "No cheaper station before the destination, so bought just enough to finish."
         },
         "geometry": {
@@ -7615,10 +7640,11 @@
     "range_miles": 500.0,
     "mpg": 10.0,
     "tank_capacity_gallons": 50.0,
-    "initial_fuel_gallons": 0.0,
+    "initial_fuel_gallons": null,
     "corridor_miles": 5.0,
-    "first_fill": "A non-full tank is first filled at the cheapest station within 25 miles of the start (the nearest within 100 miles if none).",
-    "small_stops": "Top-ups under 5 gallons move to the previous or next stop when feasible; the extra cost is reported as merge_extra_cost_usd.",
+    "min_stop_gallons": 5.0,
+    "starting_fuel": "Omitted initial_fuel_gallons: the vehicle starts with just enough fuel to reach the first station on the route, and that fuel is valued at the station's price and included in the total.",
+    "detours": "Reaching an off-route station costs 1.3x its straight-line distance each way; that fuel is bought at the stop and included. A small reserve keeps the tank between 0 and 50 gallons.",
     "station_locations": "Station positions are their city's coordinates (the price file has no coordinates).",
     "prices": "Retail prices from the supplied CSV."
   },
@@ -7626,13 +7652,13 @@
     "routing_calls": 0,
     "route_cache_hit": true,
     "route_source": "memory",
-    "candidate_stations": 97,
+    "candidate_stations": 96,
     "stations_without_coordinates": 112,
     "timing_ms": {
       "routing": 0.0,
-      "matching": 0.1,
-      "optimize": 0.2,
-      "total": 0.5
+      "matching": 0.0,
+      "optimize": 0.6,
+      "total": 0.8
     },
     "geocoding_calls": 0
   }

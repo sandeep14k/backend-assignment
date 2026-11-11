@@ -141,7 +141,7 @@ def fetch_route(start, finish):
     call: 0 when served from cache, 1 normally, 2 only if the mirror was used.
     """
     coordinates = f"{start['longitude']:.5f},{start['latitude']:.5f};{finish['longitude']:.5f},{finish['latitude']:.5f}"
-    key = "route:v3:" + hashlib.sha256(coordinates.encode()).hexdigest()[:32]
+    key = "route:v4:" + hashlib.sha256(coordinates.encode()).hexdigest()[:32]
     calls = 0
     global _last_activity
     _last_activity = time.monotonic()
