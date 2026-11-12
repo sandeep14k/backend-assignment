@@ -1,0 +1,29 @@
+[
+  {
+    "osm3s": {
+      "timestamp_osm_base": "2026-11-11T21:22:47Z"
+    },
+    "source": "https://download.geofabrik.de/north-america/us/washington-latest.osm.pbf",
+    "sha256": "2603b5c93ef501100990ebafbbcebf06bb5e570b3fd59c6d9d0ecd52c4239278",
+    "processed_at": "2026-11-12T21:43:46.345111+00:00",
+    "limitations": "Fuel nodes and ways only; relations excluded."
+  },
+  {
+    "osm3s": {
+      "timestamp_osm_base": "2026-11-11T21:22:47Z"
+    },
+    "source": "https://download.geofabrik.de/north-america/us/montana-latest.osm.pbf",
+    "sha256": "76d6358cb909a568faaf39f0d6519ed5d1564254771339be4b402dbb4814d3ed",
+    "processed_at": "2026-11-12T21:44:33.283180+00:00",
+    "limitations": "Fuel nodes and ways only; relations excluded."
+  },
+  {
+    "osm3s": {
+      "timestamp_osm_base": "2026-11-11T21:22:47Z"
+    },
+    "source": "https://download.geofabrik.de/north-america/us/arizona-latest.osm.pbf",
+    "sha256": "9bf5cafbaefb7e31316e573ac5c05d4fd8acaa3ffbf99c42c895be61f31ad241",
+    "processed_at": "2026-11-12T21:47:24.070910+00:00",
+    "limitations": "Fuel nodes and ways only; relations excluded."
+  }
+]
