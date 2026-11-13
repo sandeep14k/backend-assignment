@@ -84,3 +84,9 @@ class PlanningTests(SimpleTestCase):
         with patch("planner.services.candidates", return_value=[far]), self.assertRaises(InfeasibleRoute) as error:
             select_adaptively(fake_route(569), index_of([]), None, 5)
         self.assertIn("between mile 0 (the start) and mile 537 (Jean, NV): a 537-mile gap", str(error.exception))
+
+    def test_starting_fuel_reason_is_kept_when_no_gap_explains_it(self):
+        near = {**make_station("a", -87.6, 41.9), "route_mile": 20, "offset_miles": 0}
+        with patch("planner.services.candidates", return_value=[near]), self.assertRaises(InfeasibleRoute) as error:
+            select_adaptively(fake_route(300), index_of([]), 0, 5)
+        self.assertIn("Starting with 0 gal is not enough to reach a station", str(error.exception))

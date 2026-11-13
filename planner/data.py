@@ -207,6 +207,10 @@ def location(value):
     if numbers is not None and len(numbers) == 2:
         return _point(numbers[0], numbers[1], "coordinates")
 
+    last = re.split(r"[,\s]+", value.strip())[-1].upper()
+    if last == "CANADA" or last in CANADIAN_PROVINCES:
+        raise ValueError(f"'{value}' is in Canada. Start and finish must be in the USA. {LOCATION_HELP}")
+
     parts = [part.strip() for part in value.split(",") if part.strip()]
     if not parts:
         raise ValueError(f"Could not read location '{value}'. {LOCATION_HELP}")

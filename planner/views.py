@@ -66,7 +66,10 @@ def _parse(request):
     else:
         if request.content_type != "application/json":
             raise UnsupportedMediaType("Content-Type must be application/json.")
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Request body must be valid JSON ({exc.msg} at character {exc.pos}).") from None
         if not isinstance(data, dict):
             raise ValueError("Request body must be a JSON object.")
     unknown = set(data) - FIELDS

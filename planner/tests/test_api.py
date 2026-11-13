@@ -45,7 +45,13 @@ class APITests(SimpleTestCase):
             response = post(self.client, body)
             self.assertEqual(response.status_code, 400, body)
             self.assertEqual(response.json()["code"], "invalid_request")
-        self.assertEqual(self.client.post("/api/route/", "{", content_type="application/json").status_code, 400)
+        broken = self.client.post("/api/route/", "{", content_type="application/json")
+        self.assertEqual(broken.status_code, 400)
+        self.assertIn("must be valid JSON", broken.json()["error"])
+        for canadian in ["Toronto, ON", "Vancouver BC", "Montreal, QC, Canada"]:
+            response = post(self.client, {**base, "start": canadian})
+            self.assertEqual(response.status_code, 400, canadian)
+            self.assertIn("is in Canada", response.json()["error"])
         self.assertEqual(self.client.put("/api/route/").status_code, 405)
         self.assertEqual(self.client.post("/api/route/", "x", content_type="text/plain").status_code, 415)
 

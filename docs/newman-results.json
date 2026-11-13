@@ -2,7 +2,7 @@
   "collection": {
     "item": [
       {
-        "id": "640be80c-4a86-4f8f-a232-b724f10aed47",
+        "id": "0b97008b-3ecc-41f3-a183-0c859a93ea05",
         "name": "1. New York -> Miami (cold: 1 routing call)",
         "request": {
           "url": {
@@ -39,7 +39,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "b2696d1c-4e51-4627-8e5e-175be50c4a7b",
+              "id": "e6f2693e-4b3e-43af-a51c-8e7d103a0830",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -53,13 +53,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "67f95ece-e2ad-4b8a-b243-6cddc23548ad"
+              "_lastExecutionId": "dea8a9d9-8a45-4b80-a2cf-3f4515e0ab9b"
             }
           }
         ]
       },
       {
-        "id": "bf0c9167-e0fe-4333-8f6d-7691c8a78107",
+        "id": "bcd9a0ab-68b2-400d-b5e6-da83bf68887e",
         "name": "2. Same trip again (cached: 0 routing calls)",
         "request": {
           "url": {
@@ -96,7 +96,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "67b9087d-fef1-4962-8485-4adc93ef28d3",
+              "id": "12ff3ba3-b172-4257-819a-eebe09565601",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -111,13 +111,13 @@
                 "pm.test(\"served from cache\", () => pm.expect(d.metadata.routing_calls).to.eql(0));",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "4ee83edf-09c1-47a6-aa72-3d3f72e7778e"
+              "_lastExecutionId": "2c6d28d4-2be6-431a-9c71-d21047eb95ac"
             }
           }
         ]
       },
       {
-        "id": "6db0e62c-a93f-4cf6-9cb8-4c6580803e6a",
+        "id": "405caa7c-521c-4ead-98b1-e2f10e3a9bff",
         "name": "3. GET with full state names",
         "request": {
           "url": {
@@ -148,7 +148,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "fca1f102-00d4-4b25-99fe-589c9ca538f0",
+              "id": "2f834a4c-95f0-429b-bfc8-f271f36cf649",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -162,13 +162,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "9e68c054-2e7e-42f4-9753-60a6ba4c7596"
+              "_lastExecutionId": "a635fb07-3b4a-40c2-a856-f80a02156c40"
             }
           }
         ]
       },
       {
-        "id": "dbf00d1c-fb4e-49a0-afd2-2ce499928dcb",
+        "id": "fda73a05-0da4-4c72-bcf3-13f6402e2ca8",
         "name": "4. Coordinates + half tank",
         "request": {
           "url": {
@@ -205,7 +205,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "ce895070-6c3f-49ad-b9ae-79f71a3db65c",
+              "id": "d24d15d2-053a-4da9-98b6-987808e33c46",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -219,13 +219,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "9d429f3a-dd17-48b6-b0d9-412a4e9d4c01"
+              "_lastExecutionId": "a422dd3d-4ca6-4c7b-b0eb-8901da087a80"
             }
           }
         ]
       },
       {
-        "id": "e64d5de0-b7b2-4c06-b526-dcb09adc07d5",
+        "id": "2aae31fd-cc95-48f0-a69f-115c064d0daa",
         "name": "5. Street addresses (Census geocoder, cached)",
         "request": {
           "url": {
@@ -262,7 +262,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "0ae8ae16-b038-4941-b2c1-06553f83545f",
+              "id": "97c7c727-12de-4109-9734-defbab519027",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -277,13 +277,13 @@
                 "pm.test(\"matched as addresses\", () => pm.expect(d.start.matched).to.eql(\"address\"));",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "4dca4074-53ea-42db-81f8-7178d8166329"
+              "_lastExecutionId": "6e105eae-615e-41c7-b74d-d3928204faf1"
             }
           }
         ]
       },
       {
-        "id": "177d4bbc-11fa-4c01-b3a5-b8c07aa88553",
+        "id": "495d9538-f1c3-427e-be84-cccfb18ded35",
         "name": "6. Short trip with full tank (no fuel purchase)",
         "request": {
           "url": {
@@ -320,7 +320,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "6c2d53d5-1738-4bc8-a03b-f7071e595217",
+              "id": "d6c79554-085a-4963-ab4e-57b66ffc72e8",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -335,13 +335,13 @@
                 "pm.test(\"no fuel stops\", () => pm.expect(d.fuel_stops.length).to.eql(0));",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "c493af32-6db6-439b-8b07-d194b404b80b"
+              "_lastExecutionId": "02c3e8e5-3d9a-4846-a46a-48d9914ca8c1"
             }
           }
         ]
       },
       {
-        "id": "ddd643b6-4ef5-45d6-b4d5-d2f4355e504c",
+        "id": "01c29da2-201b-4b5a-a2cf-3d24275959d1",
         "name": "7. Typo -> 400 with suggestion",
         "request": {
           "url": {
@@ -378,19 +378,19 @@
           {
             "listen": "test",
             "script": {
-              "id": "dfc87dff-1e98-4807-a0ca-5cb6f08c22ce",
+              "id": "6e21552e-3dfe-4e5c-b056-9633902c00e3",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"400\", () => pm.response.to.have.status(400));",
                 "pm.test(\"suggests a fix\", () => pm.expect(pm.response.json().error).to.include(\"Did you mean Chicago, IL\"));"
               ],
-              "_lastExecutionId": "3deb3b93-9489-4315-ae33-97ccec5f3025"
+              "_lastExecutionId": "0206252d-d309-47ae-bce2-0a4d7440986f"
             }
           }
         ]
       },
       {
-        "id": "ab2e986c-60e5-46e3-a90f-b9ce99ecb741",
+        "id": "580a02d3-386b-45c5-a016-6126db64ba8f",
         "name": "8. Unknown field -> 400",
         "request": {
           "url": {
@@ -427,18 +427,18 @@
           {
             "listen": "test",
             "script": {
-              "id": "d05dd361-ee9a-4741-97ee-87ff93c67934",
+              "id": "69fca38f-a381-4243-a2bb-2f1d86c02bbf",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"400\", () => pm.response.to.have.status(400));"
               ],
-              "_lastExecutionId": "4b74c8c8-c5b7-4884-969d-7f5635baf478"
+              "_lastExecutionId": "9dbfcc69-e1ce-47af-84b7-656680a17c60"
             }
           }
         ]
       },
       {
-        "id": "6dfb6292-3d48-4c09-9e82-695d4e7bced3",
+        "id": "8509fa27-dca9-4804-b2a2-63f72f419da7",
         "name": "Chicago, IL -> Los Angeles, CA",
         "request": {
           "url": {
@@ -475,7 +475,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "4d59dd93-a6a1-43a0-9b09-e877fae0e490",
+              "id": "d8ae2983-fb7a-41a8-8dd3-07ed18c0c744",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -489,13 +489,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "df4a19f1-1f5b-4742-92f3-dd96dd56d7d2"
+              "_lastExecutionId": "19c8ecef-c181-47f2-a2b6-01cdeb8c855b"
             }
           }
         ]
       },
       {
-        "id": "0e347865-e6c2-414b-9f47-f28a2aef6101",
+        "id": "bda225e8-dddf-491f-b80f-b82de997fe50",
         "name": "Seattle, WA -> Boston, MA",
         "request": {
           "url": {
@@ -532,7 +532,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "31aaafe4-2fd6-43eb-a9ce-4d8b468a817e",
+              "id": "c8947fa9-70da-4a97-958c-e629939159af",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -546,13 +546,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "d600c9f2-fe27-4048-a1d0-cd5c670bf326"
+              "_lastExecutionId": "2681b2fe-9402-4ac4-bbe5-075ef0a85f19"
             }
           }
         ]
       },
       {
-        "id": "9cb1a662-bc30-43f1-9d6b-8e3ac5ad9db8",
+        "id": "a82cfcce-bd04-454f-ac19-9dcbca33025e",
         "name": "Chicago -> Houston (Texas: city-centre stations, 1 routing call)",
         "request": {
           "url": {
@@ -589,7 +589,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "be5bb755-4d59-4eec-ad0d-ef76fe43e931",
+              "id": "eebf7d6d-1394-4ef7-96eb-a818ea0adda1",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -603,13 +603,13 @@
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));",
                 "pm.test(\"at most 1 routing call (0 when cached)\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(1));"
               ],
-              "_lastExecutionId": "7aba3eef-3c4e-48b4-9749-595c0b237d6e"
+              "_lastExecutionId": "f5d47f16-243a-4d42-b8f7-a7bec1a1b7cd"
             }
           }
         ]
       },
       {
-        "id": "ac808ebb-25c3-4537-85c4-2eac6f4324d5",
+        "id": "bfd79e09-4b28-450a-bae8-d307dcbcfcf2",
         "name": "Dallas -> Denver with verify_stops (road-routed through every stop)",
         "request": {
           "url": {
@@ -646,7 +646,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "3b22f56f-c069-449a-9c30-777ddb8910f8",
+              "id": "54d55500-4626-4261-9719-e364b101dee5",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -661,13 +661,13 @@
                 "pm.test(\"stops routed by road\", () => pm.expect(d.metadata.itinerary_routed).to.eql(true));",
                 "pm.test(\"at most 3 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(3));"
               ],
-              "_lastExecutionId": "fb09db75-020f-422a-a38a-769f8235e721"
+              "_lastExecutionId": "532c51f4-03ee-42f9-a2f5-a05debb83980"
             }
           }
         ]
       },
       {
-        "id": "adab3715-dde0-402f-94b4-d7a16c17c302",
+        "id": "99c69b32-ccc2-4a86-9ab2-c6db0efe6a38",
         "name": "San Francisco -> Las Vegas -> 422 names the gap in the supplied price list",
         "request": {
           "url": {
@@ -704,13 +704,13 @@
           {
             "listen": "test",
             "script": {
-              "id": "06923663-b053-4387-9c86-4aabd3971d06",
+              "id": "bce3b0c9-8adb-4351-b0a6-eea0603e7fb3",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"422\", () => pm.response.to.have.status(422));",
                 "pm.test(\"explains where coverage is missing\", () => pm.expect(pm.response.json().error).to.include(\"-mile gap\"));"
               ],
-              "_lastExecutionId": "adcb83ec-b967-457d-9fef-d140700c9ade"
+              "_lastExecutionId": "e2dab185-4ca1-40f6-aedb-a01ed256fa50"
             }
           }
         ]
@@ -725,7 +725,7 @@
       }
     ],
     "info": {
-      "_postman_id": "22d049d4-f946-46e7-84f8-a0da7859e4a4",
+      "_postman_id": "9dec047d-eac2-45bf-b5f9-5d17b6538270",
       "name": "Fuel Route Planner",
       "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
       "description": {
@@ -735,17 +735,17 @@
     }
   },
   "environment": {
-    "id": "c87f7d8c-77f5-4889-ae7c-8a2419883be4",
+    "id": "7ffe04d9-263b-42f8-b16f-13c6fb930551",
     "values": [
       {
         "type": "any",
-        "value": "http://127.0.0.1:8768",
+        "value": "http://127.0.0.1:8769",
         "key": "base_url"
       }
     ]
   },
   "globals": {
-    "id": "0488ff4d-4a85-41d5-acf4-cac22f6db26f",
+    "id": "b50d5a9e-ffa3-48e5-a2d7-a68999cea686",
     "values": []
   },
   "run": {
@@ -797,10 +797,10 @@
       }
     },
     "timings": {
-      "responseAverage": 866.4615384615385,
-      "responseMin": 2,
-      "responseMax": 3179,
-      "responseSd": 945.0400573833743,
+      "responseAverage": 455.7692307692308,
+      "responseMin": 1,
+      "responseMax": 1997,
+      "responseSd": 598.1836808007482,
       "dnsAverage": 0,
       "dnsMin": 0,
       "dnsMax": 0,
@@ -809,8 +809,8 @@
       "firstByteMin": 0,
       "firstByteMax": 0,
       "firstByteSd": 0,
-      "started": 1794560666700,
-      "completed": 1794560678154
+      "started": 1794561077345,
+      "completed": 1794561083464
     },
     "executions": [
       {
@@ -823,11 +823,11 @@
           "eof": false,
           "bof": true,
           "cr": false,
-          "ref": "434d5309-81d7-4553-b235-1d3e30123335",
-          "httpRequestId": "45885981-42a1-46c1-89bc-d0dd16f66c58"
+          "ref": "cabf51ee-b79c-46cb-9256-4778723471f8",
+          "httpRequestId": "fa22c041-5eb2-425c-b553-b158a224efe2"
         },
         "item": {
-          "id": "640be80c-4a86-4f8f-a232-b724f10aed47",
+          "id": "0b97008b-3ecc-41f3-a183-0c859a93ea05",
           "name": "1. New York -> Miami (cold: 1 routing call)",
           "request": {
             "url": {
@@ -864,7 +864,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "b2696d1c-4e51-4627-8e5e-175be50c4a7b",
+                "id": "e6f2693e-4b3e-43af-a51c-8e7d103a0830",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -878,7 +878,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "67f95ece-e2ad-4b8a-b243-6cddc23548ad"
+                "_lastExecutionId": "dea8a9d9-8a45-4b80-a2cf-3f4515e0ab9b"
               }
             }
           ]
@@ -886,7 +886,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -923,12 +923,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "18baf6f1-f9d8-4621-8503-fca3ff20488e",
+              "value": "ed4076c7-008f-469a-adb8-8e624189e170",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -959,13 +959,13 @@
           }
         },
         "response": {
-          "id": "4670ce80-9b4f-423c-bda4-53629e3bf46e",
+          "id": "895f29cd-b412-46e0-b898-00ef412c2a9b",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:27 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:18 GMT"
             },
             {
               "key": "Server",
@@ -981,7 +981,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "10032"
+              "value": "9975"
             },
             {
               "key": "X-Content-Type-Options",
@@ -1040,7 +1040,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -33007,12 +33007,11 @@
               34,
               58,
               32,
-              49,
+              55,
+              55,
               50,
-              49,
-              52,
               46,
-              54,
+              50,
               44,
               32,
               34,
@@ -33048,7 +33047,7 @@
               50,
               50,
               46,
-              52,
+              54,
               44,
               32,
               34,
@@ -33103,12 +33102,11 @@
               34,
               58,
               32,
-              49,
-              50,
-              51,
               55,
-              46,
+              57,
               53,
+              46,
+              48,
               125,
               44,
               32,
@@ -33137,10 +33135,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 1261,
-          "responseSize": 32127
+          "responseTime": 814,
+          "responseSize": 32125
         },
-        "id": "640be80c-4a86-4f8f-a232-b724f10aed47",
+        "id": "0b97008b-3ecc-41f3-a183-0c859a93ea05",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -33178,15 +33176,15 @@
       },
       {
         "cursor": {
-          "ref": "0995a5ee-4a8b-41c1-829e-c400005b84a8",
+          "ref": "8c048539-2445-406c-8e49-b1caf750fe04",
           "length": 13,
           "cycles": 1,
           "position": 1,
           "iteration": 0,
-          "httpRequestId": "a3a0e8f9-f4e6-43f4-b3f9-973c34deb445"
+          "httpRequestId": "a256edef-cc5d-4bdd-83d2-cdd184264056"
         },
         "item": {
-          "id": "bf0c9167-e0fe-4333-8f6d-7691c8a78107",
+          "id": "bcd9a0ab-68b2-400d-b5e6-da83bf68887e",
           "name": "2. Same trip again (cached: 0 routing calls)",
           "request": {
             "url": {
@@ -33223,7 +33221,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "67b9087d-fef1-4962-8485-4adc93ef28d3",
+                "id": "12ff3ba3-b172-4257-819a-eebe09565601",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -33238,7 +33236,7 @@
                   "pm.test(\"served from cache\", () => pm.expect(d.metadata.routing_calls).to.eql(0));",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "4ee83edf-09c1-47a6-aa72-3d3f72e7778e"
+                "_lastExecutionId": "2c6d28d4-2be6-431a-9c71-d21047eb95ac"
               }
             }
           ]
@@ -33246,7 +33244,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -33283,12 +33281,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "d888bcc4-eb48-43c6-80da-c7783fe4243a",
+              "value": "ffa81d26-f366-4c4a-b058-fa6f05c6de45",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -33319,13 +33317,13 @@
           }
         },
         "response": {
-          "id": "604bfc32-f452-4421-89cc-1d145fc98da1",
+          "id": "4b27352b-643d-43e7-9366-ca9a8affdff6",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:27 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:18 GMT"
             },
             {
               "key": "Server",
@@ -33341,7 +33339,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "9982"
+              "value": "9980"
             },
             {
               "key": "X-Content-Type-Options",
@@ -33400,7 +33398,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -65459,7 +65457,7 @@
               32,
               48,
               46,
-              51,
+              50,
               125,
               44,
               32,
@@ -65488,10 +65486,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 5,
+          "responseTime": 4,
           "responseSize": 32118
         },
-        "id": "bf0c9167-e0fe-4333-8f6d-7691c8a78107",
+        "id": "bcd9a0ab-68b2-400d-b5e6-da83bf68887e",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -65533,15 +65531,15 @@
       },
       {
         "cursor": {
-          "ref": "427a5e12-e5f9-4ab6-8cb1-64ea032d6d4f",
+          "ref": "266c137c-1064-4ba2-a114-8a7ec0316b63",
           "length": 13,
           "cycles": 1,
           "position": 2,
           "iteration": 0,
-          "httpRequestId": "42219406-641a-4872-b17c-cf50d8dc4f68"
+          "httpRequestId": "0dd70dba-49f9-44cf-9734-eebd8fae00ca"
         },
         "item": {
-          "id": "6db0e62c-a93f-4cf6-9cb8-4c6580803e6a",
+          "id": "405caa7c-521c-4ead-98b1-e2f10e3a9bff",
           "name": "3. GET with full state names",
           "request": {
             "url": {
@@ -65572,7 +65570,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "fca1f102-00d4-4b25-99fe-589c9ca538f0",
+                "id": "2f834a4c-95f0-429b-bfc8-f271f36cf649",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -65586,7 +65584,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "9e68c054-2e7e-42f4-9753-60a6ba4c7596"
+                "_lastExecutionId": "a635fb07-3b4a-40c2-a856-f80a02156c40"
               }
             }
           ]
@@ -65594,7 +65592,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -65636,12 +65634,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "2a2c2982-5fe8-4203-8cdc-38ef6bb0512f",
+              "value": "6b1c0a18-297b-4f3b-a8af-3cb81e863f11",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -65658,13 +65656,13 @@
           "method": "GET"
         },
         "response": {
-          "id": "a0098629-2db4-4dd1-a0d3-62c696db11cd",
+          "id": "ca4692b1-f504-4f72-b22d-9a7c77ea343a",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:28 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:18 GMT"
             },
             {
               "key": "Server",
@@ -65680,7 +65678,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "10013"
+              "value": "9978"
             },
             {
               "key": "X-Content-Type-Options",
@@ -65739,7 +65737,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -97809,7 +97807,7 @@
               32,
               48,
               46,
-              53,
+              51,
               125,
               44,
               32,
@@ -97838,10 +97836,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 3,
+          "responseTime": 4,
           "responseSize": 32129
         },
-        "id": "6db0e62c-a93f-4cf6-9cb8-4c6580803e6a",
+        "id": "405caa7c-521c-4ead-98b1-e2f10e3a9bff",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -97879,15 +97877,15 @@
       },
       {
         "cursor": {
-          "ref": "7632667e-0738-413a-b5a8-01371714806a",
+          "ref": "5b76942a-249f-419c-ae6f-f2eca5604fb8",
           "length": 13,
           "cycles": 1,
           "position": 3,
           "iteration": 0,
-          "httpRequestId": "a58637f9-6711-4aee-bf68-e6ae9cbd9493"
+          "httpRequestId": "fb549fa8-acbd-47a6-ad04-5cc0d2a5d63e"
         },
         "item": {
-          "id": "dbf00d1c-fb4e-49a0-afd2-2ce499928dcb",
+          "id": "fda73a05-0da4-4c72-bcf3-13f6402e2ca8",
           "name": "4. Coordinates + half tank",
           "request": {
             "url": {
@@ -97924,7 +97922,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "ce895070-6c3f-49ad-b9ae-79f71a3db65c",
+                "id": "d24d15d2-053a-4da9-98b6-987808e33c46",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -97938,7 +97936,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "9d429f3a-dd17-48b6-b0d9-412a4e9d4c01"
+                "_lastExecutionId": "a422dd3d-4ca6-4c7b-b0eb-8901da087a80"
               }
             }
           ]
@@ -97946,7 +97944,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -97983,12 +97981,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "fa513b9e-b7eb-4b77-b132-4324c4972c5a",
+              "value": "9fbc81ab-9402-478e-8b8e-bd5a29498062",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -98019,13 +98017,13 @@
           }
         },
         "response": {
-          "id": "2d3ebd7a-79f3-4ac6-a31b-81027b425fc7",
+          "id": "a469747e-576e-4e29-ad9c-df4cfb3720e8",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:28 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:18 GMT"
             },
             {
               "key": "Server",
@@ -98041,7 +98039,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "9781"
+              "value": "9809"
             },
             {
               "key": "X-Content-Type-Options",
@@ -98100,7 +98098,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -128635,9 +128633,9 @@
               34,
               58,
               32,
-              51,
-              49,
+              54,
               48,
+              50,
               46,
               48,
               44,
@@ -128672,10 +128670,10 @@
               34,
               58,
               32,
-              50,
               49,
+              56,
               46,
-              55,
+              52,
               44,
               32,
               34,
@@ -128730,11 +128728,11 @@
               34,
               58,
               32,
-              51,
-              51,
-              53,
-              46,
+              54,
+              50,
               52,
+              46,
+              48,
               125,
               44,
               32,
@@ -128763,10 +128761,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 340,
+          "responseTime": 628,
           "responseSize": 30693
         },
-        "id": "dbf00d1c-fb4e-49a0-afd2-2ce499928dcb",
+        "id": "fda73a05-0da4-4c72-bcf3-13f6402e2ca8",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -128804,15 +128802,15 @@
       },
       {
         "cursor": {
-          "ref": "0023601d-6b38-477d-8b3b-9febe155cbf6",
+          "ref": "6a3cc83b-35ea-4e25-83f6-89a86d004283",
           "length": 13,
           "cycles": 1,
           "position": 4,
           "iteration": 0,
-          "httpRequestId": "5a629981-0e5b-4a98-a14a-b3e86158793b"
+          "httpRequestId": "9b20141c-eb12-4839-928a-3caa73cff450"
         },
         "item": {
-          "id": "e64d5de0-b7b2-4c06-b526-dcb09adc07d5",
+          "id": "2aae31fd-cc95-48f0-a69f-115c064d0daa",
           "name": "5. Street addresses (Census geocoder, cached)",
           "request": {
             "url": {
@@ -128849,7 +128847,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "0ae8ae16-b038-4941-b2c1-06553f83545f",
+                "id": "97c7c727-12de-4109-9734-defbab519027",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -128864,7 +128862,7 @@
                   "pm.test(\"matched as addresses\", () => pm.expect(d.start.matched).to.eql(\"address\"));",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "4dca4074-53ea-42db-81f8-7178d8166329"
+                "_lastExecutionId": "6e105eae-615e-41c7-b74d-d3928204faf1"
               }
             }
           ]
@@ -128872,7 +128870,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -128909,12 +128907,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "68954e04-2170-42f2-b2af-cbed5bf7214f",
+              "value": "23cf8432-3fc4-41b3-b251-19d12ebf46ad",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -128945,13 +128943,13 @@
           }
         },
         "response": {
-          "id": "81f5eabe-05bd-47fd-a527-b8795a4fc017",
+          "id": "ca89ecf6-3bc7-4b5b-95ea-d9283bcfe4d8",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:31 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:20 GMT"
             },
             {
               "key": "Server",
@@ -128967,7 +128965,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "8495"
+              "value": "8526"
             },
             {
               "key": "X-Content-Type-Options",
@@ -129026,7 +129024,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -156499,10 +156497,10 @@
               58,
               32,
               54,
-              57,
-              51,
+              54,
+              53,
               46,
-              50,
+              49,
               44,
               32,
               34,
@@ -156535,9 +156533,10 @@
               34,
               58,
               32,
-              56,
+              49,
+              48,
               46,
-              52,
+              51,
               44,
               32,
               34,
@@ -156592,12 +156591,12 @@
               34,
               58,
               32,
-              51,
               49,
-              55,
-              53,
+              57,
+              57,
+              49,
               46,
-              51,
+              56,
               125,
               44,
               32,
@@ -156620,16 +156619,16 @@
               34,
               58,
               32,
-              50,
+              49,
               125,
               125
             ]
           },
           "cookie": [],
-          "responseTime": 3179,
-          "responseSize": 27630
+          "responseTime": 1997,
+          "responseSize": 27631
         },
-        "id": "e64d5de0-b7b2-4c06-b526-dcb09adc07d5",
+        "id": "2aae31fd-cc95-48f0-a69f-115c064d0daa",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -156671,15 +156670,15 @@
       },
       {
         "cursor": {
-          "ref": "95c8f41e-0fae-4c6b-933c-5c5d9d369c94",
+          "ref": "914c8362-3e42-495c-9367-74ee0387511f",
           "length": 13,
           "cycles": 1,
           "position": 5,
           "iteration": 0,
-          "httpRequestId": "d06eb610-35d4-4e6e-a048-34fe7dd00d1c"
+          "httpRequestId": "40e7b939-06f6-4774-a461-6ba56db22cd6"
         },
         "item": {
-          "id": "177d4bbc-11fa-4c01-b3a5-b8c07aa88553",
+          "id": "495d9538-f1c3-427e-be84-cccfb18ded35",
           "name": "6. Short trip with full tank (no fuel purchase)",
           "request": {
             "url": {
@@ -156716,7 +156715,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "6c2d53d5-1738-4bc8-a03b-f7071e595217",
+                "id": "d6c79554-085a-4963-ab4e-57b66ffc72e8",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -156731,7 +156730,7 @@
                   "pm.test(\"no fuel stops\", () => pm.expect(d.fuel_stops.length).to.eql(0));",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "c493af32-6db6-439b-8b07-d194b404b80b"
+                "_lastExecutionId": "02c3e8e5-3d9a-4846-a46a-48d9914ca8c1"
               }
             }
           ]
@@ -156739,7 +156738,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -156776,12 +156775,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "f54b9f74-431d-4f0f-961a-a99fa32e7465",
+              "value": "9e01a55d-4627-40cb-af78-9c40767388e7",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -156812,13 +156811,13 @@
           }
         },
         "response": {
-          "id": "d855d27c-192f-4c2b-9444-ce01950c4b3b",
+          "id": "96cc7be9-d993-4494-9fd5-e53cfe7e79d5",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:32 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:20 GMT"
             },
             {
               "key": "Server",
@@ -156834,7 +156833,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "2094"
+              "value": "2108"
             },
             {
               "key": "X-Content-Type-Options",
@@ -156893,7 +156892,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -161470,7 +161469,7 @@
               34,
               58,
               32,
-              49,
+              48,
               44,
               32,
               34,
@@ -161492,10 +161491,9 @@
               34,
               58,
               32,
-              102,
-              97,
-              108,
-              115,
+              116,
+              114,
+              117,
               101,
               44,
               32,
@@ -161517,10 +161515,9 @@
               34,
               58,
               32,
-              102,
-              97,
-              108,
-              115,
+              116,
+              114,
+              117,
               101,
               44,
               32,
@@ -161541,12 +161538,10 @@
               58,
               32,
               34,
-              108,
-              111,
-              97,
               100,
-              101,
-              100,
+              105,
+              115,
+              107,
               34,
               44,
               32,
@@ -161724,11 +161719,9 @@
               34,
               58,
               32,
-              53,
-              49,
-              51,
-              46,
               48,
+              46,
+              55,
               44,
               32,
               34,
@@ -161763,7 +161756,7 @@
               32,
               48,
               46,
-              56,
+              52,
               44,
               32,
               34,
@@ -161818,11 +161811,9 @@
               34,
               58,
               32,
-              53,
               49,
-              52,
               46,
-              48,
+              50,
               125,
               44,
               32,
@@ -161851,10 +161842,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 520,
-          "responseSize": 4988
+          "responseTime": 4,
+          "responseSize": 4980
         },
-        "id": "177d4bbc-11fa-4c01-b3a5-b8c07aa88553",
+        "id": "495d9538-f1c3-427e-be84-cccfb18ded35",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -161896,15 +161887,15 @@
       },
       {
         "cursor": {
-          "ref": "06003bd9-060a-4c33-ad1d-b7f39527d1b3",
+          "ref": "5ea6a0a7-3c1b-4176-8601-cf03e256c21c",
           "length": 13,
           "cycles": 1,
           "position": 6,
           "iteration": 0,
-          "httpRequestId": "936eeb29-df14-41b1-97eb-07d505c121bd"
+          "httpRequestId": "161836db-78f0-4ebf-b86e-f8f84b4a102b"
         },
         "item": {
-          "id": "ddd643b6-4ef5-45d6-b4d5-d2f4355e504c",
+          "id": "01c29da2-201b-4b5a-a2cf-3d24275959d1",
           "name": "7. Typo -> 400 with suggestion",
           "request": {
             "url": {
@@ -161941,13 +161932,13 @@
             {
               "listen": "test",
               "script": {
-                "id": "dfc87dff-1e98-4807-a0ca-5cb6f08c22ce",
+                "id": "6e21552e-3dfe-4e5c-b056-9633902c00e3",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"400\", () => pm.response.to.have.status(400));",
                   "pm.test(\"suggests a fix\", () => pm.expect(pm.response.json().error).to.include(\"Did you mean Chicago, IL\"));"
                 ],
-                "_lastExecutionId": "3deb3b93-9489-4315-ae33-97ccec5f3025"
+                "_lastExecutionId": "0206252d-d309-47ae-bce2-0a4d7440986f"
               }
             }
           ]
@@ -161955,7 +161946,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -161992,12 +161983,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "4168d833-57cb-4614-afaf-79b713801e51",
+              "value": "ba28c182-3d00-4b59-b5a0-284a0e3b6076",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -162028,13 +162019,13 @@
           }
         },
         "response": {
-          "id": "92892b9b-700d-4895-b07d-60605fa40bd6",
+          "id": "3811fdc5-5bbe-49e0-848d-8ca028ef31fb",
           "status": "Bad Request",
           "code": 400,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:32 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:20 GMT"
             },
             {
               "key": "Server",
@@ -162167,10 +162158,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 14,
+          "responseTime": 6,
           "responseSize": 96
         },
-        "id": "ddd643b6-4ef5-45d6-b4d5-d2f4355e504c",
+        "id": "01c29da2-201b-4b5a-a2cf-3d24275959d1",
         "assertions": [
           {
             "assertion": "400",
@@ -162184,15 +162175,15 @@
       },
       {
         "cursor": {
-          "ref": "9fb367d3-6440-4b2e-afaf-ae60ec308df5",
+          "ref": "146fb325-653a-4199-9879-fda3b9463b29",
           "length": 13,
           "cycles": 1,
           "position": 7,
           "iteration": 0,
-          "httpRequestId": "93ecdaaf-2fe3-4fe4-9550-00bb3d63eae9"
+          "httpRequestId": "6fd7a739-214c-4ea1-810f-2e1d3c3a1e69"
         },
         "item": {
-          "id": "ab2e986c-60e5-46e3-a90f-b9ce99ecb741",
+          "id": "580a02d3-386b-45c5-a016-6126db64ba8f",
           "name": "8. Unknown field -> 400",
           "request": {
             "url": {
@@ -162229,12 +162220,12 @@
             {
               "listen": "test",
               "script": {
-                "id": "d05dd361-ee9a-4741-97ee-87ff93c67934",
+                "id": "69fca38f-a381-4243-a2bb-2f1d86c02bbf",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"400\", () => pm.response.to.have.status(400));"
                 ],
-                "_lastExecutionId": "4b74c8c8-c5b7-4884-969d-7f5635baf478"
+                "_lastExecutionId": "9dbfcc69-e1ce-47af-84b7-656680a17c60"
               }
             }
           ]
@@ -162242,7 +162233,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -162279,12 +162270,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "88f4f1df-953b-43fa-ac82-16142188433c",
+              "value": "feaf9f9e-d233-4e2b-a379-9d506db2c027",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -162315,13 +162306,13 @@
           }
         },
         "response": {
-          "id": "8bfbc3e3-8ffa-46d8-8d17-b7c8fead8f94",
+          "id": "d6d609c5-4f08-4291-a742-0aee3540e756",
           "status": "Bad Request",
           "code": 400,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:32 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:20 GMT"
             },
             {
               "key": "Server",
@@ -162494,10 +162485,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 2,
+          "responseTime": 1,
           "responseSize": 136
         },
-        "id": "ab2e986c-60e5-46e3-a90f-b9ce99ecb741",
+        "id": "580a02d3-386b-45c5-a016-6126db64ba8f",
         "assertions": [
           {
             "assertion": "400",
@@ -162507,15 +162498,15 @@
       },
       {
         "cursor": {
-          "ref": "df07ae17-c4ed-4dbd-96cd-f7d7ae1252d4",
+          "ref": "fa22be50-3365-4e65-9af8-14a6a2139892",
           "length": 13,
           "cycles": 1,
           "position": 8,
           "iteration": 0,
-          "httpRequestId": "9fbc59a2-fb33-44d6-bb8e-52adb1aa27ab"
+          "httpRequestId": "cc912493-8e41-44b0-8644-e1cf340d9fd1"
         },
         "item": {
-          "id": "6dfb6292-3d48-4c09-9e82-695d4e7bced3",
+          "id": "8509fa27-dca9-4804-b2a2-63f72f419da7",
           "name": "Chicago, IL -> Los Angeles, CA",
           "request": {
             "url": {
@@ -162552,7 +162543,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "4d59dd93-a6a1-43a0-9b09-e877fae0e490",
+                "id": "d8ae2983-fb7a-41a8-8dd3-07ed18c0c744",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -162566,7 +162557,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "df4a19f1-1f5b-4742-92f3-dd96dd56d7d2"
+                "_lastExecutionId": "19c8ecef-c181-47f2-a2b6-01cdeb8c855b"
               }
             }
           ]
@@ -162574,7 +162565,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -162611,12 +162602,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "918b6e47-2a22-427d-8621-11da11a2a29a",
+              "value": "f9e1e090-d7a5-48b7-bcc0-9e9095e81c48",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -162647,13 +162638,13 @@
           }
         },
         "response": {
-          "id": "0ad0c57d-55b5-4f01-aa06-c454d62d760c",
+          "id": "e97df0e4-f00b-469e-bd54-5075c3344591",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:33 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:21 GMT"
             },
             {
               "key": "Server",
@@ -162669,7 +162660,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "17817"
+              "value": "17858"
             },
             {
               "key": "X-Content-Type-Options",
@@ -162728,7 +162719,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -220046,12 +220037,11 @@
               34,
               58,
               32,
-              49,
-              53,
               57,
-              54,
+              57,
+              48,
               46,
-              53,
+              57,
               44,
               32,
               34,
@@ -220085,9 +220075,9 @@
               58,
               32,
               49,
-              52,
+              51,
               46,
-              53,
+              56,
               44,
               32,
               34,
@@ -220143,11 +220133,11 @@
               58,
               32,
               49,
-              54,
-              49,
-              49,
+              48,
+              48,
+              52,
               46,
-              49,
+              57,
               125,
               44,
               32,
@@ -220176,10 +220166,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 1617,
-          "responseSize": 57478
+          "responseTime": 1012,
+          "responseSize": 57477
         },
-        "id": "6dfb6292-3d48-4c09-9e82-695d4e7bced3",
+        "id": "8509fa27-dca9-4804-b2a2-63f72f419da7",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -220217,15 +220207,15 @@
       },
       {
         "cursor": {
-          "ref": "fc836577-8a32-4a13-a2ec-4c01df60be9f",
+          "ref": "01545513-e2cc-447b-ba64-dcecbcc17e24",
           "length": 13,
           "cycles": 1,
           "position": 9,
           "iteration": 0,
-          "httpRequestId": "8f6ce09d-6c67-485c-a964-148e6959e4ea"
+          "httpRequestId": "4cdc2216-443a-416f-a284-a853c834543a"
         },
         "item": {
-          "id": "0e347865-e6c2-414b-9f47-f28a2aef6101",
+          "id": "bda225e8-dddf-491f-b80f-b82de997fe50",
           "name": "Seattle, WA -> Boston, MA",
           "request": {
             "url": {
@@ -220262,7 +220252,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "31aaafe4-2fd6-43eb-a9ce-4d8b468a817e",
+                "id": "c8947fa9-70da-4a97-958c-e629939159af",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -220276,7 +220266,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "d600c9f2-fe27-4048-a1d0-cd5c670bf326"
+                "_lastExecutionId": "2681b2fe-9402-4ac4-bbe5-075ef0a85f19"
               }
             }
           ]
@@ -220284,7 +220274,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -220321,12 +220311,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "f14f840f-f58a-4843-a4a1-15efb373c6e8",
+              "value": "8dfa68a2-ab9b-49ce-83e6-a496967f1e38",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -220357,13 +220347,13 @@
           }
         },
         "response": {
-          "id": "3ac556aa-9bf3-41dd-9b6b-ed860491b764",
+          "id": "b099048d-b2db-484d-83e9-d5334ee46aa7",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:34 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:23 GMT"
             },
             {
               "key": "Server",
@@ -220379,7 +220369,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "27259"
+              "value": "27264"
             },
             {
               "key": "X-Content-Type-Options",
@@ -220438,7 +220428,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -308256,10 +308246,10 @@
               32,
               49,
               48,
-              48,
               51,
+              56,
               46,
-              51,
+              49,
               44,
               32,
               34,
@@ -308293,9 +308283,9 @@
               58,
               32,
               50,
-              48,
+              49,
               46,
-              52,
+              50,
               44,
               32,
               34,
@@ -308352,10 +308342,10 @@
               32,
               49,
               48,
-              50,
-              51,
-              46,
+              53,
               57,
+              46,
+              53,
               125,
               44,
               32,
@@ -308384,10 +308374,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 1031,
+          "responseTime": 1067,
           "responseSize": 87976
         },
-        "id": "0e347865-e6c2-414b-9f47-f28a2aef6101",
+        "id": "bda225e8-dddf-491f-b80f-b82de997fe50",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -308425,15 +308415,15 @@
       },
       {
         "cursor": {
-          "ref": "64e0ce3d-d2d1-437e-8232-be311ef4d89b",
+          "ref": "dc6d60c8-10d5-48a9-aa20-c4f006a9ebaf",
           "length": 13,
           "cycles": 1,
           "position": 10,
           "iteration": 0,
-          "httpRequestId": "b973b247-96bf-4ca1-93de-0dffcd8d0b30"
+          "httpRequestId": "a9d5a3e0-6a05-4cf0-b23e-ef333fe708af"
         },
         "item": {
-          "id": "9cb1a662-bc30-43f1-9d6b-8e3ac5ad9db8",
+          "id": "a82cfcce-bd04-454f-ac19-9dcbca33025e",
           "name": "Chicago -> Houston (Texas: city-centre stations, 1 routing call)",
           "request": {
             "url": {
@@ -308470,7 +308460,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "be5bb755-4d59-4eec-ad0d-ef76fe43e931",
+                "id": "eebf7d6d-1394-4ef7-96eb-a818ea0adda1",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -308484,7 +308474,7 @@
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));",
                   "pm.test(\"at most 1 routing call (0 when cached)\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(1));"
                 ],
-                "_lastExecutionId": "7aba3eef-3c4e-48b4-9749-595c0b237d6e"
+                "_lastExecutionId": "f5d47f16-243a-4d42-b8f7-a7bec1a1b7cd"
               }
             }
           ]
@@ -308492,7 +308482,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -308529,12 +308519,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "b490c95e-398a-4db1-89f8-5188ce093cb5",
+              "value": "2b47b185-dc12-4759-a936-e018572d5491",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -308565,13 +308555,13 @@
           }
         },
         "response": {
-          "id": "d206e8be-5867-44c2-b776-eb416abccc98",
+          "id": "5b3ddc94-4948-40f8-a561-e772c4697864",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:35 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:23 GMT"
             },
             {
               "key": "Server",
@@ -308587,7 +308577,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "8160"
+              "value": "8199"
             },
             {
               "key": "X-Content-Type-Options",
@@ -308646,7 +308636,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -335296,7 +335286,7 @@
               34,
               58,
               32,
-              49,
+              48,
               44,
               32,
               34,
@@ -335318,10 +335308,9 @@
               34,
               58,
               32,
-              102,
-              97,
-              108,
-              115,
+              116,
+              114,
+              117,
               101,
               44,
               32,
@@ -335343,10 +335332,9 @@
               34,
               58,
               32,
-              102,
-              97,
-              108,
-              115,
+              116,
+              114,
+              117,
               101,
               44,
               32,
@@ -335367,12 +335355,12 @@
               58,
               32,
               34,
-              108,
-              111,
-              97,
-              100,
+              109,
               101,
-              100,
+              109,
+              111,
+              114,
+              121,
               34,
               44,
               32,
@@ -335586,11 +335574,9 @@
               34,
               58,
               32,
-              51,
               48,
-              50,
               46,
-              54,
+              48,
               44,
               32,
               34,
@@ -335623,9 +335609,9 @@
               34,
               58,
               32,
-              53,
+              48,
               46,
-              55,
+              52,
               44,
               32,
               34,
@@ -335680,9 +335666,7 @@
               34,
               58,
               32,
-              51,
               48,
-              56,
               46,
               53,
               125,
@@ -335713,10 +335697,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 311,
-          "responseSize": 27097
+          "responseTime": 3,
+          "responseSize": 27091
         },
-        "id": "9cb1a662-bc30-43f1-9d6b-8e3ac5ad9db8",
+        "id": "a82cfcce-bd04-454f-ac19-9dcbca33025e",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -335754,15 +335738,15 @@
       },
       {
         "cursor": {
-          "ref": "8743461c-c34e-438e-9f5b-3b6526c6b021",
+          "ref": "4a4ab393-81a8-4737-8e07-8167daaccf2f",
           "length": 13,
           "cycles": 1,
           "position": 11,
           "iteration": 0,
-          "httpRequestId": "79e460c0-c86f-4d29-9ccc-45765ffcbd08"
+          "httpRequestId": "da9988ad-bcca-4a91-899d-31b9c7f55144"
         },
         "item": {
-          "id": "ac808ebb-25c3-4537-85c4-2eac6f4324d5",
+          "id": "bfd79e09-4b28-450a-bae8-d307dcbcfcf2",
           "name": "Dallas -> Denver with verify_stops (road-routed through every stop)",
           "request": {
             "url": {
@@ -335799,7 +335783,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "3b22f56f-c069-449a-9c30-777ddb8910f8",
+                "id": "54d55500-4626-4261-9719-e364b101dee5",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -335814,7 +335798,7 @@
                   "pm.test(\"stops routed by road\", () => pm.expect(d.metadata.itinerary_routed).to.eql(true));",
                   "pm.test(\"at most 3 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(3));"
                 ],
-                "_lastExecutionId": "fb09db75-020f-422a-a38a-769f8235e721"
+                "_lastExecutionId": "532c51f4-03ee-42f9-a2f5-a05debb83980"
               }
             }
           ]
@@ -335822,7 +335806,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -335859,12 +335843,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "6d591a1e-b299-47e3-9eb5-02dac038a6b4",
+              "value": "293cdb60-4a42-4628-a3af-c06d5e628713",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -335895,13 +335879,13 @@
           }
         },
         "response": {
-          "id": "040b22cf-3f29-4563-a8d9-15562f7c9cf7",
+          "id": "28480bf9-d846-4197-87bb-11838afee655",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:37 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:23 GMT"
             },
             {
               "key": "Server",
@@ -335917,7 +335901,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "7033"
+              "value": "7020"
             },
             {
               "key": "X-Content-Type-Options",
@@ -335976,7 +335960,7 @@
               56,
               55,
               54,
-              56,
+              57,
               47,
               109,
               97,
@@ -358810,7 +358794,7 @@
               34,
               58,
               32,
-              50,
+              49,
               44,
               32,
               34,
@@ -358881,12 +358865,10 @@
               58,
               32,
               34,
-              108,
-              111,
-              97,
               100,
-              101,
-              100,
+              105,
+              115,
+              107,
               34,
               44,
               32,
@@ -359098,11 +359080,9 @@
               34,
               58,
               32,
-              57,
-              57,
-              48,
+              50,
               46,
-              49,
+              56,
               44,
               32,
               34,
@@ -359135,9 +359115,9 @@
               34,
               58,
               32,
-              53,
+              48,
               46,
-              49,
+              51,
               44,
               32,
               34,
@@ -359161,12 +359141,11 @@
               34,
               58,
               32,
-              49,
-              50,
-              50,
-              50,
+              51,
+              55,
+              51,
               46,
-              57,
+              52,
               44,
               32,
               34,
@@ -359195,12 +359174,11 @@
               34,
               58,
               32,
-              50,
-              50,
-              49,
-              57,
+              51,
+              55,
+              55,
               46,
-              49,
+              54,
               125,
               44,
               32,
@@ -359229,10 +359207,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 2222,
-          "responseSize": 23283
+          "responseTime": 380,
+          "responseSize": 23277
         },
-        "id": "ac808ebb-25c3-4537-85c4-2eac6f4324d5",
+        "id": "bfd79e09-4b28-450a-bae8-d307dcbcfcf2",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -359274,15 +359252,15 @@
       },
       {
         "cursor": {
-          "ref": "3e851919-6ab3-4126-9e06-ce390437d22b",
+          "ref": "74e609b4-46e3-4458-a57e-6060e746d712",
           "length": 13,
           "cycles": 1,
           "position": 12,
           "iteration": 0,
-          "httpRequestId": "a3615b39-f494-4dba-9f78-f7956109dbb9"
+          "httpRequestId": "089887ae-5f4f-4db0-bc4c-33dc01105bfc"
         },
         "item": {
-          "id": "adab3715-dde0-402f-94b4-d7a16c17c302",
+          "id": "99c69b32-ccc2-4a86-9ab2-c6db0efe6a38",
           "name": "San Francisco -> Las Vegas -> 422 names the gap in the supplied price list",
           "request": {
             "url": {
@@ -359319,13 +359297,13 @@
             {
               "listen": "test",
               "script": {
-                "id": "06923663-b053-4387-9c86-4aabd3971d06",
+                "id": "bce3b0c9-8adb-4351-b0a6-eea0603e7fb3",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"422\", () => pm.response.to.have.status(422));",
                   "pm.test(\"explains where coverage is missing\", () => pm.expect(pm.response.json().error).to.include(\"-mile gap\"));"
                 ],
-                "_lastExecutionId": "adcb83ec-b967-457d-9fef-d140700c9ade"
+                "_lastExecutionId": "e2dab185-4ca1-40f6-aedb-a01ed256fa50"
               }
             }
           ]
@@ -359333,7 +359311,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8768",
+            "port": "8769",
             "path": [
               "api",
               "route",
@@ -359370,12 +359348,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "70e65c09-788f-4990-aa93-86d6f31ffb38",
+              "value": "21aee6bd-9a54-457b-b12b-3fb9e7087593",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8768",
+              "value": "127.0.0.1:8769",
               "system": true
             },
             {
@@ -359406,13 +359384,13 @@
           }
         },
         "response": {
-          "id": "f0696fcd-cdeb-4f3d-87e4-70154d0a93cf",
+          "id": "365e8616-dcc7-4c30-9693-76d7765f1e94",
           "status": "Unprocessable Content",
           "code": 422,
           "header": [
             {
               "key": "Date",
-              "value": "Fri, 13 Nov 2026 09:04:38 GMT"
+              "value": "Fri, 13 Nov 2026 09:11:23 GMT"
             },
             {
               "key": "Server",
@@ -359428,7 +359406,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "196"
+              "value": "227"
             },
             {
               "key": "X-Content-Type-Options",
@@ -359445,10 +359423,6 @@
             {
               "key": "Vary",
               "value": "Accept-Encoding"
-            },
-            {
-              "key": "Content-Encoding",
-              "value": "gzip"
             }
           ],
           "stream": {
@@ -359684,10 +359658,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 759,
+          "responseTime": 5,
           "responseSize": 227
         },
-        "id": "adab3715-dde0-402f-94b4-d7a16c17c302",
+        "id": "99c69b32-ccc2-4a86-9ab2-c6db0efe6a38",
         "assertions": [
           {
             "assertion": "422",
@@ -359701,7 +359675,7 @@
       }
     ],
     "transfers": {
-      "responseTotal": 111094
+      "responseTotal": 111176
     },
     "failures": [],
     "error": null

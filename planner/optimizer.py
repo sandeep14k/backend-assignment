@@ -98,7 +98,7 @@ def _prune_dominated(stations):
     Such stations (typically several in one city, which share its coordinates)
     are identical in the model except for price, so a plan using a dearer one
     can always switch to the cheapest at no extra cost. This roughly halves the
-    integer program without changing its optimum.
+    problem without changing its optimum.
     """
     best = {}
     for node in stations:
@@ -308,7 +308,9 @@ def optimize(stations, distance_miles, initial_gallons=None):
             needed = float(np.min(miles / MPG + detours)) if len(stations) else None
             raise InfeasibleRoute(
                 f"Starting with {initial:g} gal is not enough to reach a station"
-                + (f" (the nearest needs {needed:.2f} gal)." if needed is not None else ".")
+                + (f" (the nearest needs {needed:.2f} gal)." if needed and needed >= 0.01 else "")
+                + (" (the nearest needs a little fuel to reach)." if needed is not None and needed < 0.01 else "")
+                + ("." if needed is None else "")
                 + " Omit initial_fuel_gallons to start with just enough."
             )
         if np.any(detours):

@@ -104,13 +104,14 @@ def coverage_gaps(nodes, distance, initial):
 
 
 def select_adaptively(route, index, initial, corridor):
-    nodes = candidates(route, index, corridor)
+    nodes, last_error = candidates(route, index, corridor), None
     for radius in [corridor, *[r for r in (10, 15, 25) if r > corridor]]:
         expanded = candidates(route, index, radius) if radius > corridor else []
         while True:
             try:
                 return optimize(nodes, route["distance_miles"], initial), nodes, radius
-            except InfeasibleRoute:
+            except InfeasibleRoute as error:
+                last_error = error
                 if not expanded:
                     break
                 gaps = coverage_gaps(nodes, route["distance_miles"], initial)
@@ -121,11 +122,13 @@ def select_adaptively(route, index, initial, corridor):
                 if len(by_id) == len(nodes):
                     break
                 nodes = sorted(by_id.values(), key=lambda s: s["route_mile"])
-    raise InfeasibleRoute(_coverage_message(route, index))
+    # A gap in the price list explains it best; otherwise keep the optimizer's own reason
+    # (e.g. the starting fuel cannot reach any station).
+    raise InfeasibleRoute(_coverage_message(route, index) or str(last_error))
 
 
 def _coverage_message(route, index):
-    """Say where the supplied price list leaves the route without fuel, e.g. 'mile 0 to 537'."""
+    """Say where the supplied price list leaves the route without fuel, e.g. 'mile 0 to 537', or None."""
     wide = candidates(route, index, 25)
     ends = [(0.0, "the start"), *((s["route_mile"], f"{s['city']}, {s['state']}") for s in wide)]
     ends.append((route["distance_miles"], "the finish"))
@@ -138,7 +141,7 @@ def _coverage_message(route, index):
             f"({left_name}) and mile {right:.0f} ({right_name}): a {size:.0f}-mile gap, longer than the "
             f"{RANGE_MILES:.0f}-mile range."
         )
-    return "No feasible fuel plan within the 25-mile station search limit. Try a larger initial_fuel_gallons."
+    return None
 
 
 def _with_heading(route, stops):

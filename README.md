@@ -13,7 +13,7 @@ Python 3.13+. No API keys, database or migrations.
 ```sh
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
-python manage.py test          # 114 tests
+python manage.py test          # 115 tests
 python manage.py runserver
 ```
 
@@ -184,7 +184,7 @@ OpenRouteService, GraphHopper, Mapbox, HERE, TomTom, Geoapify and Google all nee
 ```sh
 ruff check . && ruff format --check .
 python manage.py check
-python manage.py test                       # 114 offline tests
+python manage.py test                       # 115 offline tests
 python scripts/validate_submission.py       # 33 end-to-end cases, replaying recorded OSRM responses
 npx newman run docs/postman_collection.json # 13 requests, 89 assertions (server running)
 ```
