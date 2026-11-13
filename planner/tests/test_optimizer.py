@@ -1,5 +1,6 @@
 import random
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.test import SimpleTestCase
 from scipy.optimize import linprog
@@ -133,8 +134,9 @@ class OptimizerTests(SimpleTestCase):
         self.assertEqual([s["id"] for s in plan["fuel_stops"]], ["a"])
         self.assertEqual(plan["total_cost_usd"], "120.00")
 
+    @patch("planner.optimizer.STOP_WEIGHT", 0)
     def test_matches_independent_linear_program_without_detours(self):
-        """With every station on the road, the plan equals a plain LP optimum (HiGHS) on 100 random trips."""
+        """Without the fixed stop cost, purchases match a plain LP on 100 random trips."""
         rng = random.Random(7)
         for _ in range(100):
             miles = [0.0]
@@ -321,10 +323,12 @@ class DynamicProgramTests(SimpleTestCase):
         from planner.tests.milp_oracle import solve_milp
 
         rng, solved = np.random.default_rng(11), 0
-        for _ in range(400):
+        for case in range(400):
             n, distance = int(rng.integers(1, 30)), float(rng.uniform(50, 2500))
             miles = np.sort(rng.uniform(0, distance * 0.999, n))
             detours = rng.choice([0.0, 0.05, 0.3, 1.5], n) * rng.uniform(0, 1, n)
+            if case % 5 == 0:
+                detours[:] = 0  # The same fixed stop cost must apply to on-route stations.
             prices = np.round(rng.uniform(2.5, 4.5, n), 3)
             initial = float(rng.choice([miles[0] / 10 + detours[0], rng.uniform(0, 50)]))
             results = []

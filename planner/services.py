@@ -6,7 +6,7 @@ import time
 from collections import Counter
 
 from planner import cache
-from planner.data import station_index
+from planner.data import is_sourced, station_index
 from planner.geo import heading_at
 from planner.optimizer import (
     CAPACITY_GALLONS,
@@ -191,9 +191,9 @@ def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, veri
 
     Default: one routing call. Stations are matched to the route geometry and the
     optimizer charges each stop's estimated detour (``detour_miles``, both
-    ways) against the tank, so the plan never relies on fuel it does not have.
+    ways) against the tank. Feasibility is relative to this location/access model.
     ``verify_stops`` spends one or two more calls to route through the chosen
-    stations and re-solve purchases on the actual road legs.
+    coordinates and re-solve purchases. Exit and town positions remain estimates.
     """
     started = time.perf_counter()
     budget = RoutingBudget()
@@ -207,14 +207,14 @@ def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, veri
     matching_ms = _elapsed_ms(step)
     step = time.perf_counter()
     estimated_selection, selection_source = cache.get_or_load(
-        f"{derived_key}:adaptive:v2:{corridor_miles!r}:{initial_fuel_gallons!r}",
+        f"{derived_key}:adaptive:v3:{corridor_miles!r}:{initial_fuel_gallons!r}",
         lambda: select_adaptively(route, index, initial_fuel_gallons, corridor_miles),
     )
     estimated, on_route, search_radius = estimated_selection
     selection_ms = _elapsed_ms(step)
     step = time.perf_counter()
     selected, located = estimated["fuel_stops"], []
-    if not verify_stops:
+    if not verify_stops or not selected:
         plan = copy.deepcopy(estimated)
         for stop in plan["fuel_stops"]:
             stop["road_snap_metres"] = None
@@ -235,6 +235,7 @@ def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, veri
             corridor_miles,
             False,
             [routing_ms, matching_ms, selection_ms, 0.0, 0.0],
+            verification_requested=verify_stops,
         )
     if selected:
         selected = _with_heading(route, selected)
@@ -245,7 +246,7 @@ def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, veri
             )
         except NoRoute as exc:
             if not budget.remaining:
-                raise InfeasibleRoute("Station access could not be verified within the routing budget.") from exc
+                raise InfeasibleRoute("Stop coordinates could not be routed within the routing budget.") from exc
             # Provider does not identify the bad waypoint: replace the nearest
             # eligible alternative once, then require complete road verification.
             alternatives = [
@@ -265,7 +266,7 @@ def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, veri
             try:
                 route, _, _ = fetch_itinerary(start, finish, selected, max_calls=1, budget=budget)
             except NoRoute as retry:
-                raise InfeasibleRoute("Alternative station access could not be verified.") from retry
+                raise InfeasibleRoute("Alternative stop coordinates could not be routed.") from retry
             verification_calls = budget.used - before
         routing_calls += verification_calls
         budget.used = max(budget.used, routing_calls)
@@ -286,7 +287,7 @@ def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, veri
     # Separate cache stages: never hold one cross-process cache lock while
     # acquiring another. The final plan uses routed road legs, not offset * 1.3.
     identities = hashlib.sha256(",".join(stop["id"] for stop in located).encode()).hexdigest()[:24]
-    final_key = f"{route['cache_key']}:final:v3:{index.fingerprint}:{initial_fuel_gallons!r}:{identities}"
+    final_key = f"{route['cache_key']}:final:v4:{index.fingerprint}:{initial_fuel_gallons!r}:{identities}"
     plan, plan_source = cache.get_or_load(
         final_key, lambda: optimize(located, route["distance_miles"], initial_fuel_gallons)
     )
@@ -307,22 +308,47 @@ def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, veri
         corridor_miles,
         bool(selected),
         [routing_ms, matching_ms, selection_ms, itinerary_ms, optimize_ms],
+        verification_requested=verify_stops,
     )
 
 
 def _response(
     route, start, finish, plan, located, on_route, search_radius, routing_calls, route_source, plan_source,
-    initial_fuel_gallons, corridor_miles, itinerary_routed, timings,
+    initial_fuel_gallons, corridor_miles, itinerary_routed, timings, verification_requested=False,
 ):  # fmt: skip
     plan["fuel_stops"] = [{field: stop[field] for field in STOP_FIELDS} for stop in plan["fuel_stops"]]
+    approximate = [stop for stop in plan["fuel_stops"] if not is_sourced(stop)]
+    warnings = []
+    if approximate:
+        warnings.append(
+            {
+                "code": "approximate_station_locations",
+                "message": f"{len(approximate)} fuel stop(s) use an exit or town location. "
+                "Confirm the listed station address and access before driving; fuel and detour estimates may change.",
+                "station_ids": [stop["id"] for stop in approximate],
+            }
+        )
+    for stop in plan["fuel_stops"]:
+        if is_sourced(stop):
+            stop["location_note"] = "Station coordinates matched to a cited source."
+        elif stop["coordinate_precision"] == "exit_match":
+            stop["location_note"] = "Approximate: highway exit; pump access assumes 0.5 mile each way."
+        else:
+            stop["location_note"] = "Approximate: town centre; actual station position and access are unverified."
     routing_ms, matching_ms, selection_ms, itinerary_ms, optimize_ms = timings
     precisions = Counter(stop["coordinate_precision"] for stop in plan["fuel_stops"])
+    verification_status = "not_requested"
+    if itinerary_routed:
+        verification_status = "waypoints_routed"
+    elif verification_requested and not plan["fuel_stops"]:
+        verification_status = "not_needed"
     return {
         "start": start,
         "finish": finish,
         "distance_miles": round(route["distance_miles"], 1),
         "duration_hours": round(route["duration_seconds"] / 3600, 2),
         **plan,
+        "warnings": warnings,
         "map": _geojson(route, start, finish, plan["fuel_stops"]),
         "routed_leg_miles": route.get("leg_miles", [route["distance_miles"]]),
         "routed_waypoints": [
@@ -342,21 +368,26 @@ def _response(
             "tank_capacity_gallons": CAPACITY_GALLONS,
             "initial_fuel_gallons": initial_fuel_gallons,
             "corridor_miles": corridor_miles,
-            "starting_fuel": "Automatic mode values the routed first-leg fuel at the first station's price. "
+            "starting_fuel": "Automatic mode starts with enough fuel for the first reachable candidate, "
+            "including modeled access, and values it at that station's price. "
             "Explicit starting fuel is already owned and is not charged again.",
             "detours": (
-                "Mileage and fuel use the OSRM road legs through the chosen stations (verify_stops=true)."
+                "Mileage uses OSRM road legs through the chosen coordinates. Fuel also includes the "
+                "estimated 0.5-mile access each way for exit locations. Town locations remain approximate."
                 if itinerary_routed
                 else "Each stop's detour is estimated as 1.3 x its straight-line offset from the route, each way, "
-                "and that fuel is charged against the tank and included in fuel_burned_gallons."
+                "plus 0.5 mile each way for exit locations. Detour fuel is included in fuel_burned_gallons."
             ),
+            "verification_scope": "verify_stops routes through the available coordinates, not the actual pumps "
+            "when coordinates represent an exit or town centre. A road snap does not establish station access.",
             "station_locations": f"All {len(station_index().stations):,} priced US stations are candidates. "
             "coordinate_precision says where each position comes from: osm_identity_match / "
             "operator_identity_match (the station itself), exit_match (the OpenStreetMap interstate exit named in "
             "its CSV address, plus 0.5 mile each way to reach the pumps), or city_centroid (its listed town).",
             "optimization_scope": "Exact minimum-cost choice of stops and gallons for the fixed route and the "
-            "estimated detours (mixed-integer program). Each stop must save at least $0.50 to be made; "
-            "reported costs are fuel money only.",
+            "modeled detours using a dynamic program. The objective is fuel spending plus $0.50 per stop "
+            "in both estimated and waypoint-routed modes; reported costs are fuel money only. "
+            "In waypoint-routed mode, purchases are optimized over the selected waypoints on that itinerary.",
             "prices": "Retail prices from the supplied CSV.",
         },
         "metadata": {
@@ -369,6 +400,8 @@ def _response(
             "candidate_pool_stations": len(station_index().stations),
             "stop_coordinate_precision": dict(precisions),
             "itinerary_routed": itinerary_routed,
+            "approximate_stop_count": len(approximate),
+            "verification_status": verification_status,
             "timing_ms": {
                 "routing": routing_ms,
                 "matching": matching_ms,

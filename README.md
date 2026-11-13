@@ -4,7 +4,7 @@ A Django API that takes a start and finish anywhere in the USA and returns the d
 
 - **One routing call per new trip**, zero for repeated trips (cached).
 - **About 0.4–1.2 s for a new cross-country trip, 95%+ of it the OSRM request; about 1 ms cached.** The planner itself takes 5–20 ms (measured below).
-- **Minimum-cost fuel plan:** an exact dynamic program chooses where to stop and how many gallons to buy. It finds the same optimum as a mixed-integer solver, 15–100× faster. It never lets the tank run dry or overfill, and it includes the fuel used to detour to each station.
+- **Minimum-cost fuel plan:** an exact dynamic program chooses where to stop and how many gallons to buy. It finds the same optimum as a mixed-integer solver, 15–100× faster. It keeps modeled fuel between 0 and 50 gallons and includes estimated detour fuel. Station-location precision and remaining uncertainty are included in the API and map.
 
 ## Quick start
 
@@ -13,7 +13,7 @@ Python 3.13+. No API keys, database or migrations.
 ```sh
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
-python manage.py test          # 115 tests
+python manage.py test          # 122 tests
 python manage.py runserver
 ```
 
@@ -23,7 +23,7 @@ curl -X POST http://127.0.0.1:8000/api/route/ \
   -d '{"start": "New York, NY", "finish": "Miami, FL"}'
 ```
 
-Open the returned `map_url` in a browser for an interactive map with numbered fuel stops and the reason for each one. The same route and stops are in the JSON as GeoJSON (`map`). A full response is in [`docs/example-response.json`](docs/example-response.json). Postman: import [`docs/postman_collection.json`](docs/postman_collection.json) (13 requests, 89 assertions, all passing: [results](docs/newman-results.json)).
+Open the returned `map_url` in a browser for an interactive map with numbered fuel stops and the reason for each one. The same route and stops are in the JSON as GeoJSON (`map`). A full response is in [`docs/example-response.json`](docs/example-response.json). Postman: import [`docs/postman_collection.json`](docs/postman_collection.json) (13 requests, 89 assertions, all passing: [results](docs/newman-review-results.json)).
 
 ## How each requirement is met
 
@@ -31,7 +31,7 @@ Open the returned `map_url` in a browser for an interactive map with numbered fu
 |---|---|
 | Start and finish within the USA | `"Chicago, IL"`, `"Chicago Illinois"`, `"NYC"`, `"41.88, -87.63"`, or a street address. Cities and coordinates resolve offline. Non-US points are rejected using real borders (Windsor, ON, one mile from Detroit, is rejected). Typos get suggestions (`Chicgo, IL` → "Did you mean Chicago, IL?"). |
 | Map of the route | GeoJSON `FeatureCollection` (route line, start, finish, numbered stops) plus `map_url`, a Leaflet page drawn with OpenStreetMap tiles. |
-| Optimal, cost-effective fuel stops | All 6,626 priced US stations within 5 miles of the route (widening to 25 miles only where there is a gap) are candidates. An exact dynamic program minimizes fuel spending. See [How the plan is computed](#how-the-plan-is-computed). |
+| Optimal, cost-effective fuel stops | All 6,626 priced US stations within 5 miles of the route (widening to 25 miles only where there is a gap) are candidates. An exact dynamic program minimizes fuel spending plus $0.50 per stop within the stated route and detour model. See [How the plan is computed](#how-the-plan-is-computed). |
 | 500-mile range, multiple fuel-ups | The tank is modelled as 0–50 gallons at every pump, including detour fuel. Long trips get as many stops as needed (New York → Los Angeles: 10). |
 | Total money spent at 10 MPG | `total_cost_usd`, with a receipt for every stop (`gallons_purchased × price_per_gallon`). |
 | Use the supplied fuel prices | The CSV is the only price source. Duplicate station IDs with different prices use their mean. |
@@ -47,9 +47,9 @@ Open the returned `map_url` in a browser for an interactive map with numbered fu
 | Field | Default | Meaning |
 |---|---|---|
 | `start`, `finish` | required | US city, `"lat, lon"`, or street address (max 200 characters) |
-| `initial_fuel_gallons` | automatic | Fuel already in the tank (0–50). If omitted, the car starts with just enough to reach the first station, and that fuel is priced into the total. |
+| `initial_fuel_gallons` | automatic | Fuel already in the tank (0–50). If omitted, the car starts with just enough to reach the first candidate reachable within 500 miles including access, and that fuel is priced into the total. |
 | `corridor_miles` | 5 | How far from the route to look for stations (0.1–25) |
-| `verify_stops` | `false` | `true` routes by road through every chosen station (one or two more calls) and recomputes purchases on the real road legs. |
+| `verify_stops` | `false` | `true` routes through the chosen coordinates (one or two more calls) and recomputes purchases. Exit/town positions remain approximate; this does not verify actual pump access. No extra call is needed when no stops are selected. |
 
 Main response fields:
 
@@ -88,19 +88,19 @@ Main response fields:
 3. **Optimize.** An exact dynamic program (`_solve_dp`) decides which stations to visit and how many gallons to buy at each. The constraints:
    - fuel balance between consecutive stations;
    - you can only buy where you stop;
-   - you never reach a pump empty;
+   - fuel never falls below zero before reaching a modeled pump;
    - you never leave with more than 50 gallons.
 
-   A detour to a station costs `1.3 × offset` road miles each way, a typical US road-to-straight-line ratio, plus 0.5 mile each way from an exit to its pumps for exit-placed stations. That fuel is drawn from the tank and counted in `fuel_burned_gallons`. The objective is fuel cost plus **$0.50 per stop**, so a stop must save at least 50¢ to be made. Without that, the strict minimum adds stops that each save only cents. Reported costs are real fuel money only. Stations at the same position keep only the cheapest, which halves the problem without changing the answer.
+   A detour to a station costs `1.3 × offset` road miles each way, a typical US road-to-straight-line ratio, plus 0.5 mile each way from an exit to its pumps for exit-placed stations. That fuel is drawn from the tank and counted in `fuel_burned_gallons`. The objective is fuel cost plus **$0.50 per stop**, so a stop must save at least 50¢ to be made. Without that, the strict minimum adds stops that each save only cents. Reported costs are real fuel money only. Stations at the same route mile and with the same effective access distance keep only the cheapest. Exit ramp access is part of that distance, so a reachable pump cannot be discarded in favor of an unreachable exit position. The same $0.50 stop objective applies when every station is directly on the route.
 
    **Why a dynamic program is exact here.** In some optimal plan, every stop either fills the tank or buys just enough to reach the next stop empty (Khuller, Malekian & Mestre, *To fill or not to fill*, 2011). Any other purchase can be shifted to a cheaper stop, and a stop that buys nothing would only cost its detour. So fuel on arrival at a pump is either 0, the starting fuel less the drive from the start, or 50 gallons less the drive from an earlier stop that filled up. The program runs over (stop, arrival fuel) states, and only stops within one tank of each other connect, so New York → Los Angeles solves in about 12 ms.
 
    The test suite checks it against an independent mixed-integer program (`planner/tests/milp_oracle.py`, SciPy HiGHS) on 400 random cases. In a 3,000-case check during development, the two always agreed on feasibility and on the optimum, and every plan passed an independent tank re-simulation. The mixed-integer program took 90–350 ms per real route and up to 1.2 s with a wide corridor.
 4. **Respond.** The response includes receipts, tank levels on arrival and departure, a one-sentence reason for each stop, and the saving against a driver who ignores prices on the same stations (Chicago → Houston saves $23.77).
 
-With `verify_stops=true`, step 4 first routes through the chosen stations and re-solves purchases on the real road legs. Exit waypoints are sent with the route's heading (OSRM `bearings`), so they snap to the carriageway going the right way; without that, a waypoint on the opposite carriageway forced U-turns that added 40 miles to Chicago → Houston. If a leg turns out longer than the range, one bridging station is inserted, still within 3 calls. In live tests the one-call estimate matched the road-verified result closely:
+With `verify_stops=true`, step 4 first routes through the chosen coordinates and re-solves purchases over those waypoints. Exit locations retain the 0.5-mile access allowance each way. Town-centre waypoints remain estimates of station position; the route does not establish the road distance to their actual pumps. Exit waypoints are sent with the route's heading (OSRM `bearings`), so they snap to the carriageway going the right way; without that, a waypoint on the opposite carriageway forced U-turns that added 40 miles to Chicago → Houston. If a leg turns out longer than the range, one bridging station is inserted, still within 3 calls. In live tests the one-call estimate matched the waypoint-routed result closely (agreement between these models is not independent proof of pump accessibility):
 
-| Trip | One call (default) | Road-verified |
+| Trip | One call (default) | Waypoint-routed |
 |---|---:|---:|
 | Chicago → Houston | 1,086.9 mi, $330.01 | 1,088.3 mi, $330.04 |
 | Dallas → Denver | 794.8 mi, $221.35 | 798.8 mi, $221.39 |
@@ -117,6 +117,8 @@ The CSV gives names, prices and towns but **no coordinates**. Its addresses are 
 | `osm_identity_match` / `operator_identity_match` | 300 | The station itself: an OpenStreetMap fuel station matched by brand plus store number or street address, or a Love's store page whose OPIS ID matches. |
 | `exit_match` | 3,242 | The OpenStreetMap interstate exit named in the station's address. |
 | `city_centroid` | 3,084 | The listed town ([US Cities Database](https://github.com/kelvins/US-Cities-Database), MIT). These addresses name no exit (`US-69`, `SR-29 & SR-55`) or their exit couldn't be matched unambiguously. |
+
+**How location uncertainty is presented.** Each returned stop includes its original CSV address, `coordinate_precision`, source and a readable `location_note`. The map displays these beside the station and in its popup. If a plan uses approximate locations, `warnings` identifies the affected station IDs and the map asks the driver to confirm their addresses and access. `metadata.approximate_stop_count` gives the count; `verification_status` is `not_requested`, `not_needed`, or `waypoints_routed`. A successful waypoint route is never labeled as verification of the actual pumps.
 
 **How exits are matched** (`planner/exits.py`). OpenStreetMap maps numbered exits as `motorway_junction` nodes on motorways whose `ref` names the highway (`I 44;OK 66`). A station is placed at an exit only if all of these hold:
 - a highway in its address matches the exit's motorway;
@@ -153,7 +155,7 @@ Measured on 2026-11-13 against the public OSRM server with an empty cache ([`doc
 | New York → Miami | $381.48 | 439 ms (OSRM 424) | 0.8 ms | 1 |
 | Seattle → Boston | $979.95 | 867 ms (OSRM 848) | 1.8 ms | 1 |
 
-Almost all of a new trip's time is the OSRM request. Everything else (station matching, optimization, JSON) takes **10.7 ms median** on a cached route with no network ([`docs/local-api-benchmark.json`](docs/local-api-benchmark.json)), down from 141 ms with the mixed-integer solver. The solver alone takes 15.5 ms against 233 ms for the mixed-integer program on a 350-station coast-to-coast instance, with the identical optimum ([`docs/optimizer-benchmark.json`](docs/optimizer-benchmark.json), `python scripts/benchmark_optimizer.py`).
+Almost all of a new trip's time is the OSRM request. Everything else (station matching, optimization, JSON) takes **10.8 ms median** on a cached route with no network ([`docs/local-api-benchmark.json`](docs/local-api-benchmark.json)), down from 141 ms with the mixed-integer solver. The solver alone takes 15.5 ms against 233 ms for the mixed-integer program on a 350-station coast-to-coast instance, with the identical optimum ([`docs/optimizer-benchmark.json`](docs/optimizer-benchmark.json), `python scripts/benchmark_optimizer.py`).
 
 What would not help: OSRM's `overview=simplified` geometry answers in about 0.3 s instead of 1.4 s, but strays up to 6 miles from the road, wider than the station corridor, so it is not used. Lower cold latency needs a self-hosted OSRM near the API.
 
@@ -184,12 +186,12 @@ OpenRouteService, GraphHopper, Mapbox, HERE, TomTom, Geoapify and Google all nee
 ```sh
 ruff check . && ruff format --check .
 python manage.py check
-python manage.py test                       # 115 offline tests
+python manage.py test                       # 122 offline tests
 python scripts/validate_submission.py       # 33 end-to-end cases, replaying recorded OSRM responses
 npx newman run docs/postman_collection.json # 13 requests, 89 assertions (server running)
 ```
 
-- **Unit tests** check the optimizer against an independent mixed-integer program (400 random cases), an LP solver (100 cases) and an exhaustive search over station subsets. They also run 300 random tank simulations and cover range boundaries, the per-stop cost, coverage-gap messages, malformed OSRM responses, the call budget, cache deduplication across threads and processes, input parsing and data provenance.
+- **Unit tests** check the optimizer against an independent mixed-integer program (400 random cases), an LP solver with the fixed stop penalty disabled (100 cases) and an exhaustive search over station subsets. They also run 300 random tank simulations and cover range boundaries, the per-stop cost, coverage-gap messages, malformed OSRM responses, the call budget, cache deduplication across threads and processes, input parsing and data provenance. Review regressions cover mixed exit/pump pruning, an unreachable first candidate, short trips with no fuel purchases under verification, the stop penalty without detours, and preservation of location uncertainty after routing.
 - **End-to-end acceptance** ([`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md), [results](docs/acceptance-results.json)) sends 33 real requests through Django, replaying recorded OSRM responses: 19 trips that should succeed (including Texas, California and the Southeast, and both modes), 5 expected 422s and 9 invalid inputs. For every successful trip, an independent checker re-simulates the tank stop by stop and re-adds every receipt.
 - CI (`.github/workflows/ci.yml`) runs lint, formatting, Django checks and the tests.
 

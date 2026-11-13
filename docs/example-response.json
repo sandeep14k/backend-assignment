@@ -19,7 +19,7 @@
     "gallons": 0.4043,
     "valued_at_price_per_gallon": "3.23900000",
     "cost_usd": "1.31",
-    "note": "Fuel to reach the first candidate station (DELTA (Jersey City, NJ)), including its detour, valued at its price and included in the total."
+    "note": "Fuel to reach the first reachable candidate station (DELTA (Jersey City, NJ)), including its detour, valued at its price and included in the total."
   },
   "initial_fuel_gallons": 0.4043,
   "savings": {
@@ -50,7 +50,8 @@
       "gallons_on_departure": 2.317285,
       "detour_miles": 8.086,
       "cost_usd": "7.51",
-      "reason": "Bought just enough to reach BOLLA MARKET (Elizabeth, NJ) at mile 19, which is cheaper at $3.099/gal."
+      "reason": "Bought just enough to reach BOLLA MARKET (Elizabeth, NJ) at mile 19, which is cheaper at $3.099/gal.",
+      "location_note": "Approximate: town centre; actual station position and access are unverified."
     },
     {
       "id": "52322",
@@ -71,7 +72,8 @@
       "gallons_on_departure": 27.386053,
       "detour_miles": 1.088,
       "cost_usd": "84.87",
-      "reason": "Bought just enough to reach QUARLES #4011/SHELL (Woodford, VA) at mile 291, which is cheaper at $2.899/gal."
+      "reason": "Bought just enough to reach QUARLES #4011/SHELL (Woodford, VA) at mile 291, which is cheaper at $2.899/gal.",
+      "location_note": "Approximate: highway exit; pump access assumes 0.5 mile each way."
     },
     {
       "id": "70895",
@@ -92,7 +94,8 @@
       "gallons_on_departure": 26.420121,
       "detour_miles": 1.047,
       "cost_usd": "76.59",
-      "reason": "Bought just enough to reach SHEETZ #804 (Hope Mills, NC) at mile 555, which is cheaper at $2.859/gal."
+      "reason": "Bought just enough to reach SHEETZ #804 (Hope Mills, NC) at mile 555, which is cheaper at $2.859/gal.",
+      "location_note": "Approximate: highway exit; pump access assumes 0.5 mile each way."
     },
     {
       "id": "72975",
@@ -113,7 +116,8 @@
       "gallons_on_departure": 50.0,
       "detour_miles": 0.611,
       "cost_usd": "142.95",
-      "reason": "Filled the tank to reach Chevron (Hardeeville, SC) at mile 789 ($3.007/gal); the next selected station is no cheaper."
+      "reason": "Filled the tank to reach Chevron (Hardeeville, SC) at mile 789 ($3.007/gal); the next selected station is no cheaper.",
+      "location_note": "Station coordinates matched to a cited source."
     },
     {
       "id": "66628",
@@ -134,13 +138,26 @@
       "gallons_on_departure": 49.137207,
       "detour_miles": 1.049,
       "cost_usd": "68.25",
-      "reason": "Last stop: bought just enough to finish the trip."
+      "reason": "Last stop: bought just enough to finish the trip.",
+      "location_note": "Approximate: highway exit; pump access assumes 0.5 mile each way."
     }
   ],
   "fuel_burned_gallons": 129.220656,
   "fuel_purchased_gallons": 128.816356,
   "remaining_gallons": 0.0,
   "average_price_per_gallon": "2.95",
+  "warnings": [
+    {
+      "code": "approximate_station_locations",
+      "message": "4 fuel stop(s) use an exit or town location. Confirm the listed station address and access before driving; fuel and detour estimates may change.",
+      "station_ids": [
+        "72087",
+        "52322",
+        "70895",
+        "66628"
+      ]
+    }
+  ],
   "map": {
     "type": "FeatureCollection",
     "features": [
@@ -4094,7 +4111,8 @@
           "gallons_on_departure": 2.317285,
           "detour_miles": 8.086,
           "cost_usd": "7.51",
-          "reason": "Bought just enough to reach BOLLA MARKET (Elizabeth, NJ) at mile 19, which is cheaper at $3.099/gal."
+          "reason": "Bought just enough to reach BOLLA MARKET (Elizabeth, NJ) at mile 19, which is cheaper at $3.099/gal.",
+          "location_note": "Approximate: town centre; actual station position and access are unverified."
         },
         "geometry": {
           "type": "Point",
@@ -4127,7 +4145,8 @@
           "gallons_on_departure": 27.386053,
           "detour_miles": 1.088,
           "cost_usd": "84.87",
-          "reason": "Bought just enough to reach QUARLES #4011/SHELL (Woodford, VA) at mile 291, which is cheaper at $2.899/gal."
+          "reason": "Bought just enough to reach QUARLES #4011/SHELL (Woodford, VA) at mile 291, which is cheaper at $2.899/gal.",
+          "location_note": "Approximate: highway exit; pump access assumes 0.5 mile each way."
         },
         "geometry": {
           "type": "Point",
@@ -4160,7 +4179,8 @@
           "gallons_on_departure": 26.420121,
           "detour_miles": 1.047,
           "cost_usd": "76.59",
-          "reason": "Bought just enough to reach SHEETZ #804 (Hope Mills, NC) at mile 555, which is cheaper at $2.859/gal."
+          "reason": "Bought just enough to reach SHEETZ #804 (Hope Mills, NC) at mile 555, which is cheaper at $2.859/gal.",
+          "location_note": "Approximate: highway exit; pump access assumes 0.5 mile each way."
         },
         "geometry": {
           "type": "Point",
@@ -4193,7 +4213,8 @@
           "gallons_on_departure": 50.0,
           "detour_miles": 0.611,
           "cost_usd": "142.95",
-          "reason": "Filled the tank to reach Chevron (Hardeeville, SC) at mile 789 ($3.007/gal); the next selected station is no cheaper."
+          "reason": "Filled the tank to reach Chevron (Hardeeville, SC) at mile 789 ($3.007/gal); the next selected station is no cheaper.",
+          "location_note": "Station coordinates matched to a cited source."
         },
         "geometry": {
           "type": "Point",
@@ -4226,7 +4247,8 @@
           "gallons_on_departure": 49.137207,
           "detour_miles": 1.049,
           "cost_usd": "68.25",
-          "reason": "Last stop: bought just enough to finish the trip."
+          "reason": "Last stop: bought just enough to finish the trip.",
+          "location_note": "Approximate: highway exit; pump access assumes 0.5 mile each way."
         },
         "geometry": {
           "type": "Point",
@@ -4248,10 +4270,11 @@
     "tank_capacity_gallons": 50.0,
     "initial_fuel_gallons": null,
     "corridor_miles": 5.0,
-    "starting_fuel": "Automatic mode values the routed first-leg fuel at the first station's price. Explicit starting fuel is already owned and is not charged again.",
-    "detours": "Each stop's detour is estimated as 1.3 x its straight-line offset from the route, each way, and that fuel is charged against the tank and included in fuel_burned_gallons.",
+    "starting_fuel": "Automatic mode starts with enough fuel for the first reachable candidate, including modeled access, and values it at that station's price. Explicit starting fuel is already owned and is not charged again.",
+    "detours": "Each stop's detour is estimated as 1.3 x its straight-line offset from the route, each way, plus 0.5 mile each way for exit locations. Detour fuel is included in fuel_burned_gallons.",
+    "verification_scope": "verify_stops routes through the available coordinates, not the actual pumps when coordinates represent an exit or town centre. A road snap does not establish station access.",
     "station_locations": "All 6,626 priced US stations are candidates. coordinate_precision says where each position comes from: osm_identity_match / operator_identity_match (the station itself), exit_match (the OpenStreetMap interstate exit named in its CSV address, plus 0.5 mile each way to reach the pumps), or city_centroid (its listed town).",
-    "optimization_scope": "Exact minimum-cost choice of stops and gallons for the fixed route and the estimated detours (mixed-integer program). Each stop must save at least $0.50 to be made; reported costs are fuel money only.",
+    "optimization_scope": "Exact minimum-cost choice of stops and gallons for the fixed route and the modeled detours using a dynamic program. The objective is fuel spending plus $0.50 per stop in both estimated and waypoint-routed modes; reported costs are fuel money only. In waypoint-routed mode, purchases are optimized over the selected waypoints on that itinerary.",
     "prices": "Retail prices from the supplied CSV."
   },
   "metadata": {
@@ -4268,13 +4291,15 @@
       "osm_identity_match": 1
     },
     "itinerary_routed": false,
+    "approximate_stop_count": 4,
+    "verification_status": "not_requested",
     "timing_ms": {
       "routing": 0.0,
       "matching": 0.0,
       "selection": 0.0,
       "itinerary_routing": 0.0,
       "optimize": 0.0,
-      "total": 0.2
+      "total": 0.1
     },
     "geocoding_calls": 0
   }

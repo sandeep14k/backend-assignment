@@ -15,6 +15,7 @@
   form { display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin:18px 0; }
   label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted); flex:1 1 200px; }
   label.small { flex:0 1 150px; }
+  label.check { flex-direction:row; align-items:center; flex:1 1 200px; padding:10px 0; }
   input, button { padding:10px 12px; border:1px solid #b9cfc6; border-radius:8px; font:inherit; color:var(--ink); background:#fff; }
   button { background:var(--brand); color:#fff; border-color:var(--brand); cursor:pointer; font-weight:600; flex:0 0 auto; }
   button:disabled { opacity:.55; cursor:wait; }
@@ -35,6 +36,8 @@
   td.why { white-space:normal; min-width:280px; font-size:13px; color:var(--muted); }
   p.why { margin:6px 0 0; max-width:260px; font-size:12px; color:#5a6d65; }
   .note { font-size:13px; color:var(--muted); margin-top:12px; }
+  .warning { padding:10px 12px; margin-bottom:12px; border:1px solid #d4b272; border-radius:8px; background:#fff8e8; }
+  .location-note { display:block; white-space:normal; max-width:260px; font-size:12px; color:var(--muted); }
   .pin { background:var(--fuel); color:#fff; border:2px solid #fff; border-radius:50%; width:24px; height:24px; display:grid; place-items:center; font:700 12px system-ui; box-shadow:0 1px 4px #0005; }
   [hidden] { display:none !important; }
 </style>
@@ -49,14 +52,16 @@
     <label>Finish <input id="finish" name="finish" value="Miami, FL" required></label>
     <label class="small">Fuel at start (gal) <input id="initial" name="initial_fuel_gallons" type="number" min="0" max="50" step="any" placeholder="auto"></label>
     <label class="small">Corridor (mi) <input id="corridor" name="corridor_miles" type="number" min="0.1" max="25" step="any" placeholder="5"></label>
+    <label class="check"><input id="verify" name="verify_stops" type="checkbox"> Route through stop coordinates</label>
     <button id="submit">Plan route</button>
   </form>
 
   <p id="status" role="status" aria-live="polite">Enter US cities ("Chicago, IL"), street addresses, or coordinates ("41.88, -87.63").</p>
+  <div id="warnings" class="note warning" role="status" hidden></div>
   <div class="cards" id="cards" hidden></div>
   <div id="map" aria-label="Route map"></div>
   <div class="table-wrap"><table id="stops" hidden></table></div>
-  <p class="note">Prices come from the supplied CSV. Stations are placed at the station itself where matched, otherwise at the OpenStreetMap exit named in their address, otherwise at their listed town. Each stop's detour is included in the fuel and cost. Add <code>verify_stops=true</code> to route by road through every stop.</p>
+  <p class="note">Prices come from the supplied CSV. Station locations may represent a matched station, a highway exit, or a town centre. Fuel costs include modeled detours. Routing through stop coordinates checks the roads between those points; it cannot verify actual pump access for approximate locations.</p>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -90,6 +95,7 @@ function popup(feature, target) {
   const box = document.createElement("div");
   if (p.kind === "fuel_stop") {
     box.append(el("strong", `${p.stop_number}. ${p.name}`), el("div", `${p.city}, ${p.state} · mile ${p.route_mile.toFixed(0)}`),
+      el("div", p.address), el("p", p.location_note, "why"),
       el("div", `${p.gallons_purchased.toFixed(1)} gal × $${Number(p.price_per_gallon).toFixed(3)}/gal = $${p.cost_usd}`),
       el("p", p.reason, "why"));
   } else {
@@ -105,6 +111,8 @@ function card(value, label, extra) {
 }
 
 function render(data) {
+  $("warnings").replaceChildren(...data.warnings.map(w => el("div", w.message)));
+  $("warnings").hidden = data.warnings.length === 0;
   layer = L.geoJSON(data.map, { style: { color: "#185d46", weight: 5, opacity: .85 }, pointToLayer: marker, onEachFeature: popup }).addTo(map);
   map.fitBounds(layer.getBounds(), { padding: [30, 30] });
 
@@ -125,7 +133,9 @@ function render(data) {
   table.replaceChildren(head);
   data.fuel_stops.forEach((s, i) => {
     const row = el("tr");
-    row.append(el("td", String(i + 1)), el("td", s.name), el("td", `${s.city}, ${s.state}${s.coordinate_precision === "city_centroid" ? " (town centre)" : ""}`),
+    const location = el("td", `${s.city}, ${s.state}`);
+    location.append(el("span", s.address, "location-note"), el("span", s.location_note, "location-note"));
+    row.append(el("td", String(i + 1)), el("td", s.name), location,
       el("td", s.route_mile.toFixed(0), "num"), el("td", `$${Number(s.price_per_gallon).toFixed(3)}`, "num"),
       el("td", s.gallons_purchased.toFixed(1), "num"), el("td", `$${s.cost_usd}`, "num"), el("td", s.reason, "why"));
     table.append(row);
@@ -141,12 +151,14 @@ async function plan() {
   for (const [param, id] of [["initial_fuel_gallons", "initial"], ["corridor_miles", "corridor"]]) {
     if ($(id).value !== "") params.set(param, $(id).value); else params.delete(param);
   }
+  if ($("verify").checked) params.set("verify_stops", "true"); else params.delete("verify_stops");
   history.replaceState(null, "", `/map/?${params}`);
   $("submit").disabled = true;
   $("status").className = "";
   $("status").textContent = "Planning route and fuel stops…";
   $("cards").hidden = true;
   $("stops").hidden = true;
+  $("warnings").hidden = true;
   if (layer) { map.removeLayer(layer); layer = null; }
   try {
     const response = await fetch(`/api/route/?${params}`);
@@ -165,6 +177,7 @@ async function plan() {
 $("form").addEventListener("submit", (event) => { event.preventDefault(); plan(); });
 
 const query = new URLSearchParams(location.search);
+$("verify").checked = ["true", "1", "yes"].includes((query.get("verify_stops") || "").trim().toLowerCase());
 for (const [param, id] of [["start", "start"], ["finish", "finish"], ["initial_fuel_gallons", "initial"], ["corridor_miles", "corridor"]]) {
   if (query.has(param)) $(id).value = query.get(param);
 }

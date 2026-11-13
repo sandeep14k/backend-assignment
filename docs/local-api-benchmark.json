@@ -4,19 +4,19 @@
   "measurements": {
     "cached_route_fresh_plan": {
       "samples": 30,
-      "median_ms": 10.682,
-      "p95_ms": 12.385,
-      "max_ms": 25.28,
-      "response_bytes": 32117,
+      "median_ms": 10.849,
+      "p95_ms": 11.396,
+      "max_ms": 27.791,
+      "response_bytes": 33724,
       "routing_calls": 0,
       "failures": 0
     },
     "cached_response": {
       "samples": 30,
-      "median_ms": 0.649,
-      "p95_ms": 0.721,
-      "max_ms": 0.892,
-      "response_bytes": 32114,
+      "median_ms": 0.675,
+      "p95_ms": 0.805,
+      "max_ms": 0.901,
+      "response_bytes": 33721,
       "routing_calls": 0,
       "failures": 0
     }

@@ -1,0 +1,518 @@
+{
+  "date": "2026-11-13",
+  "collection": "docs/postman_collection.json",
+  "base_url": "http://127.0.0.1:8765",
+  "stats": {
+    "iterations": {
+      "total": 1,
+      "pending": 0,
+      "failed": 0
+    },
+    "items": {
+      "total": 13,
+      "pending": 0,
+      "failed": 0
+    },
+    "scripts": {
+      "total": 13,
+      "pending": 0,
+      "failed": 0
+    },
+    "prerequests": {
+      "total": 13,
+      "pending": 0,
+      "failed": 0
+    },
+    "requests": {
+      "total": 13,
+      "pending": 0,
+      "failed": 0
+    },
+    "tests": {
+      "total": 13,
+      "pending": 0,
+      "failed": 0
+    },
+    "assertions": {
+      "total": 89,
+      "pending": 0,
+      "failed": 0
+    },
+    "testScripts": {
+      "total": 13,
+      "pending": 0,
+      "failed": 0
+    },
+    "prerequestScripts": {
+      "total": 0,
+      "pending": 0,
+      "failed": 0
+    }
+  },
+  "timings": {
+    "responseAverage": 790.2307692307693,
+    "responseMin": 2,
+    "responseMax": 2324,
+    "responseSd": 750.375306491169,
+    "dnsAverage": 0,
+    "dnsMin": 0,
+    "dnsMax": 0,
+    "dnsSd": 0,
+    "firstByteAverage": 0,
+    "firstByteMin": 0,
+    "firstByteMax": 0,
+    "firstByteSd": 0,
+    "started": 1794565014597,
+    "completed": 1794565025117
+  },
+  "failures": [],
+  "requests": [
+    {
+      "name": "1. New York -> Miami (cold: 1 routing call)",
+      "status": 200,
+      "response_ms": 1303,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "at most 1 routing call (0 when cached)",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "2. Same trip again (cached: 0 routing calls)",
+      "status": 200,
+      "response_ms": 4,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "at most 3 routing calls",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "served from cache",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "3. GET with full state names",
+      "status": 200,
+      "response_ms": 7,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "at most 3 routing calls",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "4. Coordinates + half tank",
+      "status": 200,
+      "response_ms": 331,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "at most 3 routing calls",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "5. Street addresses (Census geocoder, cached)",
+      "status": 200,
+      "response_ms": 1869,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "at most 3 routing calls",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "matched as addresses",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "6. Short trip with full tank (no fuel purchase)",
+      "status": 200,
+      "response_ms": 780,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "at most 3 routing calls",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "no fuel stops",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "7. Typo -> 400 with suggestion",
+      "status": 400,
+      "response_ms": 11,
+      "assertions": [
+        {
+          "name": "400",
+          "passed": true
+        },
+        {
+          "name": "suggests a fix",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "8. Unknown field -> 400",
+      "status": 400,
+      "response_ms": 2,
+      "assertions": [
+        {
+          "name": "400",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Chicago, IL -> Los Angeles, CA",
+      "status": 200,
+      "response_ms": 1390,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "at most 3 routing calls",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Seattle, WA -> Boston, MA",
+      "status": 200,
+      "response_ms": 1280,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "at most 3 routing calls",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Chicago -> Houston (Texas: city-centre stations, 1 routing call)",
+      "status": 200,
+      "response_ms": 280,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        },
+        {
+          "name": "at most 1 routing call (0 when cached)",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Dallas -> Denver with verify_stops (road-routed through every stop)",
+      "status": 200,
+      "response_ms": 2324,
+      "assertions": [
+        {
+          "name": "200 OK",
+          "passed": true
+        },
+        {
+          "name": "total cost equals sum of receipts",
+          "passed": true
+        },
+        {
+          "name": "tank never exceeds 50 gallons",
+          "passed": true
+        },
+        {
+          "name": "tank never runs dry",
+          "passed": true
+        },
+        {
+          "name": "every stop explains itself",
+          "passed": true
+        },
+        {
+          "name": "never costs more than a price-blind driver",
+          "passed": true
+        },
+        {
+          "name": "fuel balance reconciles",
+          "passed": true
+        },
+        {
+          "name": "stops routed by road",
+          "passed": true
+        },
+        {
+          "name": "at most 3 routing calls",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "San Francisco -> Las Vegas -> 422 names the gap in the supplied price list",
+      "status": 422,
+      "response_ms": 692,
+      "assertions": [
+        {
+          "name": "422",
+          "passed": true
+        },
+        {
+          "name": "explains where coverage is missing",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}
