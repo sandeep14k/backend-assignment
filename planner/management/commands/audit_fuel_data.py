@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from planner.data import CANADIAN_PROVINCES, find_city, station_index, stations
+from planner.enrichment import distance
 
 
 class Command(BaseCommand):
@@ -66,10 +67,13 @@ class Command(BaseCommand):
         w(f"  KD-tree                      {len(index.stations)} points, built once at startup")
         w(f"  skipped by loader            {unlocated} (equals Canadian count: {unlocated == len(canadian)})")
 
-        # Spot-check: a station's coordinates are exactly its own city's coordinates.
-        sample = next(iter(inventory))
-        city = find_city(sample["city"], sample["state"])
-        w(
-            f"  spot check                   {sample['name']} ({sample['city']}, {sample['state']}) -> "
-            f"{sample['latitude']}, {sample['longitude']} == city row {city['LATITUDE']}, {city['LONGITUDE']}"
-        )
+        # One sample per position source, with how far it sits from its listed town.
+        for label in sorted(precision):
+            sample = next(s for s in inventory if s["coordinate_precision"] == label)
+            city = find_city(sample["city"], sample["state"])
+            offset = distance(sample, {"latitude": float(city["LATITUDE"]), "longitude": float(city["LONGITUDE"])})
+            w(
+                f"  sample {label:<23} {sample['name']} ({sample['address']}, {sample['city']}, {sample['state']}) "
+                f"-> {sample['latitude']:.5f}, {sample['longitude']:.5f}, {offset:.1f} mi from town  "
+                f"{sample['coordinate_source'] or '(town coordinates)'}"
+            )

@@ -7,15 +7,15 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 57474,
-      "elapsed_ms": 410.17
+      "elapsed_ms": 411.36
     },
     {
       "name": "seattle_boston",
       "passed": true,
       "status": 200,
       "routing_calls": 1,
-      "response_bytes": 87971,
-      "elapsed_ms": 990.43
+      "response_bytes": 87972,
+      "elapsed_ms": 1018.64
     },
     {
       "name": "ny_miami",
@@ -23,15 +23,15 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 32122,
-      "elapsed_ms": 965.81
+      "elapsed_ms": 944.56
     },
     {
       "name": "north_south",
       "passed": true,
       "status": 200,
       "routing_calls": 1,
-      "response_bytes": 26701,
-      "elapsed_ms": 1021.13
+      "response_bytes": 26700,
+      "elapsed_ms": 990.15
     },
     {
       "name": "rural",
@@ -39,7 +39,7 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 12553,
-      "elapsed_ms": 839.35
+      "elapsed_ms": 862.52
     },
     {
       "name": "chicago_short",
@@ -47,23 +47,23 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 4984,
-      "elapsed_ms": 977.86
+      "elapsed_ms": 980.07
     },
     {
       "name": "seattle_short",
       "passed": true,
       "status": 200,
       "routing_calls": 1,
-      "response_bytes": 7377,
-      "elapsed_ms": 1003.06
+      "response_bytes": 7378,
+      "elapsed_ms": 1003.87
     },
     {
       "name": "ny_alias",
       "passed": true,
       "status": 200,
       "routing_calls": 1,
-      "response_bytes": 9564,
-      "elapsed_ms": 1009.74
+      "response_bytes": 9563,
+      "elapsed_ms": 1003.33
     },
     {
       "name": "coordinates",
@@ -71,15 +71,15 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 5041,
-      "elapsed_ms": 996.77
+      "elapsed_ms": 992.28
     },
     {
       "name": "partial_tank",
       "passed": true,
       "status": 200,
       "routing_calls": 1,
-      "response_bytes": 3590,
-      "elapsed_ms": 1001.89
+      "response_bytes": 3592,
+      "elapsed_ms": 1008.21
     },
     {
       "name": "southern_short",
@@ -87,7 +87,7 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 3695,
-      "elapsed_ms": 1000.55
+      "elapsed_ms": 999.88
     },
     {
       "name": "western_short",
@@ -95,15 +95,15 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 5762,
-      "elapsed_ms": 1004.77
+      "elapsed_ms": 1009.68
     },
     {
       "name": "chicago_houston",
       "passed": true,
       "status": 200,
       "routing_calls": 1,
-      "response_bytes": 27096,
-      "elapsed_ms": 1107.03
+      "response_bytes": 27097,
+      "elapsed_ms": 1130.48
     },
     {
       "name": "la_houston",
@@ -111,7 +111,7 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 30609,
-      "elapsed_ms": 956.88
+      "elapsed_ms": 942.11
     },
     {
       "name": "dallas_denver",
@@ -119,7 +119,7 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 22466,
-      "elapsed_ms": 1119.24
+      "elapsed_ms": 1111.27
     },
     {
       "name": "seattle_miami",
@@ -127,7 +127,7 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 82928,
-      "elapsed_ms": 1218.74
+      "elapsed_ms": 1218.05
     },
     {
       "name": "bangor_san_diego",
@@ -135,7 +135,7 @@
       "status": 200,
       "routing_calls": 1,
       "response_bytes": 87802,
-      "elapsed_ms": 815.67
+      "elapsed_ms": 815.74
     },
     {
       "name": "verified_chicago_houston",
@@ -143,15 +143,15 @@
       "status": 200,
       "routing_calls": 2,
       "response_bytes": 27944,
-      "elapsed_ms": 1828.3
+      "elapsed_ms": 1819.11
     },
     {
       "name": "verified_ny_miami",
       "passed": true,
       "status": 200,
       "routing_calls": 2,
-      "response_bytes": 33164,
-      "elapsed_ms": 1992.71
+      "response_bytes": 33165,
+      "elapsed_ms": 2005.76
     },
     {
       "name": "gap_sf_vegas",
@@ -159,7 +159,7 @@
       "status": 422,
       "routing_calls": null,
       "response_bytes": 227,
-      "elapsed_ms": 1005.9
+      "elapsed_ms": 1003.11
     },
     {
       "name": "gap_portland_phoenix",
@@ -167,7 +167,7 @@
       "status": 422,
       "routing_calls": null,
       "response_bytes": 236,
-      "elapsed_ms": 1019.01
+      "elapsed_ms": 1025.03
     },
     {
       "name": "empty_remote",
@@ -175,7 +175,7 @@
       "status": 422,
       "routing_calls": null,
       "response_bytes": 151,
-      "elapsed_ms": 1030.5
+      "elapsed_ms": 1014.43
     },
     {
       "name": "disconnected",
@@ -183,7 +183,7 @@
       "status": 422,
       "routing_calls": null,
       "response_bytes": 75,
-      "elapsed_ms": 946.94
+      "elapsed_ms": 958.05
     },
     {
       "name": "coverage_alaska",
@@ -191,7 +191,7 @@
       "status": 422,
       "routing_calls": null,
       "response_bytes": 151,
-      "elapsed_ms": 1011.25
+      "elapsed_ms": 1018.68
     },
     {
       "name": "non_us",
@@ -199,7 +199,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 136,
-      "elapsed_ms": 51.52
+      "elapsed_ms": 60.82
     },
     {
       "name": "foreign_coords",
@@ -207,7 +207,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 87,
-      "elapsed_ms": 2.17
+      "elapsed_ms": 2.24
     },
     {
       "name": "empty_start",
@@ -215,7 +215,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 151,
-      "elapsed_ms": 0.28
+      "elapsed_ms": 0.3
     },
     {
       "name": "same_place",
@@ -223,7 +223,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 82,
-      "elapsed_ms": 0.26
+      "elapsed_ms": 0.28
     },
     {
       "name": "ambiguous",
@@ -231,7 +231,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 130,
-      "elapsed_ms": 0.25
+      "elapsed_ms": 0.26
     },
     {
       "name": "bad_tank",
@@ -239,7 +239,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 95,
-      "elapsed_ms": 0.22
+      "elapsed_ms": 0.24
     },
     {
       "name": "negative_tank",
@@ -247,7 +247,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 95,
-      "elapsed_ms": 0.21
+      "elapsed_ms": 0.23
     },
     {
       "name": "unknown_city",
@@ -255,7 +255,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 153,
-      "elapsed_ms": 2.29
+      "elapsed_ms": 2.24
     },
     {
       "name": "border",
@@ -263,7 +263,7 @@
       "status": 400,
       "routing_calls": null,
       "response_bytes": 93,
-      "elapsed_ms": 0.56
+      "elapsed_ms": 0.53
     }
   ]
 }
