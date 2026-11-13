@@ -29,7 +29,7 @@
     "savings_usd": "45.38",
     "savings_percent": 10.6
   },
-  "unrounded_total_cost_usd": "380.16210008910016316939176",
+  "unrounded_total_cost_usd": "380.16210213401009516781022",
   "fuel_stops": [
     {
       "id": "72087",
@@ -131,7 +131,7 @@
       "offset_miles": 0.019,
       "gallons_on_arrival": 26.444309,
       "gallons_purchased": 22.692897,
-      "gallons_on_departure": 49.137206,
+      "gallons_on_departure": 49.137207,
       "detour_miles": 1.049,
       "cost_usd": "68.25",
       "reason": "Last stop: bought just enough to finish the trip."
@@ -4223,7 +4223,7 @@
           "offset_miles": 0.019,
           "gallons_on_arrival": 26.444309,
           "gallons_purchased": 22.692897,
-          "gallons_on_departure": 49.137206,
+          "gallons_on_departure": 49.137207,
           "detour_miles": 1.049,
           "cost_usd": "68.25",
           "reason": "Last stop: bought just enough to finish the trip."
@@ -4274,7 +4274,7 @@
       "selection": 0.0,
       "itinerary_routing": 0.0,
       "optimize": 0.0,
-      "total": 0.1
+      "total": 0.2
     },
     "geocoding_calls": 0
   }

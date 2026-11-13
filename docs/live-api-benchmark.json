@@ -4,7 +4,7 @@
     "finish": "Los Angeles, CA",
     "mode": "new_route",
     "status": 200,
-    "http_stack_ms": 1470.027,
+    "http_stack_ms": 1169.142,
     "metadata": {
       "routing_calls": 1,
       "route_cache_hit": false,
@@ -19,12 +19,12 @@
       },
       "itinerary_routed": false,
       "timing_ms": {
-        "routing": 1166.9,
+        "routing": 1078.8,
         "matching": 0.0,
-        "selection": 158.3,
+        "selection": 14.2,
         "itinerary_routing": 0.0,
         "optimize": 0.0,
-        "total": 1325.4
+        "total": 1093.3
       },
       "geocoding_calls": 0
     },
@@ -36,7 +36,7 @@
     "finish": "Los Angeles, CA",
     "mode": "cached",
     "status": 200,
-    "http_stack_ms": 1.162,
+    "http_stack_ms": 1.538,
     "metadata": {
       "routing_calls": 0,
       "route_cache_hit": true,
@@ -68,7 +68,7 @@
     "finish": "Miami, FL",
     "mode": "new_route",
     "status": 200,
-    "http_stack_ms": 844.764,
+    "http_stack_ms": 438.637,
     "metadata": {
       "routing_calls": 1,
       "route_cache_hit": false,
@@ -84,12 +84,12 @@
       },
       "itinerary_routed": false,
       "timing_ms": {
-        "routing": 681.4,
+        "routing": 423.5,
         "matching": 0.0,
-        "selection": 161.1,
+        "selection": 13.5,
         "itinerary_routing": 0.0,
         "optimize": 0.0,
-        "total": 842.9
+        "total": 437.3
       },
       "geocoding_calls": 0
     },
@@ -101,7 +101,7 @@
     "finish": "Miami, FL",
     "mode": "cached",
     "status": 200,
-    "http_stack_ms": 0.753,
+    "http_stack_ms": 0.762,
     "metadata": {
       "routing_calls": 0,
       "route_cache_hit": true,
@@ -134,7 +134,7 @@
     "finish": "Boston, MA",
     "mode": "new_route",
     "status": 200,
-    "http_stack_ms": 1176.97,
+    "http_stack_ms": 867.339,
     "metadata": {
       "routing_calls": 1,
       "route_cache_hit": false,
@@ -150,12 +150,12 @@
       },
       "itinerary_routed": false,
       "timing_ms": {
-        "routing": 979.9,
+        "routing": 847.5,
         "matching": 0.0,
-        "selection": 193.5,
+        "selection": 16.2,
         "itinerary_routing": 0.0,
         "optimize": 0.0,
-        "total": 1173.9
+        "total": 864.1
       },
       "geocoding_calls": 0
     },
@@ -167,7 +167,7 @@
     "finish": "Boston, MA",
     "mode": "cached",
     "status": 200,
-    "http_stack_ms": 1.714,
+    "http_stack_ms": 1.796,
     "metadata": {
       "routing_calls": 0,
       "route_cache_hit": true,

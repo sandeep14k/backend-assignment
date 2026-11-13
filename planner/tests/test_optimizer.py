@@ -279,20 +279,6 @@ class FuelRegressionTests(SimpleTestCase):
                 self.assertGreaterEqual(Decimal(plan["savings"]["savings_usd"]), 0)
         self.assertGreater(baselines, 30)
 
-    def test_solver_timeout_is_reported_not_returned_as_optimal(self):
-        from unittest.mock import patch
-
-        from scipy.optimize import OptimizeResult
-
-        from planner.optimizer import OptimizationTimeout
-
-        nodes = [{**station(0, 3, "a"), "offset_miles": 1}]
-        with (
-            patch("planner.optimizer.milp", return_value=OptimizeResult(status=1, success=False)),
-            self.assertRaises(OptimizationTimeout),
-        ):
-            optimize(nodes, 100)
-
     def test_subcent_price_differences_and_zero_purchase_waypoint(self):
         nodes = [station(0, "3.00000001", "a"), station(200, "3.00000000", "b"), station(300, "4", "c")]
         plan = optimize(nodes, 600, 0)
@@ -323,3 +309,50 @@ class StopCostTests(SimpleTestCase):
         self.assertEqual(stop["detour_miles"], 1.0)  # 0.5 mile each way between the exit and the pumps.
         self.assertAlmostEqual(stop["gallons_on_arrival"], 20 - 10 - 0.05, places=6)
         self.assertAlmostEqual(plan["fuel_burned_gallons"], 30.1, places=6)
+
+
+class DynamicProgramTests(SimpleTestCase):
+    """The production dynamic program must match an independent mixed-integer program exactly."""
+
+    def test_matches_the_reference_mixed_integer_program(self):
+        import numpy as np
+
+        from planner.optimizer import STOP_WEIGHT, _solve_dp
+        from planner.tests.milp_oracle import solve_milp
+
+        rng, solved = np.random.default_rng(11), 0
+        for _ in range(400):
+            n, distance = int(rng.integers(1, 30)), float(rng.uniform(50, 2500))
+            miles = np.sort(rng.uniform(0, distance * 0.999, n))
+            detours = rng.choice([0.0, 0.05, 0.3, 1.5], n) * rng.uniform(0, 1, n)
+            prices = np.round(rng.uniform(2.5, 4.5, n), 3)
+            initial = float(rng.choice([miles[0] / 10 + detours[0], rng.uniform(0, 50)]))
+            results = []
+            for solve in (_solve_dp, solve_milp):
+                try:
+                    results.append(solve(miles, detours, prices, distance, initial))
+                except InfeasibleRoute:
+                    results.append(None)
+            dp, reference = results
+            self.assertEqual(dp is None, reference is None)  # Same feasibility.
+            if dp is None:
+                continue
+            solved += 1
+            value = [float(prices @ q + STOP_WEIGHT * z.sum()) for q, z, _ in (dp, reference)]
+            self.assertAlmostEqual(value[0], value[1], delta=1e-5)  # Same optimum (MILP tolerance ~1e-6).
+            purchases, visits, _ = dp
+            tank, position = initial, 0.0  # Re-simulate: never empty, never over 50 gallons.
+            for i in range(n):
+                tank -= (miles[i] - position) / 10
+                position = miles[i]
+                if visits[i]:
+                    tank -= detours[i]
+                    self.assertGreaterEqual(tank, -1e-6)
+                    tank += purchases[i]
+                    self.assertLessEqual(tank, 50 + 1e-6)
+                    tank -= detours[i]
+                else:
+                    self.assertEqual(purchases[i], 0)
+                self.assertGreaterEqual(tank, -1e-6)
+            self.assertGreaterEqual(tank - (distance - position) / 10, -1e-6)
+        self.assertGreater(solved, 250)

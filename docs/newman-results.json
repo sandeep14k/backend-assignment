@@ -2,7 +2,7 @@
   "collection": {
     "item": [
       {
-        "id": "9f6c7954-143d-49d0-aa85-5685dbde9ce1",
+        "id": "640be80c-4a86-4f8f-a232-b724f10aed47",
         "name": "1. New York -> Miami (cold: 1 routing call)",
         "request": {
           "url": {
@@ -39,7 +39,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "cdbe5a07-b769-4a2e-b758-53fd91ff3d78",
+              "id": "b2696d1c-4e51-4627-8e5e-175be50c4a7b",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -53,13 +53,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "f6b0a94c-e93a-485c-9a69-05f41d44de08"
+              "_lastExecutionId": "67f95ece-e2ad-4b8a-b243-6cddc23548ad"
             }
           }
         ]
       },
       {
-        "id": "3cb5cadb-024b-4078-9b0c-ae946f51e39f",
+        "id": "bf0c9167-e0fe-4333-8f6d-7691c8a78107",
         "name": "2. Same trip again (cached: 0 routing calls)",
         "request": {
           "url": {
@@ -96,7 +96,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "83a48010-1e69-4249-90a6-3b49f5dabe63",
+              "id": "67b9087d-fef1-4962-8485-4adc93ef28d3",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -111,13 +111,13 @@
                 "pm.test(\"served from cache\", () => pm.expect(d.metadata.routing_calls).to.eql(0));",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "007dc547-cd0a-4c4e-b71d-708ae914b9b4"
+              "_lastExecutionId": "4ee83edf-09c1-47a6-aa72-3d3f72e7778e"
             }
           }
         ]
       },
       {
-        "id": "fceb89d5-f0d5-4bdd-af4e-6f27724fae8b",
+        "id": "6db0e62c-a93f-4cf6-9cb8-4c6580803e6a",
         "name": "3. GET with full state names",
         "request": {
           "url": {
@@ -148,7 +148,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "4784a2f1-3033-4ff8-a9dc-8103d1c14cb7",
+              "id": "fca1f102-00d4-4b25-99fe-589c9ca538f0",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -162,13 +162,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "a0ff7eda-e34c-4645-95ca-240a367a6d7d"
+              "_lastExecutionId": "9e68c054-2e7e-42f4-9753-60a6ba4c7596"
             }
           }
         ]
       },
       {
-        "id": "552d3f1e-53b2-4a2d-b15a-74f2a1c004db",
+        "id": "dbf00d1c-fb4e-49a0-afd2-2ce499928dcb",
         "name": "4. Coordinates + half tank",
         "request": {
           "url": {
@@ -205,7 +205,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "9c8b3227-d108-4600-85a4-96e62d338256",
+              "id": "ce895070-6c3f-49ad-b9ae-79f71a3db65c",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -219,13 +219,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "ac3b5eeb-7d55-4169-bba1-54155546b597"
+              "_lastExecutionId": "9d429f3a-dd17-48b6-b0d9-412a4e9d4c01"
             }
           }
         ]
       },
       {
-        "id": "10b19570-b571-41d2-9bd4-0df2548d1408",
+        "id": "e64d5de0-b7b2-4c06-b526-dcb09adc07d5",
         "name": "5. Street addresses (Census geocoder, cached)",
         "request": {
           "url": {
@@ -262,7 +262,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "e1f9a4a9-134b-4104-a685-2da441c52dd9",
+              "id": "0ae8ae16-b038-4941-b2c1-06553f83545f",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -277,13 +277,13 @@
                 "pm.test(\"matched as addresses\", () => pm.expect(d.start.matched).to.eql(\"address\"));",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "db67816a-9114-4cb9-af41-1941d49c80ba"
+              "_lastExecutionId": "4dca4074-53ea-42db-81f8-7178d8166329"
             }
           }
         ]
       },
       {
-        "id": "88c5c074-8d89-4c6f-a225-a5a97c15040a",
+        "id": "177d4bbc-11fa-4c01-b3a5-b8c07aa88553",
         "name": "6. Short trip with full tank (no fuel purchase)",
         "request": {
           "url": {
@@ -320,7 +320,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "ce081a39-d8ff-425a-a876-3fea426a10f0",
+              "id": "6c2d53d5-1738-4bc8-a03b-f7071e595217",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -335,13 +335,13 @@
                 "pm.test(\"no fuel stops\", () => pm.expect(d.fuel_stops.length).to.eql(0));",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "e45174bb-8031-479a-9fe2-495c717ad403"
+              "_lastExecutionId": "c493af32-6db6-439b-8b07-d194b404b80b"
             }
           }
         ]
       },
       {
-        "id": "6fc0e07f-b0d8-4883-b96d-6ab095e7588e",
+        "id": "ddd643b6-4ef5-45d6-b4d5-d2f4355e504c",
         "name": "7. Typo -> 400 with suggestion",
         "request": {
           "url": {
@@ -378,19 +378,19 @@
           {
             "listen": "test",
             "script": {
-              "id": "42ccf1bf-7403-4ef2-bbb7-074f5872b959",
+              "id": "dfc87dff-1e98-4807-a0ca-5cb6f08c22ce",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"400\", () => pm.response.to.have.status(400));",
                 "pm.test(\"suggests a fix\", () => pm.expect(pm.response.json().error).to.include(\"Did you mean Chicago, IL\"));"
               ],
-              "_lastExecutionId": "d358cdfe-7154-421b-a826-e853fbba0609"
+              "_lastExecutionId": "3deb3b93-9489-4315-ae33-97ccec5f3025"
             }
           }
         ]
       },
       {
-        "id": "d6e331c1-cf12-4a69-96ca-1fca24b36afc",
+        "id": "ab2e986c-60e5-46e3-a90f-b9ce99ecb741",
         "name": "8. Unknown field -> 400",
         "request": {
           "url": {
@@ -427,18 +427,18 @@
           {
             "listen": "test",
             "script": {
-              "id": "afb6603b-c25a-4145-a3ac-fc3878f30146",
+              "id": "d05dd361-ee9a-4741-97ee-87ff93c67934",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"400\", () => pm.response.to.have.status(400));"
               ],
-              "_lastExecutionId": "8cf0e071-a792-40d7-8eba-59a1d0c719d8"
+              "_lastExecutionId": "4b74c8c8-c5b7-4884-969d-7f5635baf478"
             }
           }
         ]
       },
       {
-        "id": "67dd6a20-8f97-4bd8-8987-7049a8a19562",
+        "id": "6dfb6292-3d48-4c09-9e82-695d4e7bced3",
         "name": "Chicago, IL -> Los Angeles, CA",
         "request": {
           "url": {
@@ -475,7 +475,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "c3df59d1-2135-4237-b8dc-52946d14d0b0",
+              "id": "4d59dd93-a6a1-43a0-9b09-e877fae0e490",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -489,13 +489,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "76cc13bb-3085-40b8-b5d9-330cabe97f71"
+              "_lastExecutionId": "df4a19f1-1f5b-4742-92f3-dd96dd56d7d2"
             }
           }
         ]
       },
       {
-        "id": "8d836d44-f53e-42d4-a273-c7e08e518183",
+        "id": "0e347865-e6c2-414b-9f47-f28a2aef6101",
         "name": "Seattle, WA -> Boston, MA",
         "request": {
           "url": {
@@ -532,7 +532,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "fc2cc4ba-7710-48a4-b5e4-ff5dc554b20c",
+              "id": "31aaafe4-2fd6-43eb-a9ce-4d8b468a817e",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -546,13 +546,13 @@
                 "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
               ],
-              "_lastExecutionId": "e18fda65-9115-4c96-9a8a-d8bc6aa8d6ec"
+              "_lastExecutionId": "d600c9f2-fe27-4048-a1d0-cd5c670bf326"
             }
           }
         ]
       },
       {
-        "id": "7bfc2c3d-5226-46be-90c9-1d1a8f39ff57",
+        "id": "9cb1a662-bc30-43f1-9d6b-8e3ac5ad9db8",
         "name": "Chicago -> Houston (Texas: city-centre stations, 1 routing call)",
         "request": {
           "url": {
@@ -589,7 +589,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "fc8ae6ab-e8a5-4c31-830a-cc943a0d7ee0",
+              "id": "be5bb755-4d59-4eec-ad0d-ef76fe43e931",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -603,13 +603,13 @@
                 "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));",
                 "pm.test(\"at most 1 routing call (0 when cached)\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(1));"
               ],
-              "_lastExecutionId": "df903b7e-75aa-45dc-9d62-5bc8d4d76202"
+              "_lastExecutionId": "7aba3eef-3c4e-48b4-9749-595c0b237d6e"
             }
           }
         ]
       },
       {
-        "id": "4e6b21dc-961d-495a-b778-df08e63542aa",
+        "id": "ac808ebb-25c3-4537-85c4-2eac6f4324d5",
         "name": "Dallas -> Denver with verify_stops (road-routed through every stop)",
         "request": {
           "url": {
@@ -646,7 +646,7 @@
           {
             "listen": "test",
             "script": {
-              "id": "6f63fbce-bf52-4e6f-b7d1-7df8b2c20a52",
+              "id": "3b22f56f-c069-449a-9c30-777ddb8910f8",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -661,13 +661,13 @@
                 "pm.test(\"stops routed by road\", () => pm.expect(d.metadata.itinerary_routed).to.eql(true));",
                 "pm.test(\"at most 3 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(3));"
               ],
-              "_lastExecutionId": "c5ddabe2-224f-478f-8189-73403e2046fd"
+              "_lastExecutionId": "fb09db75-020f-422a-a38a-769f8235e721"
             }
           }
         ]
       },
       {
-        "id": "6226ce59-125e-4d4a-8511-91d6bf3a6727",
+        "id": "adab3715-dde0-402f-94b4-d7a16c17c302",
         "name": "San Francisco -> Las Vegas -> 422 names the gap in the supplied price list",
         "request": {
           "url": {
@@ -704,13 +704,13 @@
           {
             "listen": "test",
             "script": {
-              "id": "0b9f711c-3272-47eb-875e-0010909be799",
+              "id": "06923663-b053-4387-9c86-4aabd3971d06",
               "type": "text/javascript",
               "exec": [
                 "pm.test(\"422\", () => pm.response.to.have.status(422));",
                 "pm.test(\"explains where coverage is missing\", () => pm.expect(pm.response.json().error).to.include(\"-mile gap\"));"
               ],
-              "_lastExecutionId": "6cbbcaa0-03d6-4484-a1c9-68e94069559d"
+              "_lastExecutionId": "adcb83ec-b967-457d-9fef-d140700c9ade"
             }
           }
         ]
@@ -725,7 +725,7 @@
       }
     ],
     "info": {
-      "_postman_id": "2a059c69-ae81-4c9e-964e-fad4949013b1",
+      "_postman_id": "22d049d4-f946-46e7-84f8-a0da7859e4a4",
       "name": "Fuel Route Planner",
       "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
       "description": {
@@ -735,17 +735,17 @@
     }
   },
   "environment": {
-    "id": "4a9cf7b0-499f-4908-afd2-eb6df96e8c7f",
+    "id": "c87f7d8c-77f5-4889-ae7c-8a2419883be4",
     "values": [
       {
         "type": "any",
-        "value": "http://127.0.0.1:8767",
+        "value": "http://127.0.0.1:8768",
         "key": "base_url"
       }
     ]
   },
   "globals": {
-    "id": "b57eb53d-4e41-4ed5-8db9-e79e569f804e",
+    "id": "0488ff4d-4a85-41d5-acf4-cac22f6db26f",
     "values": []
   },
   "run": {
@@ -797,10 +797,10 @@
       }
     },
     "timings": {
-      "responseAverage": 845.8461538461538,
+      "responseAverage": 866.4615384615385,
       "responseMin": 2,
-      "responseMax": 2068,
-      "responseSd": 697.760135792087,
+      "responseMax": 3179,
+      "responseSd": 945.0400573833743,
       "dnsAverage": 0,
       "dnsMin": 0,
       "dnsMax": 0,
@@ -809,8 +809,8 @@
       "firstByteMin": 0,
       "firstByteMax": 0,
       "firstByteSd": 0,
-      "started": 1794526574227,
-      "completed": 1794526585416
+      "started": 1794560666700,
+      "completed": 1794560678154
     },
     "executions": [
       {
@@ -823,11 +823,11 @@
           "eof": false,
           "bof": true,
           "cr": false,
-          "ref": "cc54378f-ac7f-43f9-a9c5-3efd06b1234e",
-          "httpRequestId": "158f446c-04f3-4170-b0b2-7d49d417434a"
+          "ref": "434d5309-81d7-4553-b235-1d3e30123335",
+          "httpRequestId": "45885981-42a1-46c1-89bc-d0dd16f66c58"
         },
         "item": {
-          "id": "9f6c7954-143d-49d0-aa85-5685dbde9ce1",
+          "id": "640be80c-4a86-4f8f-a232-b724f10aed47",
           "name": "1. New York -> Miami (cold: 1 routing call)",
           "request": {
             "url": {
@@ -864,7 +864,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "cdbe5a07-b769-4a2e-b758-53fd91ff3d78",
+                "id": "b2696d1c-4e51-4627-8e5e-175be50c4a7b",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -878,7 +878,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "f6b0a94c-e93a-485c-9a69-05f41d44de08"
+                "_lastExecutionId": "67f95ece-e2ad-4b8a-b243-6cddc23548ad"
               }
             }
           ]
@@ -886,7 +886,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -923,12 +923,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "75ea335f-d12b-46a1-9751-ef744cb4b973",
+              "value": "18baf6f1-f9d8-4621-8503-fca3ff20488e",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -959,13 +959,13 @@
           }
         },
         "response": {
-          "id": "8b43fcb8-0225-4e29-8ecd-fef4b613612f",
+          "id": "4670ce80-9b4f-423c-bda4-53629e3bf46e",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:15 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:27 GMT"
             },
             {
               "key": "Server",
@@ -981,7 +981,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "10047"
+              "value": "10032"
             },
             {
               "key": "X-Content-Type-Options",
@@ -1040,7 +1040,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -1975,24 +1975,24 @@
               50,
               49,
               48,
+              50,
+              49,
+              51,
+              52,
               48,
-              48,
-              56,
-              57,
               49,
               48,
               48,
+              57,
+              53,
               49,
               54,
-              51,
-              49,
-              54,
-              57,
-              51,
-              57,
-              49,
               55,
-              54,
+              56,
+              49,
+              48,
+              50,
+              50,
               34,
               44,
               32,
@@ -4920,7 +4920,7 @@
               55,
               50,
               48,
-              54,
+              55,
               44,
               32,
               34,
@@ -31302,7 +31302,7 @@
               55,
               50,
               48,
-              54,
+              55,
               44,
               32,
               34,
@@ -33007,11 +33007,12 @@
               34,
               58,
               32,
-              57,
-              55,
-              48,
+              49,
+              50,
+              49,
+              52,
               46,
-              55,
+              54,
               44,
               32,
               34,
@@ -33045,10 +33046,9 @@
               58,
               32,
               50,
-              55,
-              49,
+              50,
               46,
-              49,
+              52,
               44,
               32,
               34,
@@ -33105,10 +33105,10 @@
               32,
               49,
               50,
-              52,
-              50,
+              51,
+              55,
               46,
-              52,
+              53,
               125,
               44,
               32,
@@ -33137,10 +33137,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 1267,
+          "responseTime": 1261,
           "responseSize": 32127
         },
-        "id": "9f6c7954-143d-49d0-aa85-5685dbde9ce1",
+        "id": "640be80c-4a86-4f8f-a232-b724f10aed47",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -33178,15 +33178,15 @@
       },
       {
         "cursor": {
-          "ref": "39501a5b-1c2c-4266-9f55-e4fcb896500e",
+          "ref": "0995a5ee-4a8b-41c1-829e-c400005b84a8",
           "length": 13,
           "cycles": 1,
           "position": 1,
           "iteration": 0,
-          "httpRequestId": "1c623e48-0981-43e8-8e76-78e6e0ebdd35"
+          "httpRequestId": "a3a0e8f9-f4e6-43f4-b3f9-973c34deb445"
         },
         "item": {
-          "id": "3cb5cadb-024b-4078-9b0c-ae946f51e39f",
+          "id": "bf0c9167-e0fe-4333-8f6d-7691c8a78107",
           "name": "2. Same trip again (cached: 0 routing calls)",
           "request": {
             "url": {
@@ -33223,7 +33223,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "83a48010-1e69-4249-90a6-3b49f5dabe63",
+                "id": "67b9087d-fef1-4962-8485-4adc93ef28d3",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -33238,7 +33238,7 @@
                   "pm.test(\"served from cache\", () => pm.expect(d.metadata.routing_calls).to.eql(0));",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "007dc547-cd0a-4c4e-b71d-708ae914b9b4"
+                "_lastExecutionId": "4ee83edf-09c1-47a6-aa72-3d3f72e7778e"
               }
             }
           ]
@@ -33246,7 +33246,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -33283,12 +33283,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "e11e1f2e-c798-4958-8dcc-6ab250855259",
+              "value": "d888bcc4-eb48-43c6-80da-c7783fe4243a",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -33319,13 +33319,13 @@
           }
         },
         "response": {
-          "id": "c0c61cc7-5205-4520-a5fe-1467ff47b1f6",
+          "id": "604bfc32-f452-4421-89cc-1d145fc98da1",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:15 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:27 GMT"
             },
             {
               "key": "Server",
@@ -33341,7 +33341,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "10045"
+              "value": "9982"
             },
             {
               "key": "X-Content-Type-Options",
@@ -33400,7 +33400,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -34335,24 +34335,24 @@
               50,
               49,
               48,
+              50,
+              49,
+              51,
+              52,
               48,
-              48,
-              56,
-              57,
               49,
               48,
               48,
+              57,
+              53,
               49,
               54,
-              51,
-              49,
-              54,
-              57,
-              51,
-              57,
-              49,
               55,
-              54,
+              56,
+              49,
+              48,
+              50,
+              50,
               34,
               44,
               32,
@@ -37280,7 +37280,7 @@
               55,
               50,
               48,
-              54,
+              55,
               44,
               32,
               34,
@@ -63662,7 +63662,7 @@
               55,
               50,
               48,
-              54,
+              55,
               44,
               32,
               34,
@@ -65459,7 +65459,7 @@
               32,
               48,
               46,
-              50,
+              51,
               125,
               44,
               32,
@@ -65488,10 +65488,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 3,
+          "responseTime": 5,
           "responseSize": 32118
         },
-        "id": "3cb5cadb-024b-4078-9b0c-ae946f51e39f",
+        "id": "bf0c9167-e0fe-4333-8f6d-7691c8a78107",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -65533,15 +65533,15 @@
       },
       {
         "cursor": {
-          "ref": "51aec861-9330-4435-8527-939e22247a42",
+          "ref": "427a5e12-e5f9-4ab6-8cb1-64ea032d6d4f",
           "length": 13,
           "cycles": 1,
           "position": 2,
           "iteration": 0,
-          "httpRequestId": "c8c48919-efcc-49ec-9176-cbd97ebd0cc8"
+          "httpRequestId": "42219406-641a-4872-b17c-cf50d8dc4f68"
         },
         "item": {
-          "id": "fceb89d5-f0d5-4bdd-af4e-6f27724fae8b",
+          "id": "6db0e62c-a93f-4cf6-9cb8-4c6580803e6a",
           "name": "3. GET with full state names",
           "request": {
             "url": {
@@ -65572,7 +65572,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "4784a2f1-3033-4ff8-a9dc-8103d1c14cb7",
+                "id": "fca1f102-00d4-4b25-99fe-589c9ca538f0",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -65586,7 +65586,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "a0ff7eda-e34c-4645-95ca-240a367a6d7d"
+                "_lastExecutionId": "9e68c054-2e7e-42f4-9753-60a6ba4c7596"
               }
             }
           ]
@@ -65594,7 +65594,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -65636,12 +65636,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "ed0b96e2-21e7-457e-b673-0d2892e6ca0e",
+              "value": "2a2c2982-5fe8-4203-8cdc-38ef6bb0512f",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -65658,13 +65658,13 @@
           "method": "GET"
         },
         "response": {
-          "id": "60f71ffe-0c6f-46d6-a582-ae5af7f67f8d",
+          "id": "a0098629-2db4-4dd1-a0d3-62c696db11cd",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:15 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:28 GMT"
             },
             {
               "key": "Server",
@@ -65680,7 +65680,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "9993"
+              "value": "10013"
             },
             {
               "key": "X-Content-Type-Options",
@@ -65739,7 +65739,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -66685,24 +66685,24 @@
               50,
               49,
               48,
+              50,
+              49,
+              51,
+              52,
               48,
-              48,
-              56,
-              57,
               49,
               48,
               48,
+              57,
+              53,
               49,
               54,
-              51,
-              49,
-              54,
-              57,
-              51,
-              57,
-              49,
               55,
-              54,
+              56,
+              49,
+              48,
+              50,
+              50,
               34,
               44,
               32,
@@ -69630,7 +69630,7 @@
               55,
               50,
               48,
-              54,
+              55,
               44,
               32,
               34,
@@ -96012,7 +96012,7 @@
               55,
               50,
               48,
-              54,
+              55,
               44,
               32,
               34,
@@ -97809,7 +97809,7 @@
               32,
               48,
               46,
-              52,
+              53,
               125,
               44,
               32,
@@ -97841,7 +97841,7 @@
           "responseTime": 3,
           "responseSize": 32129
         },
-        "id": "fceb89d5-f0d5-4bdd-af4e-6f27724fae8b",
+        "id": "6db0e62c-a93f-4cf6-9cb8-4c6580803e6a",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -97879,15 +97879,15 @@
       },
       {
         "cursor": {
-          "ref": "22e05872-1b8f-4841-8fa0-39ba9f2e118e",
+          "ref": "7632667e-0738-413a-b5a8-01371714806a",
           "length": 13,
           "cycles": 1,
           "position": 3,
           "iteration": 0,
-          "httpRequestId": "f1b29a76-5bfb-4bb3-8718-acda47fa81a1"
+          "httpRequestId": "a58637f9-6711-4aee-bf68-e6ae9cbd9493"
         },
         "item": {
-          "id": "552d3f1e-53b2-4a2d-b15a-74f2a1c004db",
+          "id": "dbf00d1c-fb4e-49a0-afd2-2ce499928dcb",
           "name": "4. Coordinates + half tank",
           "request": {
             "url": {
@@ -97924,7 +97924,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "9c8b3227-d108-4600-85a4-96e62d338256",
+                "id": "ce895070-6c3f-49ad-b9ae-79f71a3db65c",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -97938,7 +97938,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "ac3b5eeb-7d55-4169-bba1-54155546b597"
+                "_lastExecutionId": "9d429f3a-dd17-48b6-b0d9-412a4e9d4c01"
               }
             }
           ]
@@ -97946,7 +97946,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -97983,12 +97983,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "6481a666-6976-4545-9cb6-9b1348163777",
+              "value": "fa513b9e-b7eb-4b77-b132-4324c4972c5a",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -98019,13 +98019,13 @@
           }
         },
         "response": {
-          "id": "b27b9ad8-e8b7-48b6-9336-8b79ddaf1ec4",
+          "id": "2d3ebd7a-79f3-4ac6-a31b-81027b425fc7",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:16 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:28 GMT"
             },
             {
               "key": "Server",
@@ -98041,7 +98041,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "9808"
+              "value": "9781"
             },
             {
               "key": "X-Content-Type-Options",
@@ -98100,7 +98100,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -98881,14 +98881,13 @@
               53,
               53,
               56,
-              48,
-              49,
-              54,
-              57,
+              51,
               52,
+              49,
+              55,
+              57,
               50,
               55,
-              48,
               48,
               48,
               34,
@@ -128636,12 +128635,11 @@
               34,
               58,
               32,
+              51,
               49,
               48,
-              51,
-              56,
               46,
-              55,
+              48,
               44,
               32,
               34,
@@ -128674,11 +128672,10 @@
               34,
               58,
               32,
+              50,
               49,
-              53,
-              55,
               46,
-              51,
+              55,
               44,
               32,
               34,
@@ -128733,12 +128730,11 @@
               34,
               58,
               32,
-              49,
-              49,
-              57,
-              57,
+              51,
+              51,
+              53,
               46,
-              50,
+              52,
               125,
               44,
               32,
@@ -128767,10 +128763,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 1202,
-          "responseSize": 30697
+          "responseTime": 340,
+          "responseSize": 30693
         },
-        "id": "552d3f1e-53b2-4a2d-b15a-74f2a1c004db",
+        "id": "dbf00d1c-fb4e-49a0-afd2-2ce499928dcb",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -128808,15 +128804,15 @@
       },
       {
         "cursor": {
-          "ref": "c3816544-fde3-46d4-b758-675e9eb428ce",
+          "ref": "0023601d-6b38-477d-8b3b-9febe155cbf6",
           "length": 13,
           "cycles": 1,
           "position": 4,
           "iteration": 0,
-          "httpRequestId": "7867007d-1b42-4fcf-92dc-7b424249831e"
+          "httpRequestId": "5a629981-0e5b-4a98-a14a-b3e86158793b"
         },
         "item": {
-          "id": "10b19570-b571-41d2-9bd4-0df2548d1408",
+          "id": "e64d5de0-b7b2-4c06-b526-dcb09adc07d5",
           "name": "5. Street addresses (Census geocoder, cached)",
           "request": {
             "url": {
@@ -128853,7 +128849,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "e1f9a4a9-134b-4104-a685-2da441c52dd9",
+                "id": "0ae8ae16-b038-4941-b2c1-06553f83545f",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -128868,7 +128864,7 @@
                   "pm.test(\"matched as addresses\", () => pm.expect(d.start.matched).to.eql(\"address\"));",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "db67816a-9114-4cb9-af41-1941d49c80ba"
+                "_lastExecutionId": "4dca4074-53ea-42db-81f8-7178d8166329"
               }
             }
           ]
@@ -128876,7 +128872,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -128913,12 +128909,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "23962a0f-8d6c-4949-9f7f-6fb4094ee92c",
+              "value": "68954e04-2170-42f2-b2af-cbed5bf7214f",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -128949,13 +128945,13 @@
           }
         },
         "response": {
-          "id": "500a2516-d2c4-4322-b3b9-bb9860bac0bf",
+          "id": "81f5eabe-05bd-47fd-a527-b8795a4fc017",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:18 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:31 GMT"
             },
             {
               "key": "Server",
@@ -128971,7 +128967,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "8541"
+              "value": "8495"
             },
             {
               "key": "X-Content-Type-Options",
@@ -129030,7 +129026,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -130141,12 +130137,12 @@
               53,
               57,
               51,
-              53,
-              56,
-              53,
-              52,
-              55,
+              54,
               48,
+              57,
+              51,
+              48,
+              51,
               57,
               50,
               52,
@@ -156502,9 +156498,9 @@
               34,
               58,
               32,
-              53,
-              55,
-              56,
+              54,
+              57,
+              51,
               46,
               50,
               44,
@@ -156539,10 +156535,9 @@
               34,
               58,
               32,
-              53,
-              52,
+              56,
               46,
-              49,
+              52,
               44,
               32,
               34,
@@ -156597,12 +156592,12 @@
               34,
               58,
               32,
+              51,
               49,
-              56,
-              52,
-              56,
+              55,
+              53,
               46,
-              48,
+              51,
               125,
               44,
               32,
@@ -156631,10 +156626,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 1852,
-          "responseSize": 27631
+          "responseTime": 3179,
+          "responseSize": 27630
         },
-        "id": "10b19570-b571-41d2-9bd4-0df2548d1408",
+        "id": "e64d5de0-b7b2-4c06-b526-dcb09adc07d5",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -156676,15 +156671,15 @@
       },
       {
         "cursor": {
-          "ref": "3e2ebdcb-2220-4080-b9c3-02eb673fe058",
+          "ref": "95c8f41e-0fae-4c6b-933c-5c5d9d369c94",
           "length": 13,
           "cycles": 1,
           "position": 5,
           "iteration": 0,
-          "httpRequestId": "d88e482a-7e76-4734-b3d4-42d4a15a0d6f"
+          "httpRequestId": "d06eb610-35d4-4e6e-a048-34fe7dd00d1c"
         },
         "item": {
-          "id": "88c5c074-8d89-4c6f-a225-a5a97c15040a",
+          "id": "177d4bbc-11fa-4c01-b3a5-b8c07aa88553",
           "name": "6. Short trip with full tank (no fuel purchase)",
           "request": {
             "url": {
@@ -156721,7 +156716,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "ce081a39-d8ff-425a-a876-3fea426a10f0",
+                "id": "6c2d53d5-1738-4bc8-a03b-f7071e595217",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -156736,7 +156731,7 @@
                   "pm.test(\"no fuel stops\", () => pm.expect(d.fuel_stops.length).to.eql(0));",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "e45174bb-8031-479a-9fe2-495c717ad403"
+                "_lastExecutionId": "c493af32-6db6-439b-8b07-d194b404b80b"
               }
             }
           ]
@@ -156744,7 +156739,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -156781,12 +156776,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "0f7b664c-ec24-4644-97c8-6e444308c3b3",
+              "value": "f54b9f74-431d-4f0f-961a-a99fa32e7465",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -156817,13 +156812,13 @@
           }
         },
         "response": {
-          "id": "6b275942-e2eb-48b7-8892-56fef3321a2c",
+          "id": "d855d27c-192f-4c2b-9444-ce01950c4b3b",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:19 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:32 GMT"
             },
             {
               "key": "Server",
@@ -156839,7 +156834,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "2090"
+              "value": "2094"
             },
             {
               "key": "X-Content-Type-Options",
@@ -156898,7 +156893,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -161730,10 +161725,10 @@
               58,
               32,
               53,
-              53,
-              50,
+              49,
+              51,
               46,
-              57,
+              48,
               44,
               32,
               34,
@@ -161766,9 +161761,9 @@
               34,
               58,
               32,
-              50,
+              48,
               46,
-              53,
+              56,
               44,
               32,
               34,
@@ -161824,10 +161819,10 @@
               58,
               32,
               53,
-              53,
-              53,
+              49,
+              52,
               46,
-              55,
+              48,
               125,
               44,
               32,
@@ -161856,10 +161851,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 561,
+          "responseTime": 520,
           "responseSize": 4988
         },
-        "id": "88c5c074-8d89-4c6f-a225-a5a97c15040a",
+        "id": "177d4bbc-11fa-4c01-b3a5-b8c07aa88553",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -161901,15 +161896,15 @@
       },
       {
         "cursor": {
-          "ref": "6386d74e-9504-41cf-a785-9708e907fb9b",
+          "ref": "06003bd9-060a-4c33-ad1d-b7f39527d1b3",
           "length": 13,
           "cycles": 1,
           "position": 6,
           "iteration": 0,
-          "httpRequestId": "23aa38ce-9a64-4211-ae8f-d84dcff64458"
+          "httpRequestId": "936eeb29-df14-41b1-97eb-07d505c121bd"
         },
         "item": {
-          "id": "6fc0e07f-b0d8-4883-b96d-6ab095e7588e",
+          "id": "ddd643b6-4ef5-45d6-b4d5-d2f4355e504c",
           "name": "7. Typo -> 400 with suggestion",
           "request": {
             "url": {
@@ -161946,13 +161941,13 @@
             {
               "listen": "test",
               "script": {
-                "id": "42ccf1bf-7403-4ef2-bbb7-074f5872b959",
+                "id": "dfc87dff-1e98-4807-a0ca-5cb6f08c22ce",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"400\", () => pm.response.to.have.status(400));",
                   "pm.test(\"suggests a fix\", () => pm.expect(pm.response.json().error).to.include(\"Did you mean Chicago, IL\"));"
                 ],
-                "_lastExecutionId": "d358cdfe-7154-421b-a826-e853fbba0609"
+                "_lastExecutionId": "3deb3b93-9489-4315-ae33-97ccec5f3025"
               }
             }
           ]
@@ -161960,7 +161955,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -161997,12 +161992,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "beed5218-3fd0-4691-ad28-fdbb1be6e9fd",
+              "value": "4168d833-57cb-4614-afaf-79b713801e51",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -162033,13 +162028,13 @@
           }
         },
         "response": {
-          "id": "33c3b120-3523-4075-bce9-3bc8f0b89e68",
+          "id": "92892b9b-700d-4895-b07d-60605fa40bd6",
           "status": "Bad Request",
           "code": 400,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:19 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:32 GMT"
             },
             {
               "key": "Server",
@@ -162172,10 +162167,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 12,
+          "responseTime": 14,
           "responseSize": 96
         },
-        "id": "6fc0e07f-b0d8-4883-b96d-6ab095e7588e",
+        "id": "ddd643b6-4ef5-45d6-b4d5-d2f4355e504c",
         "assertions": [
           {
             "assertion": "400",
@@ -162189,15 +162184,15 @@
       },
       {
         "cursor": {
-          "ref": "ecc4e6bb-213d-4265-bb42-70baa46484f9",
+          "ref": "9fb367d3-6440-4b2e-afaf-ae60ec308df5",
           "length": 13,
           "cycles": 1,
           "position": 7,
           "iteration": 0,
-          "httpRequestId": "d5393bfa-84f1-4f40-8a10-f2b7c6769d49"
+          "httpRequestId": "93ecdaaf-2fe3-4fe4-9550-00bb3d63eae9"
         },
         "item": {
-          "id": "d6e331c1-cf12-4a69-96ca-1fca24b36afc",
+          "id": "ab2e986c-60e5-46e3-a90f-b9ce99ecb741",
           "name": "8. Unknown field -> 400",
           "request": {
             "url": {
@@ -162234,12 +162229,12 @@
             {
               "listen": "test",
               "script": {
-                "id": "afb6603b-c25a-4145-a3ac-fc3878f30146",
+                "id": "d05dd361-ee9a-4741-97ee-87ff93c67934",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"400\", () => pm.response.to.have.status(400));"
                 ],
-                "_lastExecutionId": "8cf0e071-a792-40d7-8eba-59a1d0c719d8"
+                "_lastExecutionId": "4b74c8c8-c5b7-4884-969d-7f5635baf478"
               }
             }
           ]
@@ -162247,7 +162242,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -162284,12 +162279,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "403f0a82-b7e0-43cd-8f16-0e7d9c4cde1c",
+              "value": "88f4f1df-953b-43fa-ac82-16142188433c",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -162320,13 +162315,13 @@
           }
         },
         "response": {
-          "id": "6ba2274d-337c-4bc7-b27c-68a56abe6c55",
+          "id": "8bfbc3e3-8ffa-46d8-8d17-b7c8fead8f94",
           "status": "Bad Request",
           "code": 400,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:19 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:32 GMT"
             },
             {
               "key": "Server",
@@ -162502,7 +162497,7 @@
           "responseTime": 2,
           "responseSize": 136
         },
-        "id": "d6e331c1-cf12-4a69-96ca-1fca24b36afc",
+        "id": "ab2e986c-60e5-46e3-a90f-b9ce99ecb741",
         "assertions": [
           {
             "assertion": "400",
@@ -162512,15 +162507,15 @@
       },
       {
         "cursor": {
-          "ref": "05a98403-be50-475b-909c-ad345988d83f",
+          "ref": "df07ae17-c4ed-4dbd-96cd-f7d7ae1252d4",
           "length": 13,
           "cycles": 1,
           "position": 8,
           "iteration": 0,
-          "httpRequestId": "5481e4cb-2353-41e9-8b5c-71947c0a9fef"
+          "httpRequestId": "9fbc59a2-fb33-44d6-bb8e-52adb1aa27ab"
         },
         "item": {
-          "id": "67dd6a20-8f97-4bd8-8987-7049a8a19562",
+          "id": "6dfb6292-3d48-4c09-9e82-695d4e7bced3",
           "name": "Chicago, IL -> Los Angeles, CA",
           "request": {
             "url": {
@@ -162557,7 +162552,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "c3df59d1-2135-4237-b8dc-52946d14d0b0",
+                "id": "4d59dd93-a6a1-43a0-9b09-e877fae0e490",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -162571,7 +162566,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "76cc13bb-3085-40b8-b5d9-330cabe97f71"
+                "_lastExecutionId": "df4a19f1-1f5b-4742-92f3-dd96dd56d7d2"
               }
             }
           ]
@@ -162579,7 +162574,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -162616,12 +162611,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "cac8f842-b396-4d11-bd21-9eab753b1a93",
+              "value": "918b6e47-2a22-427d-8621-11da11a2a29a",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -162652,13 +162647,13 @@
           }
         },
         "response": {
-          "id": "9d0cad36-a533-455c-ba91-7f796d192ab8",
+          "id": "0ad0c57d-55b5-4f01-aa06-c454d62d760c",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:20 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:33 GMT"
             },
             {
               "key": "Server",
@@ -162674,7 +162669,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "17778"
+              "value": "17817"
             },
             {
               "key": "X-Content-Type-Options",
@@ -162733,7 +162728,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -163701,17 +163696,17 @@
               53,
               50,
               57,
+              53,
               49,
               50,
+              54,
+              57,
               53,
-              56,
+              52,
+              55,
+              50,
+              52,
               57,
-              57,
-              49,
-              48,
-              54,
-              49,
-              54,
               48,
               34,
               44,
@@ -168525,15 +168520,15 @@
               34,
               58,
               32,
-              50,
-              53,
-              46,
-              56,
               51,
-              52,
-              55,
+              56,
+              46,
               48,
               57,
+              52,
+              56,
+              50,
+              52,
               44,
               32,
               34,
@@ -168560,15 +168555,10 @@
               34,
               58,
               32,
-              51,
-              55,
+              53,
+              48,
               46,
-              55,
-              51,
-              57,
-              56,
-              56,
-              52,
+              48,
               44,
               32,
               34,
@@ -168607,11 +168597,12 @@
               58,
               32,
               34,
-              56,
-              52,
+              49,
+              50,
+              53,
               46,
-              56,
               48,
+              52,
               34,
               44,
               32,
@@ -168626,24 +168617,21 @@
               58,
               32,
               34,
-              66,
-              111,
-              117,
-              103,
-              104,
-              116,
-              32,
-              106,
-              117,
-              115,
-              116,
-              32,
+              70,
+              105,
+              108,
+              108,
               101,
-              110,
-              111,
-              117,
-              103,
+              100,
+              32,
+              116,
               104,
+              101,
+              32,
+              116,
+              97,
+              110,
+              107,
               32,
               116,
               111,
@@ -169111,9 +169099,15 @@
               34,
               58,
               32,
-              48,
+              49,
+              50,
               46,
+              50,
+              54,
               48,
+              49,
+              49,
+              54,
               44,
               32,
               34,
@@ -169137,15 +169131,15 @@
               34,
               58,
               32,
-              51,
-              48,
+              49,
+              55,
               46,
-              49,
               57,
-              49,
-              56,
-              53,
               51,
+              49,
+              55,
+              51,
+              55,
               44,
               32,
               34,
@@ -169218,11 +169212,11 @@
               58,
               32,
               34,
-              57,
-              57,
+              53,
+              56,
               46,
-              49,
-              48,
+              56,
+              54,
               34,
               44,
               32,
@@ -169359,7 +169353,8 @@
               50,
               49,
               52,
-              51,
+              50,
+              57,
               44,
               32,
               34,
@@ -217573,15 +217568,15 @@
               34,
               58,
               32,
-              50,
-              53,
-              46,
-              56,
               51,
-              52,
-              55,
+              56,
+              46,
               48,
               57,
+              52,
+              56,
+              50,
+              52,
               44,
               32,
               34,
@@ -217608,15 +217603,10 @@
               34,
               58,
               32,
-              51,
-              55,
+              53,
+              48,
               46,
-              55,
-              51,
-              57,
-              56,
-              56,
-              52,
+              48,
               44,
               32,
               34,
@@ -217655,11 +217645,12 @@
               58,
               32,
               34,
-              56,
-              52,
+              49,
+              50,
+              53,
               46,
-              56,
               48,
+              52,
               34,
               44,
               32,
@@ -217674,24 +217665,21 @@
               58,
               32,
               34,
-              66,
-              111,
-              117,
-              103,
-              104,
-              116,
-              32,
-              106,
-              117,
-              115,
-              116,
-              32,
+              70,
+              105,
+              108,
+              108,
               101,
-              110,
-              111,
-              117,
-              103,
+              100,
+              32,
+              116,
               104,
+              101,
+              32,
+              116,
+              97,
+              110,
+              107,
               32,
               116,
               111,
@@ -218307,9 +218295,15 @@
               34,
               58,
               32,
-              48,
+              49,
+              50,
               46,
+              50,
+              54,
               48,
+              49,
+              49,
+              54,
               44,
               32,
               34,
@@ -218333,15 +218327,15 @@
               34,
               58,
               32,
-              51,
-              48,
+              49,
+              55,
               46,
-              49,
               57,
-              49,
-              56,
-              53,
               51,
+              49,
+              55,
+              51,
+              55,
               44,
               32,
               34,
@@ -218414,11 +218408,11 @@
               58,
               32,
               34,
-              57,
-              57,
+              53,
+              56,
               46,
-              49,
-              48,
+              56,
+              54,
               34,
               44,
               32,
@@ -220053,11 +220047,11 @@
               58,
               32,
               49,
-              51,
-              52,
-              52,
+              53,
+              57,
+              54,
               46,
-              50,
+              53,
               44,
               32,
               34,
@@ -220091,10 +220085,9 @@
               58,
               32,
               49,
-              54,
-              55,
+              52,
               46,
-              51,
+              53,
               44,
               32,
               34,
@@ -220150,11 +220143,11 @@
               58,
               32,
               49,
-              53,
+              54,
               49,
               49,
               46,
-              55,
+              49,
               125,
               44,
               32,
@@ -220183,10 +220176,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 1518,
-          "responseSize": 57480
+          "responseTime": 1617,
+          "responseSize": 57478
         },
-        "id": "67dd6a20-8f97-4bd8-8987-7049a8a19562",
+        "id": "6dfb6292-3d48-4c09-9e82-695d4e7bced3",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -220224,15 +220217,15 @@
       },
       {
         "cursor": {
-          "ref": "f4fa7b2b-d116-45c2-ad20-5064d9c52f63",
+          "ref": "fc836577-8a32-4a13-a2ec-4c01df60be9f",
           "length": 13,
           "cycles": 1,
           "position": 9,
           "iteration": 0,
-          "httpRequestId": "f22271c4-b611-4153-883f-49ec0859b7db"
+          "httpRequestId": "8f6ce09d-6c67-485c-a964-148e6959e4ea"
         },
         "item": {
-          "id": "8d836d44-f53e-42d4-a273-c7e08e518183",
+          "id": "0e347865-e6c2-414b-9f47-f28a2aef6101",
           "name": "Seattle, WA -> Boston, MA",
           "request": {
             "url": {
@@ -220269,7 +220262,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "fc2cc4ba-7710-48a4-b5e4-ff5dc554b20c",
+                "id": "31aaafe4-2fd6-43eb-a9ce-4d8b468a817e",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -220283,7 +220276,7 @@
                   "console.log(`${d.distance_miles} mi, $${d.total_cost_usd}, ${d.fuel_stops.length} stops, ${d.metadata.timing_ms.total} ms, map: ${d.map_url}`);",
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));"
                 ],
-                "_lastExecutionId": "e18fda65-9115-4c96-9a8a-d8bc6aa8d6ec"
+                "_lastExecutionId": "d600c9f2-fe27-4048-a1d0-cd5c670bf326"
               }
             }
           ]
@@ -220291,7 +220284,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -220328,12 +220321,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "bc408b6a-5d91-4286-8793-493241cf4942",
+              "value": "f14f840f-f58a-4843-a4a1-15efb373c6e8",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -220364,13 +220357,13 @@
           }
         },
         "response": {
-          "id": "ca20a0ea-8dcd-42a2-b040-45783c169399",
+          "id": "3ac556aa-9bf3-41dd-9b6b-ed860491b764",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:21 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:34 GMT"
             },
             {
               "key": "Server",
@@ -220386,7 +220379,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "27256"
+              "value": "27259"
             },
             {
               "key": "X-Content-Type-Options",
@@ -220445,7 +220438,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -221413,16 +221406,16 @@
               57,
               53,
               48,
-              49,
-              52,
-              54,
               50,
-              54,
-              48,
-              56,
-              53,
+              57,
+              52,
+              55,
               50,
               55,
+              53,
+              49,
+              57,
+              52,
               34,
               44,
               32,
@@ -308261,11 +308254,12 @@
               34,
               58,
               32,
-              56,
-              50,
-              53,
-              46,
               49,
+              48,
+              48,
+              51,
+              46,
+              51,
               44,
               32,
               34,
@@ -308298,9 +308292,8 @@
               34,
               58,
               32,
-              49,
-              57,
-              56,
+              50,
+              48,
               46,
               52,
               44,
@@ -308362,7 +308355,7 @@
               50,
               51,
               46,
-              55,
+              57,
               125,
               44,
               32,
@@ -308391,10 +308384,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 1030,
+          "responseTime": 1031,
           "responseSize": 87976
         },
-        "id": "8d836d44-f53e-42d4-a273-c7e08e518183",
+        "id": "0e347865-e6c2-414b-9f47-f28a2aef6101",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -308432,15 +308425,15 @@
       },
       {
         "cursor": {
-          "ref": "d7f68c89-5835-4e06-ac21-0b67746e448d",
+          "ref": "64e0ce3d-d2d1-437e-8232-be311ef4d89b",
           "length": 13,
           "cycles": 1,
           "position": 10,
           "iteration": 0,
-          "httpRequestId": "0ce28d99-d884-4123-9f1b-fbe20ca8f50b"
+          "httpRequestId": "b973b247-96bf-4ca1-93de-0dffcd8d0b30"
         },
         "item": {
-          "id": "7bfc2c3d-5226-46be-90c9-1d1a8f39ff57",
+          "id": "9cb1a662-bc30-43f1-9d6b-8e3ac5ad9db8",
           "name": "Chicago -> Houston (Texas: city-centre stations, 1 routing call)",
           "request": {
             "url": {
@@ -308477,7 +308470,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "fc8ae6ab-e8a5-4c31-830a-cc943a0d7ee0",
+                "id": "be5bb755-4d59-4eec-ad0d-ef76fe43e931",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -308491,7 +308484,7 @@
                   "pm.test(\"fuel balance reconciles\", () => pm.expect(d.initial_fuel_gallons + d.fuel_purchased_gallons).to.be.closeTo(d.fuel_burned_gallons + d.remaining_gallons, 0.02));",
                   "pm.test(\"at most 1 routing call (0 when cached)\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(1));"
                 ],
-                "_lastExecutionId": "df903b7e-75aa-45dc-9d62-5bc8d4d76202"
+                "_lastExecutionId": "7aba3eef-3c4e-48b4-9749-595c0b237d6e"
               }
             }
           ]
@@ -308499,7 +308492,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -308536,12 +308529,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "92a19eb8-9125-4bec-8700-a517a02ae32b",
+              "value": "b490c95e-398a-4db1-89f8-5188ce093cb5",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -308572,13 +308565,13 @@
           }
         },
         "response": {
-          "id": "82e861d5-7245-4280-a812-6c82ac712bdb",
+          "id": "d206e8be-5867-44c2-b776-eb416abccc98",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:22 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:35 GMT"
             },
             {
               "key": "Server",
@@ -308594,7 +308587,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "8232"
+              "value": "8160"
             },
             {
               "key": "X-Content-Type-Options",
@@ -308653,7 +308646,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -309607,17 +309600,17 @@
               56,
               49,
               50,
-              53,
-              49,
-              55,
-              57,
               54,
+              48,
+              49,
+              48,
+              55,
               49,
               50,
-              53,
-              54,
-              55,
+              57,
               48,
+              48,
+              53,
               48,
               34,
               44,
@@ -335594,10 +335587,10 @@
               58,
               32,
               51,
-              57,
-              51,
+              48,
+              50,
               46,
-              53,
+              54,
               44,
               32,
               34,
@@ -335630,11 +335623,9 @@
               34,
               58,
               32,
-              49,
-              49,
-              54,
+              53,
               46,
-              54,
+              55,
               44,
               32,
               34,
@@ -335689,11 +335680,11 @@
               34,
               58,
               32,
-              53,
-              49,
-              48,
-              46,
               51,
+              48,
+              56,
+              46,
+              53,
               125,
               44,
               32,
@@ -335722,10 +335713,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 514,
-          "responseSize": 27099
+          "responseTime": 311,
+          "responseSize": 27097
         },
-        "id": "7bfc2c3d-5226-46be-90c9-1d1a8f39ff57",
+        "id": "9cb1a662-bc30-43f1-9d6b-8e3ac5ad9db8",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -335763,15 +335754,15 @@
       },
       {
         "cursor": {
-          "ref": "41e1c86a-1e3f-46e2-8862-b9839a891165",
+          "ref": "8743461c-c34e-438e-9f5b-3b6526c6b021",
           "length": 13,
           "cycles": 1,
           "position": 11,
           "iteration": 0,
-          "httpRequestId": "1c7f0673-9ec6-42ea-b0e9-445c8d4a2ca3"
+          "httpRequestId": "79e460c0-c86f-4d29-9ccc-45765ffcbd08"
         },
         "item": {
-          "id": "4e6b21dc-961d-495a-b778-df08e63542aa",
+          "id": "ac808ebb-25c3-4537-85c4-2eac6f4324d5",
           "name": "Dallas -> Denver with verify_stops (road-routed through every stop)",
           "request": {
             "url": {
@@ -335808,7 +335799,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "6f63fbce-bf52-4e6f-b7d1-7df8b2c20a52",
+                "id": "3b22f56f-c069-449a-9c30-777ddb8910f8",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
@@ -335823,7 +335814,7 @@
                   "pm.test(\"stops routed by road\", () => pm.expect(d.metadata.itinerary_routed).to.eql(true));",
                   "pm.test(\"at most 3 routing calls\", () => pm.expect(d.metadata.routing_calls).to.be.at.most(3));"
                 ],
-                "_lastExecutionId": "c5ddabe2-224f-478f-8189-73403e2046fd"
+                "_lastExecutionId": "fb09db75-020f-422a-a38a-769f8235e721"
               }
             }
           ]
@@ -335831,7 +335822,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -335868,12 +335859,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "9b9d0080-6f35-4864-8360-eca3e4c9cbce",
+              "value": "6d591a1e-b299-47e3-9eb5-02dac038a6b4",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -335904,13 +335895,13 @@
           }
         },
         "response": {
-          "id": "bad8c5bd-f4b0-41ff-8cf1-27145a6c3337",
+          "id": "040b22cf-3f29-4563-a8d9-15562f7c9cf7",
           "status": "OK",
           "code": 200,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:24 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:37 GMT"
             },
             {
               "key": "Server",
@@ -335926,7 +335917,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "7025"
+              "value": "7033"
             },
             {
               "key": "X-Content-Type-Options",
@@ -335985,7 +335976,7 @@
               56,
               55,
               54,
-              55,
+              56,
               47,
               109,
               97,
@@ -336712,11 +336703,11 @@
               54,
               57,
               49,
-              55,
-              51,
+              54,
+              50,
+              50,
               56,
-              55,
-              57,
+              51,
               52,
               54,
               57,
@@ -359107,12 +359098,11 @@
               34,
               58,
               32,
-              49,
-              48,
-              50,
-              56,
-              46,
               57,
+              57,
+              48,
+              46,
+              49,
               44,
               32,
               34,
@@ -359145,11 +359135,9 @@
               34,
               58,
               32,
-              49,
               53,
-              51,
               46,
-              48,
+              49,
               44,
               32,
               34,
@@ -359173,11 +359161,12 @@
               34,
               58,
               32,
-              56,
-              55,
-              52,
+              49,
+              50,
+              50,
+              50,
               46,
-              53,
+              57,
               44,
               32,
               34,
@@ -359192,9 +359181,9 @@
               34,
               58,
               32,
-              57,
+              48,
               46,
-              52,
+              57,
               44,
               32,
               34,
@@ -359207,11 +359196,11 @@
               58,
               32,
               50,
-              48,
-              54,
-              53,
-              46,
+              50,
+              49,
               57,
+              46,
+              49,
               125,
               44,
               32,
@@ -359240,10 +359229,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 2068,
-          "responseSize": 23285
+          "responseTime": 2222,
+          "responseSize": 23283
         },
-        "id": "4e6b21dc-961d-495a-b778-df08e63542aa",
+        "id": "ac808ebb-25c3-4537-85c4-2eac6f4324d5",
         "assertions": [
           {
             "assertion": "200 OK",
@@ -359285,15 +359274,15 @@
       },
       {
         "cursor": {
-          "ref": "63bf7df2-d1fb-4cc9-9dc4-a6f69e579c34",
+          "ref": "3e851919-6ab3-4126-9e06-ce390437d22b",
           "length": 13,
           "cycles": 1,
           "position": 12,
           "iteration": 0,
-          "httpRequestId": "feba2b71-4013-4bee-bb0a-35b50aa1ffd8"
+          "httpRequestId": "a3615b39-f494-4dba-9f78-f7956109dbb9"
         },
         "item": {
-          "id": "6226ce59-125e-4d4a-8511-91d6bf3a6727",
+          "id": "adab3715-dde0-402f-94b4-d7a16c17c302",
           "name": "San Francisco -> Las Vegas -> 422 names the gap in the supplied price list",
           "request": {
             "url": {
@@ -359330,13 +359319,13 @@
             {
               "listen": "test",
               "script": {
-                "id": "0b9f711c-3272-47eb-875e-0010909be799",
+                "id": "06923663-b053-4387-9c86-4aabd3971d06",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"422\", () => pm.response.to.have.status(422));",
                   "pm.test(\"explains where coverage is missing\", () => pm.expect(pm.response.json().error).to.include(\"-mile gap\"));"
                 ],
-                "_lastExecutionId": "6cbbcaa0-03d6-4484-a1c9-68e94069559d"
+                "_lastExecutionId": "adcb83ec-b967-457d-9fef-d140700c9ade"
               }
             }
           ]
@@ -359344,7 +359333,7 @@
         "request": {
           "url": {
             "protocol": "http",
-            "port": "8767",
+            "port": "8768",
             "path": [
               "api",
               "route",
@@ -359381,12 +359370,12 @@
             },
             {
               "key": "Postman-Token",
-              "value": "c94ce4a4-2741-4dc1-a75b-f9fedb5161b6",
+              "value": "70e65c09-788f-4990-aa93-86d6f31ffb38",
               "system": true
             },
             {
               "key": "Host",
-              "value": "127.0.0.1:8767",
+              "value": "127.0.0.1:8768",
               "system": true
             },
             {
@@ -359417,13 +359406,13 @@
           }
         },
         "response": {
-          "id": "b70ce939-16ad-4744-9018-c68e253616d8",
+          "id": "f0696fcd-cdeb-4f3d-87e4-70154d0a93cf",
           "status": "Unprocessable Content",
           "code": 422,
           "header": [
             {
               "key": "Date",
-              "value": "Thu, 12 Nov 2026 23:36:25 GMT"
+              "value": "Fri, 13 Nov 2026 09:04:38 GMT"
             },
             {
               "key": "Server",
@@ -359439,7 +359428,7 @@
             },
             {
               "key": "Content-Length",
-              "value": "195"
+              "value": "196"
             },
             {
               "key": "X-Content-Type-Options",
@@ -359695,10 +359684,10 @@
             ]
           },
           "cookie": [],
-          "responseTime": 964,
+          "responseTime": 759,
           "responseSize": 227
         },
-        "id": "6226ce59-125e-4d4a-8511-91d6bf3a6727",
+        "id": "adab3715-dde0-402f-94b4-d7a16c17c302",
         "assertions": [
           {
             "assertion": "422",
@@ -359712,7 +359701,7 @@
       }
     ],
     "transfers": {
-      "responseTotal": 111242
+      "responseTotal": 111094
     },
     "failures": [],
     "error": null

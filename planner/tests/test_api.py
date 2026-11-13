@@ -131,15 +131,6 @@ class APITests(SimpleTestCase):
         response = post(self.client, {"start": "Chicago, IL", "finish": "New York, NY"})
         self.assertEqual((response.status_code, response.json()["code"]), (422, "insufficient_station_coverage"))
 
-    @patch("planner.views.plan_trip")
-    def test_optimizer_timeout_is_a_503_with_its_own_code(self, plan):
-        from planner.optimizer import OptimizationTimeout
-
-        plan.side_effect = OptimizationTimeout("Fuel optimization did not finish in time.")
-        response = post(self.client, {"start": "Chicago, IL", "finish": "Milwaukee, WI"})
-        self.assertEqual(response.status_code, 503)
-        self.assertEqual(response.json()["code"], "optimization_timeout")
-
     def test_map_page_and_health(self):
         self.assertContains(self.client.get("/map/?start=Chicago%2C+IL&finish=Denver%2C+CO"), "leaflet")
         self.assertEqual(self.client.get("/health/").json(), {"status": "ok"})

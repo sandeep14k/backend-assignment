@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods
 
 from planner.geocoding import resolve_pair
-from planner.optimizer import CAPACITY_GALLONS, InfeasibleRoute, OptimizationTimeout
+from planner.optimizer import CAPACITY_GALLONS, InfeasibleRoute
 from planner.routing import NoRoute, RoutingError
 from planner.services import plan_trip
 
@@ -99,8 +99,6 @@ def route(request):
         return _error(str(exc), 422, "insufficient_station_coverage")
     except NoRoute as exc:
         return _error(str(exc), 422, "no_route")
-    except OptimizationTimeout as exc:
-        return _error(str(exc), 503, "optimization_timeout")
     except RoutingError as exc:
         return _error(str(exc), 503, "routing_unavailable")
 

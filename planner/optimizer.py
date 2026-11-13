@@ -5,19 +5,18 @@ Vehicle (from the brief): 500-mile range at 10 MPG, i.e. a 50-gallon tank.
 Model: the route is fixed; each candidate station sits ``offset`` straight-line
 miles off it, reached by a detour of ``offset * ROAD_FACTOR`` road miles each
 way. Visiting a station is optional and costs its detour fuel; the tank must
-never be below 0 on arriving at a pump or above 50 on leaving it. A
-mixed-integer program chooses which stations to visit and how much to buy at
-each, minimizing the money spent plus STOP_WEIGHT per stop. Detours are
-estimates; with ``verify_stops`` the chosen stations are routed by road and,
-now zero-offset, get exact greedy purchases on the fixed itinerary.
+never be below 0 on arriving at a pump or above 50 on leaving it. An exact
+dynamic program (``_solve_dp``) chooses which stations to visit and how much
+to buy at each, minimizing the money spent plus STOP_WEIGHT per stop, in a few
+milliseconds. The test suite checks it against a mixed-integer program
+(``planner/tests/milp_oracle.py``). Stations on the route itself (no detours,
+as after ``verify_stops`` road routing) use an O(n) greedy instead.
 """
 
 from decimal import ROUND_HALF_UP, Decimal
 from itertools import chain
 
 import numpy as np
-from scipy.optimize import Bounds, LinearConstraint, milp  # Imported at startup: ~0.15 s.
-from scipy.sparse import coo_matrix
 
 from planner.geo import to_xyz
 
@@ -27,7 +26,6 @@ CAPACITY_GALLONS = RANGE_MILES / MPG
 ROAD_FACTOR = 1.3  # Road miles per straight-line mile for a short detour (typical US circuity is 1.2-1.4).
 # A station placed at its interstate exit (planner.exits) is still a short drive off the ramp.
 EXIT_ACCESS_MILES = 0.5
-SOLVER_SECONDS = 5.0
 # Each stop costs the driver time, so it must save at least this much fuel money to be worth making.
 # Without it the cheapest plan adds stops that save a few cents (e.g. 6 stops instead of 4 from Chicago to
 # Houston, for $0.53). It only steers the choice of stops; reported costs are real fuel money, and the plan
@@ -37,10 +35,6 @@ EPSILON = 1e-7
 
 
 class InfeasibleRoute(Exception):
-    pass
-
-
-class OptimizationTimeout(Exception):
     pass
 
 
@@ -197,66 +191,95 @@ def _solve_on_route(miles, prices, distance, initial):
     return purchases, purchases > EPSILON, road
 
 
-def _solve_milp(miles, detours, prices, distance, initial):
-    """Solve the visit-and-purchase MILP. Returns (purchases, visits, road fuel at each station and the end).
+def _solve_dp(miles, detours, prices, distance, initial):
+    """Exact minimum of fuel cost + STOP_WEIGHT per stop, by dynamic programming.
 
-    Variables per station i: purchase q, binary visit z, road fuel f (before the
-    station); f[n] is the fuel left at the destination. With one-way detour fuel
-    e and road gap g to the next station (or the destination):
-      f[0] = initial - miles[0]/MPG
-      f[i+1] = f[i] + q[i] - 2 e[i] z[i] - g[i]      (fuel balance)
-      q[i] <= 50 z[i]                               (buy only where you stop)
-      f[i] - e[i] z[i] >= 0                         (never empty on arrival at the pump)
-      f[i] - e[i] z[i] + q[i] <= 50                 (never over 50 when leaving it)
-    Objective: sum price x q (+ STOP_WEIGHT per stop as a tie-break).
+    In some optimal plan every stop either fills the tank or buys just enough to
+    reach the next stop empty (Khuller, Malekian & Mestre, "To fill or not to
+    fill", 2011): any other purchase can be shifted to a cheaper stop, and a stop
+    that buys nothing would only cost its detour. So fuel on arriving at a pump is
+    0, the starting fuel less the drive from the start, or 50 gallons less the
+    drive from an earlier stop that filled up. The states are (stop, arrival fuel),
+    and only stops within one tank of each other connect: about n x 70 x 70
+    operations for a coast-to-coast route, vectorized per stop.
+
+    Returns (purchases, visits, road fuel before each station and at the end).
     """
-    n = len(miles)
-    q, z, f = np.arange(n), n + np.arange(n), 2 * n + np.arange(n)
-    gaps = (np.append(miles[1:], distance) - miles) / MPG
-    ones, inf = np.ones(n), np.full(n, np.inf)
-    families = [  # (columns, coefficients, lower, upper): n rows each
-        ([f + 1, f, q, z], [ones, -ones, -ones, 2 * detours], -gaps, -gaps),
-        ([q, z], [ones, np.full(n, -CAPACITY_GALLONS)], -inf, np.zeros(n)),
-        ([f, z], [ones, -detours], np.zeros(n), inf),
-        ([f, q, z], [ones, ones, -detours], -inf, np.full(n, CAPACITY_GALLONS)),
-    ]
-    rows, cols, values, lower, upper = [], [], [], [], []
-    for family, (columns, coefficients, lo, hi) in enumerate(families):
-        for column, coefficient in zip(columns, coefficients, strict=True):
-            rows.append(family * n + np.arange(n))
-            cols.append(column)
-            values.append(coefficient)
-        lower.append(lo)
-        upper.append(hi)
-    start = initial - miles[0] / MPG
-    rows.append(np.array([4 * n]))
-    cols.append(np.array([f[0]]))
-    values.append(np.ones(1))
-    lower.append(np.array([start]))
-    upper.append(np.array([start]))
-    matrix = coo_matrix(
-        (np.concatenate(values), (np.concatenate(rows), np.concatenate(cols))), shape=(4 * n + 1, 3 * n + 1)
-    )
+    n, cap = len(miles), CAPACITY_GALLONS
+    to_end = (distance - miles) / MPG + detours  # Pump -> destination.
+    reach = np.searchsorted(miles, miles + cap * MPG, side="right")  # Stations at most one tank ahead.
+    fuel = [[] for _ in range(n)]  # Arrival fuel of each state at each pump.
+    cost = [[] for _ in range(n)]
+    back = [[] for _ in range(n)]  # (previous stop, its state, how it bought, this stop) or None (from the start).
+    empty_cost, empty_back = np.full(n, np.inf), [None] * n  # Best way to arrive empty, merged into one state.
 
-    objective = np.concatenate([prices, np.full(n, STOP_WEIGHT), np.zeros(n + 1)])
-    upper_bounds = np.concatenate([np.full(n, CAPACITY_GALLONS), ones, np.full(n + 1, CAPACITY_GALLONS)])
-    integrality = np.concatenate([np.zeros(n), ones, np.zeros(n + 1)])
-    result = milp(
-        objective,
-        integrality=integrality,
-        bounds=Bounds(np.zeros(3 * n + 1), upper_bounds),
-        constraints=LinearConstraint(matrix.tocsr(), np.concatenate(lower), np.concatenate(upper)),
-        options={"time_limit": SOLVER_SECONDS, "mip_rel_gap": 0.0},
-    )
-    if result.status == 2:
+    from_start = initial - (miles / MPG + detours)
+    for v in np.flatnonzero(from_start >= -EPSILON):
+        fuel[v].append(max(0.0, from_start[v]))
+        cost[v].append(0.0)
+        back[v].append(None)
+    best = (0.0, None) if initial + EPSILON >= distance / MPG else (np.inf, None)
+
+    for u in range(n):
+        if np.isfinite(empty_cost[u]):
+            fuel[u].append(0.0)
+            cost[u].append(empty_cost[u])
+            back[u].append(empty_back[u])
+        if not fuel[u]:
+            continue
+        g, c, price = np.array(fuel[u]), np.array(cost[u]), prices[u]
+        fuel[u], cost[u] = g, c
+        if to_end[u] <= cap + EPSILON:  # Finish from here: buy just enough.
+            finish = c + price * np.maximum(0.0, to_end[u] - g) + STOP_WEIGHT
+            k = int(np.argmin(finish))
+            if finish[k] < best[0]:
+                best = (finish[k], (u, k, "finish", None))
+        targets = np.arange(u + 1, reach[u])
+        need = detours[u] + (miles[targets] - miles[u]) / MPG + detours[targets]  # Pump u -> pump v.
+        targets, need = targets[need <= cap + EPSILON], need[need <= cap + EPSILON]
+        if not targets.size:
+            continue
+        fill = c + price * (cap - g) + STOP_WEIGHT  # Fill up: arrive at v with cap - need.
+        k_fill = int(np.argmin(fill))
+        for v, used in zip(targets.tolist(), need.tolist(), strict=True):
+            fuel[v].append(max(0.0, cap - used))
+            cost[v].append(fill[k_fill])
+            back[v].append((u, k_fill, "fill", v))
+        # Buy just enough to arrive at v empty (only from states holding no more than that).
+        just = c[:, None] + price * (need[None, :] - g[:, None]) + STOP_WEIGHT
+        just[g[:, None] > need[None, :] + EPSILON] = np.inf
+        k_just = np.argmin(just, axis=0)
+        value = just[k_just, np.arange(targets.size)]
+        better = value < empty_cost[targets]
+        for v, k, amount in zip(targets[better].tolist(), k_just[better].tolist(), value[better].tolist(), strict=True):
+            empty_cost[v], empty_back[v] = amount, (u, k, "just", v)
+
+    if not np.isfinite(best[0]):
         raise InfeasibleRoute(
             "No drivable fuel plan: somewhere on the route the next station is beyond the 500-mile range. "
             "Try a larger corridor_miles."
         )
-    if not result.success:
-        raise OptimizationTimeout("Fuel optimization did not finish in time; please retry with a smaller corridor.")
-    x = result.x
-    return np.maximum(x[:n], 0.0), x[n : 2 * n] > 0.5, x[2 * n :]
+    purchases, visits = np.zeros(n), np.zeros(n, dtype=bool)
+    step = best[1]
+    while step is not None:
+        u, k, kind, v = step
+        arrival = fuel[u][k]
+        if kind == "finish":
+            purchases[u] = max(0.0, to_end[u] - arrival)
+        elif kind == "fill":
+            purchases[u] = cap - arrival
+        else:
+            purchases[u] = max(0.0, detours[u] + (miles[v] - miles[u]) / MPG + detours[v] - arrival)
+        visits[u] = True
+        step = back[u][k]
+    road, tank, position = np.zeros(n + 1), initial, 0.0
+    for i in range(n):
+        tank -= (miles[i] - position) / MPG
+        road[i], position = tank, miles[i]
+        if visits[i]:
+            tank += purchases[i] - 2 * detours[i]
+    road[n] = tank - (distance - position) / MPG
+    return purchases, visits, road
 
 
 def optimize(stations, distance_miles, initial_gallons=None):
@@ -289,7 +312,7 @@ def optimize(stations, distance_miles, initial_gallons=None):
                 + " Omit initial_fuel_gallons to start with just enough."
             )
         if np.any(detours):
-            purchases, visits, road = _solve_milp(miles, detours, prices, distance_miles, initial)
+            purchases, visits, road = _solve_dp(miles, detours, prices, distance_miles, initial)
         else:
             purchases, visits, road = _solve_on_route(miles, prices, distance_miles, initial)
 
