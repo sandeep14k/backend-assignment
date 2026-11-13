@@ -1,0 +1,24 @@
+{
+  "network": false,
+  "fixture": "ny_miami.json",
+  "measurements": {
+    "cached_route_fresh_plan": {
+      "samples": 30,
+      "median_ms": 141.467,
+      "p95_ms": 145.028,
+      "max_ms": 149.429,
+      "response_bytes": 32119,
+      "routing_calls": 0,
+      "failures": 0
+    },
+    "cached_response": {
+      "samples": 30,
+      "median_ms": 0.629,
+      "p95_ms": 0.679,
+      "max_ms": 0.792,
+      "response_bytes": 32114,
+      "routing_calls": 0,
+      "failures": 0
+    }
+  }
+}

@@ -12,6 +12,8 @@ from planner.tests.helpers import osrm_response
 
 LINE = [(-87.6, 41.9), (-87.75, 42.4), (-87.9, 43.0)]
 
+SOURCED = {"coordinate_precision": "osm_identity_match", "coordinate_source": "https://www.openstreetmap.org/node/1"}
+
 
 @override_settings(OSRM_URLS=["https://primary.test", "https://mirror.test"], OSRM_HEDGE_AFTER_SECONDS=0.2)
 @patch("planner.routing._session.get")
@@ -43,7 +45,7 @@ class RoutingTests(SimpleTestCase):
         self.assertEqual(fetch_route(self.start, self.finish)[1], 2)
         self.assertTrue(get.call_args_list[1].args[0].startswith("https://mirror.test"))
 
-    def test_slow_primary_is_hedged_and_fastest_answer_wins(self, get):
+    def test_slow_primary_preserves_repair_allowance(self, get):
         def respond(url, **kwargs):
             if url.startswith("https://primary.test"):
                 time.sleep(1.0)
@@ -52,8 +54,8 @@ class RoutingTests(SimpleTestCase):
         get.side_effect = respond
         started = time.perf_counter()
         route, calls, _ = fetch_route(self.start, self.finish)
-        self.assertLess(time.perf_counter() - started, 0.8)  # Did not wait for the slow primary.
-        self.assertEqual(calls, 2)
+        self.assertGreaterEqual(time.perf_counter() - started, 1.0)
+        self.assertEqual(calls, 1)
 
     def test_all_providers_down(self, get):
         get.side_effect = requests.Timeout("slow")
@@ -89,3 +91,105 @@ class RoutingTests(SimpleTestCase):
         self.assertEqual(len(results), 8)
         self.assertEqual(get.call_count, 1)
         self.assertEqual(sum(calls for _, calls, _ in results), 1)
+
+    def test_invalid_geometry_falls_back(self, get):
+        invalid = osrm_response(LINE, 148000)
+        invalid.json.return_value["routes"][0]["geometry"] = "_"
+        get.side_effect = [invalid, osrm_response(LINE, 148000)]
+        self.assertEqual(fetch_route(self.start, self.finish)[1], 2)
+
+    def test_invalid_distance_fails_as_provider_error(self, get):
+        for distance in [float("nan"), float("inf"), -1]:
+            get.return_value = osrm_response(LINE, distance)
+            with self.assertRaises(RoutingError):
+                fetch_route(self.start, self.finish)
+
+    @override_settings(OSRM_URLS=[])
+    def test_empty_configuration_is_controlled_error(self, get):
+        with self.assertRaises(RoutingError):
+            fetch_route(self.start, self.finish)
+        get.assert_not_called()
+
+    @override_settings(OSRM_URLS=["https://one.test", "https://two.test", "https://three.test"])
+    def test_call_budget_even_with_extra_urls(self, get):
+        get.side_effect = requests.Timeout("down")
+        with self.assertRaises(RoutingError):
+            fetch_route(self.start, self.finish)
+        self.assertEqual(get.call_count, 2)
+
+    def test_changed_route_gets_new_derived_cache_key(self, get):
+        get.return_value = osrm_response(LINE, 148000)
+        first = fetch_route(self.start, self.finish)[0]
+        cache.clear()
+        get.return_value = osrm_response(LINE, 149000)
+        second = fetch_route(self.start, self.finish)[0]
+        self.assertNotEqual(first["cache_key"], second["cache_key"])
+
+    def test_itinerary_requires_leg_and_snap_evidence(self, get):
+        from planner.routing import fetch_itinerary
+
+        sourced = {**self.start, **SOURCED}
+
+        response = osrm_response(LINE, 148000)
+        get.return_value = response
+        with self.assertRaises(RoutingError):
+            fetch_itinerary(self.start, self.finish, [sourced])
+        self.assertEqual(get.call_count, 1)
+        payload = response.json.return_value
+        payload["routes"][0]["legs"] = [{"distance": 0}, {"distance": 148000}]
+        payload["waypoints"] = [{"distance": 0}, {"distance": 10}, {"distance": 0}]
+        route, calls, _ = fetch_itinerary(self.start, self.finish, [sourced])
+        self.assertEqual(calls, 1)
+        self.assertEqual(route["station_snap_metres"], [10])
+        self.assertEqual(fetch_itinerary(self.start, self.finish, [sourced])[1], 0)
+        self.assertEqual(get.call_args.kwargs["params"]["radiuses"], "unlimited;100;unlimited")
+
+    def test_itinerary_rejects_remote_road_snap(self, get):
+        from planner.routing import fetch_itinerary
+
+        response = osrm_response(LINE, 148000)
+        response.json.return_value["routes"][0]["legs"] = [{"distance": 0}, {"distance": 148000}]
+        response.json.return_value["waypoints"] = [{"distance": 0}, {"distance": 200}, {"distance": 0}]
+        get.return_value = response
+        with self.assertRaises(NoRoute):
+            fetch_itinerary(self.start, self.finish, [{**self.start, **SOURCED}])
+
+    def test_exit_stops_snap_to_the_carriageway_in_the_direction_of_travel(self, get):
+        from planner.routing import fetch_itinerary
+
+        response = osrm_response(LINE, 148000)
+        response.json.return_value["routes"][0]["legs"] = [{"distance": 0}, {"distance": 148000}]
+        response.json.return_value["waypoints"] = [{"distance": 0}, {"distance": 5}, {"distance": 0}]
+        get.return_value = response
+        on_exit = {**self.start, "coordinate_precision": "exit_match", "coordinate_source": "", "heading": 271.6}
+        fetch_itinerary(self.start, self.finish, [on_exit])
+        self.assertEqual(get.call_args.kwargs["params"]["bearings"], ";272,60;")
+        fetch_itinerary(self.start, self.finish, [{**on_exit, "heading": None}])
+        self.assertNotIn("bearings", get.call_args.kwargs["params"])
+
+    def test_city_centroid_stations_snap_to_nearest_road_at_any_distance(self, get):
+        from planner.routing import fetch_itinerary
+
+        response = osrm_response(LINE, 148000)
+        response.json.return_value["routes"][0]["legs"] = [{"distance": 0}, {"distance": 148000}]
+        response.json.return_value["waypoints"] = [{"distance": 0}, {"distance": 900}, {"distance": 0}]
+        get.return_value = response
+        centroid = {**self.start, "coordinate_precision": "city_centroid", "coordinate_source": ""}
+        route, _, _ = fetch_itinerary(self.start, self.finish, [centroid])
+        self.assertEqual(route["station_snap_metres"], [900])
+        self.assertEqual(get.call_args.kwargs["params"]["radiuses"], "unlimited;unlimited;unlimited")
+
+    def test_public_requests_are_paced_without_delaying_private_servers(self, get):
+        from planner.routing import _pace_public_provider
+
+        with (
+            patch("planner.routing._public_last_request", {}),
+            patch("planner.routing.time.monotonic", return_value=100),
+            patch("planner.routing.time.sleep") as sleep,
+        ):
+            _pace_public_provider("https://router.project-osrm.org")
+            sleep.assert_not_called()
+            _pace_public_provider("https://router.project-osrm.org")
+            sleep.assert_called_once_with(1.0)
+            _pace_public_provider("https://private.test")
+            sleep.assert_called_once()

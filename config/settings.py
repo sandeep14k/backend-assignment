@@ -41,8 +41,8 @@ CACHES = {
 }
 ROUTE_CACHE_SECONDS = int(os.environ.get("ROUTE_CACHE_SECONDS", 7 * 24 * 3600))
 
-# Free, keyless OSRM servers: the primary, then an independent mirror used only if the primary
-# fails or is slower than OSRM_HEDGE_AFTER_SECONDS. See README "Choosing the routing API".
+# Free, keyless OSRM servers: the primary, then a compatible mirror used only if the primary
+# fails. Sequential attempts preserve the repair allowance.
 OSRM_URLS = [
     url.strip().rstrip("/")
     for url in os.environ.get(
@@ -50,15 +50,16 @@ OSRM_URLS = [
     ).split(",")
     if url.strip()
 ]
-OSRM_HEDGE_AFTER_SECONDS = float(os.environ.get("OSRM_HEDGE_AFTER_SECONDS", 1.5))
 OSRM_CONNECT_TIMEOUT = 3.05
 OSRM_READ_TIMEOUT = 15
 # Street addresses only (cities and coordinates resolve offline).
 GEOCODER_URL = os.environ.get("GEOCODER_URL", "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress")
 
-# Keep HTTPS connections to OSRM open (HEAD / every 45 s) while the API was used in the last 15 minutes.
-OSRM_KEEP_WARM_SECONDS = int(os.environ.get("OSRM_KEEP_WARM_SECONDS", 15 * 60))
+# Optional connection warming adds HTTP traffic; disabled for the public demo servers.
+OSRM_KEEP_WARM_SECONDS = int(os.environ.get("OSRM_KEEP_WARM_SECONDS", 0))
 OSRM_KEEPALIVE_INTERVAL = 45
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"  # OSM tiles require a browser Referer.
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 16384
 USE_TZ = True

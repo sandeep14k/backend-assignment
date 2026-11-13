@@ -2,13 +2,14 @@
 
 Usage: python scripts/benchmark_routing_providers.py
 Uses one keep-alive session per provider; "first" includes connection setup, "warm" is the median after it.
-Each run nudges the start point ~50 m so no request repeats: public servers cache identical URLs,
-which would otherwise make repeated requests look faster than real route computation.
+Each run nudges the start point ~50 m to reduce identical-URL cache reuse.
+Provider-side caching may still occur; these are observed HTTP latencies, not engine timings.
 """
 
 import json
 import statistics
 import time
+from datetime import UTC, datetime
 
 import requests
 
@@ -59,26 +60,34 @@ KEYED = {
 
 
 def main():
+    print(f"Run started: {datetime.now(UTC).isoformat()}")
     for name, call in KEYLESS.items():
         session = requests.Session()
+        session.headers["User-Agent"] = "fuel-route-planner-assessment/1.0"
+        session.headers["X-Client-Id"] = "fuel-route-planner-assessment"
         print(name)
         for route, (a, b) in ROUTES.items():
-            times, response = [], None
+            times, response, failed = [], None, False
             for run in range(RUNS):
+                time.sleep(1.1)  # Respect public routing servers: at most one request per second.
                 start = (round(a[0] + 0.0005 * run, 6), a[1])
                 started = time.perf_counter()
                 try:
                     response = call(session, start, b)
                 except requests.RequestException as exc:
+                    failed = True
                     print(f"  {route:<20} error: {exc}")
                     break
                 times.append((time.perf_counter() - started) * 1000)
                 if response.status_code != 200:
                     break
-            if response is None:
+            if failed or response is None:
                 continue
             if response.status_code != 200:
                 print(f"  {route:<20} HTTP {response.status_code}: {response.text[:90].strip()}")
+                continue
+            if len(times) < 2:
+                print(f"  {route:<20} incomplete: no warm samples")
                 continue
             warm = statistics.median(times[1:])
             print(f"  {route:<20} first {times[0]:6.0f} ms  warm {warm:5.0f} ms  {len(response.content) // 1024:5d} KB")

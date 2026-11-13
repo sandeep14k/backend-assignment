@@ -41,38 +41,14 @@ class OptimizerTests(SimpleTestCase):
         self.assertEqual(plan["total_cost_usd"], "31.23")
         self.assertEqual(plan["average_price_per_gallon"], "3.12")
 
-    def test_small_top_up_merged_into_previous_stop(self):
-        stations = [station(0, 3, "a"), station(400, "2.99", "b"), station(420, "2.98", "c")]
-        exact = optimize(stations, 900)
-        self.assertEqual([s["id"] for s in exact["fuel_stops"]], ["a", "b", "c"])
-        merged = optimize(stations, 900, min_stop_gallons=5)
-        self.assertEqual([s["id"] for s in merged["fuel_stops"]], ["a", "c"])  # b's 2 gal bought at a
-        self.assertEqual(merged["stop_consolidation"]["stops_removed"], 1)
-        self.assertEqual(merged["fuel_purchased_gallons"], 90)
-        self.assertEqual(merged["stop_consolidation"]["cost_change_usd"], "0.02")  # 2 gal x $0.01
-        self.assertEqual(merged["stop_consolidation"]["road_optimal_plan_cost_usd"], exact["total_cost_usd"])
-
-    def test_small_top_up_moved_to_next_stop_when_tank_is_full(self):
-        # a fills to 50 at the cheapest price; b's 1-gallon top-up moves to c, reachable without it.
-        stations = [station(0, "2.9", "a"), station(10, "3.0", "b"), station(400, "3.1", "c")]
-        plan = optimize(stations, 600, min_stop_gallons=5)
-        self.assertEqual([s["id"] for s in plan["fuel_stops"]], ["a", "c"])
-
-    def test_merge_never_overfills_or_strands(self):
-        plan = optimize([station(0, "2.9", "a"), station(10, 3, "b")], 510, min_stop_gallons=5)
-        self.assertEqual([s["gallons_purchased"] for s in plan["fuel_stops"]], [50, 1])  # nowhere to move it
-        self.assertEqual(plan["stop_consolidation"]["stops_removed"], 0)
-
     def test_every_stop_explains_itself(self):
         stations = [station(0, 3, "a"), station(300, "2.5", "b"), station(700, 4, "c")]
         reasons = [s["reason"] for s in optimize(stations, 1100)["fuel_stops"]]
-        self.assertTrue(reasons[0].startswith("Bought just enough to reach station b"))
-        self.assertIn("filled the tank", reasons[1])  # Nothing cheaper than $2.50 within 500 miles.
-        self.assertIn("just enough to finish", reasons[2])
-        merged = optimize(
-            [station(0, 3, "a"), station(400, "2.99", "b"), station(420, "2.98", "c")], 900, min_stop_gallons=5
+        self.assertEqual(
+            reasons[0], "Bought just enough to reach station b at mile 300, which is cheaper at $2.500/gal."
         )
-        self.assertIn("so the stop at mile 400 can be skipped", merged["fuel_stops"][0]["reason"])
+        self.assertTrue(reasons[1].startswith("Filled the tank to reach station c at mile 700"))
+        self.assertEqual(reasons[2], "Last stop: bought just enough to finish the trip.")
 
     def test_savings_against_price_blind_driver(self):
         # Price-blind: stops only when forced (miles 0 and 450), paying $4 at 450. The plan buys more at $2.
@@ -124,16 +100,12 @@ class OptimizerTests(SimpleTestCase):
             distance = miles[-1] + rng.uniform(1, 300)
             initial = rng.choice([None, rng.uniform(1, 50)])
             try:
-                plan = optimize(nodes, distance, initial, min_stop_gallons=rng.choice([0, 5]))
+                plan = optimize(nodes, distance, initial)
             except InfeasibleRoute:
                 continue
             checked += 1
             stops = {s["id"]: s for s in plan["fuel_stops"]}
-            reserve = max(n["offset_miles"] for n in nodes) * 1.3 / 10
-            if initial is not None:
-                fuel = initial
-            else:  # Starts with the reserve plus just enough to reach the first station (none if it is at mile 0).
-                fuel = reserve + (plan["starting_fuel"]["gallons"] if plan["starting_fuel"] else 0.0)
+            fuel = plan["initial_fuel_gallons"]
             position, burned = 0.0, 0.0
             for node in nodes:
                 fuel -= (node["route_mile"] - position) / 10
@@ -154,51 +126,15 @@ class OptimizerTests(SimpleTestCase):
             self.assertAlmostEqual(burned, plan["fuel_burned_gallons"], delta=0.05)
         self.assertGreater(checked, 100)
 
-    def test_consolidation_removes_a_stop_when_its_detour_costs_more_than_it_saves(self):
+    def test_skips_a_cheaper_station_whose_detour_costs_more_than_it_saves(self):
         # b is 1 cent cheaper than a, but 4 miles off the road: the detour (1.04 gal) costs more than it saves.
         stations = [station(0, "3.00", "a"), {**station(100, "2.99", "b"), "offset_miles": 4.0}]
-        plan = optimize(stations, 400, initial_gallons=None, min_stop_gallons=0)
+        plan = optimize(stations, 400)
         self.assertEqual([s["id"] for s in plan["fuel_stops"]], ["a"])
-        consolidation = plan["stop_consolidation"]
-        self.assertEqual((consolidation["road_optimal_plan_stops"], consolidation["stops_removed"]), (2, 1))
-        self.assertLess(Decimal(consolidation["cost_change_usd"]), 0)
+        self.assertEqual(plan["total_cost_usd"], "120.00")
 
-    def test_consolidation_never_costs_more_without_the_convenience_rule(self):
-        rng = random.Random(5)
-        for _ in range(150):
-            miles = sorted(rng.uniform(0, 1500) for _ in range(30))
-            nodes = [
-                {**station(m, round(rng.uniform(2.8, 3.4), 3), str(i)), "offset_miles": rng.uniform(0, 5)}
-                for i, m in enumerate(miles)
-            ]
-            try:
-                plan = optimize(nodes, miles[-1] + 100, min_stop_gallons=0)
-            except InfeasibleRoute:
-                continue
-            self.assertLessEqual(Decimal(plan["stop_consolidation"]["cost_change_usd"]), 0)
-
-    def test_merged_plans_stay_feasible(self):
-        rng = random.Random(11)
-        for _ in range(200):
-            miles = sorted(rng.uniform(0, 1500) for _ in range(25))
-            miles[0] = 0.0
-            nodes = [station(m, round(rng.uniform(2.8, 3.4), 3), str(i)) for i, m in enumerate(miles)]
-            distance = miles[-1] + 200
-            try:
-                plan = optimize(nodes, distance, min_stop_gallons=5)
-            except InfeasibleRoute:
-                continue
-            fuel, position = 0.0, 0.0
-            for stop in plan["fuel_stops"]:
-                fuel -= (stop["route_mile"] - position) / 10
-                self.assertGreaterEqual(fuel, -0.02)  # receipts are rounded to 0.001 gal
-                fuel += stop["gallons_purchased"]
-                self.assertLessEqual(fuel, 50.02)
-                position = stop["route_mile"]
-            self.assertGreaterEqual(fuel - (distance - position) / 10, -0.02)
-
-    def test_greedy_matches_independent_linear_program(self):
-        """The O(n) greedy equals the optimum found by a general LP solver (HiGHS) on 100 random trips."""
+    def test_matches_independent_linear_program_without_detours(self):
+        """With every station on the road, the plan equals a plain LP optimum (HiGHS) on 100 random trips."""
         rng = random.Random(7)
         for _ in range(100):
             miles = [0.0]
@@ -218,5 +154,172 @@ class OptimizerTests(SimpleTestCase):
             self.assertTrue(oracle.success)
             trip = [station(m, p, str(i)) for i, (m, p) in enumerate(zip(miles, prices, strict=True))]
             plan = optimize(trip, distance, initial)
-            self.assertAlmostEqual(float(plan["unrounded_total_cost_usd"]), oracle.fun, places=4)
+            self.assertAlmostEqual(float(plan["unrounded_total_cost_usd"]), oracle.fun, delta=0.001)
             self.assertTrue(all(s["gallons_on_departure"] <= 50.001 for s in plan["fuel_stops"]))
+
+
+class FuelRegressionTests(SimpleTestCase):
+    def test_automatic_start_without_stations_is_not_free(self):
+        with self.assertRaises(InfeasibleRoute):
+            optimize([], 100)
+
+    def test_unused_station_does_not_block_empty_start(self):
+        nodes = [station(0, 3, "a"), {**station(50, 4, "b"), "offset_miles": 5}]
+        plan = optimize(nodes, 100, 0)
+        self.assertEqual(plan["total_cost_usd"], "30.00")
+        self.assertEqual([s["id"] for s in plan["fuel_stops"]], ["a"])
+
+    def test_full_tank_can_finish_without_reserve(self):
+        plan = optimize([{**station(100, 4), "offset_miles": 5}], 499, 50)
+        self.assertEqual(plan["fuel_stops"], [])
+        self.assertEqual(plan["total_cost_usd"], "0.00")
+        self.assertAlmostEqual(plan["remaining_gallons"], 0.1)
+
+    def test_starting_fuel_and_receipts_reconcile(self):
+        plan = optimize([{**station(20, 3), "offset_miles": 2}], 100)
+        self.assertEqual(plan["starting_fuel"]["gallons"], 2.26)
+        self.assertAlmostEqual(
+            plan["initial_fuel_gallons"] + plan["fuel_purchased_gallons"],
+            plan["fuel_burned_gallons"] + plan["remaining_gallons"],
+            places=5,
+        )
+        self.assertEqual(
+            Decimal(plan["total_cost_usd"]),
+            Decimal(plan["starting_fuel"]["cost_usd"]) + sum(Decimal(s["cost_usd"]) for s in plan["fuel_stops"]),
+        )
+
+    def test_detour_solver_matches_enumerated_station_subsets(self):
+        # Independent oracle: enumerate visit subsets, then solve continuous
+        # purchase quantities on each resulting physical itinerary.
+        from itertools import combinations
+
+        nodes = [
+            {**station(m, p, str(i)), "offset_miles": o}
+            for i, (m, p, o) in enumerate([(0, 3.2, 0), (100, 2.9, 4), (300, 3.0, 1), (470, 4, 2)])
+        ]
+        distance, initial = 650, 0
+        best = float("inf")
+        for count in range(1, len(nodes) + 1):
+            for selected in combinations(nodes, count):
+                traveled, previous, positions = 0.0, 0.0, []
+                for node in selected:
+                    entry = node["offset_miles"] * 1.3
+                    traveled += node["route_mile"] - previous + entry
+                    positions.append(traveled / 10)
+                    traveled += entry
+                    previous = node["route_mile"]
+                total = (traveled + distance - previous) / 10
+                if positions[0] > initial:
+                    continue
+                rows, limits = [], []
+                for i, arrival in enumerate(positions):
+                    prefix = [int(j <= i) for j in range(count)]
+                    rows.extend([prefix, [-v for v in prefix]])
+                    limits.extend([50 - initial + arrival, initial - (positions[i + 1] if i + 1 < count else total)])
+                result = linprog(
+                    [float(s["price_per_gallon"]) for s in selected],
+                    A_ub=rows,
+                    b_ub=limits,
+                    bounds=(0, None),
+                    method="highs",
+                )
+                if result.success:
+                    best = min(best, result.fun)
+        plan = optimize(nodes, distance, initial)
+        self.assertAlmostEqual(float(plan["unrounded_total_cost_usd"]), best, delta=0.001)
+
+    def test_enough_initial_fuel_never_adds_zero_purchase_detours(self):
+        nodes = [{**station(1, 3, "a"), "offset_miles": 1}, {**station(5, 2, "b"), "offset_miles": 2}]
+        for distance, initial in [(10, 50), (100, 50), (400, 50), (100, 10)]:
+            with self.subTest(distance=distance, initial=initial):
+                plan = optimize(nodes, distance, initial)
+                self.assertEqual(plan["fuel_stops"], [])
+                self.assertEqual(plan["fuel_burned_gallons"], distance / 10)
+                self.assertAlmostEqual(plan["remaining_gallons"], initial - distance / 10)
+                self.assertEqual(plan["total_cost_usd"], "0.00")
+
+    def test_equal_cost_plans_prefer_fewer_stops(self):
+        # The on-road stations have identical prices. One fill is sufficient;
+        # the off-road station forces the detour-aware solver branch.
+        nodes = [station(0, 3, "a"), station(100, 3, "b"), {**station(200, 4, "c"), "offset_miles": 1}]
+        plan = optimize(nodes, 400, 0)
+        self.assertEqual([s["id"] for s in plan["fuel_stops"]], ["a"])
+        self.assertEqual(plan["total_cost_usd"], "120.00")
+
+    def test_duplicate_positions_keep_only_the_cheapest(self):
+        # Stations in one city share coordinates; only the cheapest of them can matter.
+        base = [{**station(0, 3.0, "a"), "offset_miles": 1}, {**station(300, 3.5, "b"), "offset_miles": 2}]
+        twin_dear = {**station(300, 3.9, "dear"), "offset_miles": 2}
+        twin_cheap = {**station(300, 3.1, "cheap"), "offset_miles": 2}
+        reference = optimize(base, 600)
+        with_dear = optimize([*base, twin_dear], 600)
+        self.assertEqual(with_dear["total_cost_usd"], reference["total_cost_usd"])
+        self.assertNotIn("dear", [s["id"] for s in with_dear["fuel_stops"]])
+        with_cheap = optimize([*base, twin_cheap], 600)
+        self.assertIn("cheap", [s["id"] for s in with_cheap["fuel_stops"]])
+        self.assertLess(Decimal(with_cheap["total_cost_usd"]), Decimal(reference["total_cost_usd"]))
+
+    def test_detour_plans_explain_every_stop_and_never_lose_to_the_price_blind_driver(self):
+        rng = random.Random(8)
+        baselines = 0
+        for _ in range(60):
+            miles = sorted(rng.uniform(0, 1500) for _ in range(30))
+            nodes = [
+                {**station(m, round(rng.uniform(2.8, 3.6), 3), str(i)), "offset_miles": rng.uniform(0, 4)}
+                for i, m in enumerate(miles)
+            ]
+            try:
+                plan = optimize(nodes, miles[-1] + 100)
+            except InfeasibleRoute:
+                continue
+            self.assertTrue(all(s["reason"] for s in plan["fuel_stops"]))
+            self.assertTrue(plan["fuel_stops"][-1]["reason"].startswith("Last stop"))
+            if plan["savings"]["savings_usd"] is not None:
+                baselines += 1
+                self.assertGreaterEqual(Decimal(plan["savings"]["savings_usd"]), 0)
+        self.assertGreater(baselines, 30)
+
+    def test_solver_timeout_is_reported_not_returned_as_optimal(self):
+        from unittest.mock import patch
+
+        from scipy.optimize import OptimizeResult
+
+        from planner.optimizer import OptimizationTimeout
+
+        nodes = [{**station(0, 3, "a"), "offset_miles": 1}]
+        with (
+            patch("planner.optimizer.milp", return_value=OptimizeResult(status=1, success=False)),
+            self.assertRaises(OptimizationTimeout),
+        ):
+            optimize(nodes, 100)
+
+    def test_subcent_price_differences_and_zero_purchase_waypoint(self):
+        nodes = [station(0, "3.00000001", "a"), station(200, "3.00000000", "b"), station(300, "4", "c")]
+        plan = optimize(nodes, 600, 0)
+        self.assertEqual([s["id"] for s in plan["fuel_stops"]], ["a", "b"])
+        self.assertEqual([s["gallons_purchased"] for s in plan["fuel_stops"]], [20, 40])
+        self.assertAlmostEqual(float(plan["unrounded_total_cost_usd"]), 180.0000002)
+        with self.assertRaises(InfeasibleRoute):
+            optimize([station(500.0001, 3)], 600, 50)
+
+
+class StopCostTests(SimpleTestCase):
+    def plan(self, second_price):
+        first = {**station(0, "3.00", "a"), "offset_miles": 0.1}
+        second = {**station(100, second_price, "b"), "offset_miles": 0.1}
+        return optimize([first, second], 300, initial_gallons=1)
+
+    def test_stop_saving_cents_is_skipped(self):
+        # Buying ~20 gal at the second pump would save ~20 cents: not worth a stop.
+        self.assertEqual([s["id"] for s in self.plan("2.99")["fuel_stops"]], ["a"])
+
+    def test_stop_saving_dollars_is_made(self):
+        self.assertEqual([s["id"] for s in self.plan("2.50")["fuel_stops"]], ["a", "b"])
+
+    def test_exit_placed_station_charges_ramp_access(self):
+        on_exit = {**station(100, "3.00", "x"), "offset_miles": 0.0, "coordinate_precision": "exit_match"}
+        plan = optimize([on_exit], 300, initial_gallons=20)
+        stop = plan["fuel_stops"][0]
+        self.assertEqual(stop["detour_miles"], 1.0)  # 0.5 mile each way between the exit and the pumps.
+        self.assertAlmostEqual(stop["gallons_on_arrival"], 20 - 10 - 0.05, places=6)
+        self.assertAlmostEqual(plan["fuel_burned_gallons"], 30.1, places=6)

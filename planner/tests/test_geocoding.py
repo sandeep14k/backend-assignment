@@ -59,3 +59,20 @@ class GeocodingTests(SimpleTestCase):
         get.return_value = FOUND
         start, finish, calls = resolve_pair(WHITE_HOUSE, "Chicago, IL")
         self.assertEqual((start["matched"], finish["name"], calls), ("address", "Chicago, IL", 1))
+
+    def test_oversize_address_rejected_before_network(self, get):
+        with self.assertRaises(ValueError):
+            resolve("123 " + "x" * 201)
+        get.assert_not_called()
+
+    def test_malformed_match_falls_back_to_city(self, get):
+        get.return_value = census([{}])
+        point, calls = resolve(WHITE_HOUSE)
+        self.assertEqual((point["matched"], calls), ("city (geocoder unavailable)", 1))
+
+    @patch("planner.geocoding._executor.submit")
+    def test_city_pair_does_not_schedule_threads(self, submit, get):
+        start, finish, calls = resolve_pair("Chicago, IL", "Los Angeles, CA")
+        self.assertEqual((start["name"], finish["name"], calls), ("Chicago, IL", "Los Angeles, CA", 0))
+        submit.assert_not_called()
+        get.assert_not_called()

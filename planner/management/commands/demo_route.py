@@ -6,21 +6,19 @@ from django.test import Client
 
 from planner import cache
 from planner.data import warm
-from planner.routing import _warm_connections
 
 
 class Command(BaseCommand):
     help = "Clear the route cache, call the live API twice (cold, then cached), save docs/example-response.json."
 
     def add_arguments(self, parser):
-        parser.add_argument("--start", default="Chicago, IL")
-        parser.add_argument("--finish", default="Los Angeles, CA")
+        parser.add_argument("--start", default="New York, NY")
+        parser.add_argument("--finish", default="Miami, FL")
 
     def handle(self, *args, **options):
         cache.clear()
         warm()  # Same startup work the server does (config/wsgi.py),
-        _warm_connections()  # including an open connection to the routing servers.
-        client = Client()
+        client = Client(HTTP_HOST="127.0.0.1:8000")
         body = json.dumps({"start": options["start"], "finish": options["finish"]})
         for label in ("cold", "cached"):
             response = client.post("/api/route/", body, content_type="application/json")

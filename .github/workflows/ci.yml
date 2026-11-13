@@ -19,3 +19,4 @@ jobs:
       - run: ruff format --check .
       - run: python manage.py check
       - run: python manage.py test -v 2
+      - run: python scripts/validate_submission.py

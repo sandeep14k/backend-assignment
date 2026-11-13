@@ -22,7 +22,8 @@ def make_station(identity, lon, lat, price="3.0"):
         "latitude": lat,
         "longitude": lon,
         "price_per_gallon": str(price),
-        "coordinate_precision": "city_centroid",
+        "coordinate_precision": "osm_identity_match",
+        "coordinate_source": "https://www.openstreetmap.org/node/123",
     }
 
 

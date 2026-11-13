@@ -1,0 +1,29 @@
+Run started: 2026-11-12T21:14:14.592801+00:00
+OSRM (router.project-osrm.org), polyline6
+  Chicago-Los Angeles  first   2022 ms  warm   657 ms    105 KB
+  New York-Miami       first    648 ms  warm   655 ms     71 KB
+  Seattle-Boston       first   1071 ms  warm  1285 ms    185 KB
+OSRM (FOSSGIS routing.openstreetmap.de), polyline6
+  Chicago-Los Angeles  first   1834 ms  warm  1001 ms    105 KB
+  New York-Miami       first    617 ms  warm   618 ms     71 KB
+  Seattle-Boston       first    822 ms  warm  1058 ms    185 KB
+OSRM, GeoJSON + per-segment annotations
+  Chicago-Los Angeles  first   4084 ms  warm  1909 ms    786 KB
+  New York-Miami       first   1436 ms  warm  1630 ms    521 KB
+  Seattle-Boston       first   5246 ms  warm  2705 ms   1393 KB
+Valhalla (FOSSGIS)
+  Chicago-Los Angeles  HTTP 400: {"error_code":154,"error":"Path distance exceeds the max distance limit: 1500000 meters","
+  New York-Miami       HTTP 400: {"error_code":154,"error":"Path distance exceeds the max distance limit: 1500000 meters","
+  Seattle-Boston       HTTP 400: {"error_code":154,"error":"Path distance exceeds the max distance limit: 1500000 meters","
+BRouter (brouter.de)
+  Chicago-Los Angeles  HTTP 400: operation killed by thread-priority-watchdog after 2 seconds
+  New York-Miami       HTTP 400: operation killed by thread-priority-watchdog after 31 seconds
+  Seattle-Boston       HTTP 403: Please, retry later!
+Key-required services (called without a key):
+  OpenRouteService   HTTP 401 {"error": "Authorization field missing"}
+  GraphHopper        HTTP 401 {"message": "No API key specified. Please register and see documentation: https:
+  Mapbox             HTTP 401 {"message": "Not Authorized - Invalid Token", "error_detail": "No valid token pr
+  HERE               HTTP 401 {"error": "Unauthorized", "error_description": "No credentials found"}
+  TomTom             HTTP 401 {"detailedError": {"code": "Unauthorized", "message": "You are missing valid aut
+  Geoapify           HTTP 401 {"statusCode": 401, "error": "Unauthorized", "message": "Invalid apiKey"}
+  Google             HTTP 200 {"error_message": "You must use an API key to authenticate each request to Googl

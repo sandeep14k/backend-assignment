@@ -75,13 +75,14 @@ def simplify(coordinates, tolerance_miles=0.03):
         index = np.flatnonzero(undecided)
         segment = np.searchsorted(kept, index) - 1
         first, last = kept[segment], kept[segment + 1]
-        # Squared distance from each point to its segment's line: |r|^2 - (r.d)^2 / |d|^2.
+        # Distance to the finite segment: clipping preserves reversals beyond either endpoint.
         dx, dy, dz = x[last] - x[first], y[last] - y[first], z[last] - z[first]
         rx, ry, rz = x[index] - x[first], y[index] - y[first], z[index] - z[first]
         dd = dx * dx + dy * dy + dz * dz
         rd = rx * dx + ry * dy + rz * dz
         rr = rx * rx + ry * ry + rz * rz
-        distance = np.where(dd > 0, rr - rd * rd / np.maximum(dd, 1e-24), rr)  # squared
+        fraction = np.clip(rd / np.maximum(dd, 1e-24), 0, 1)
+        distance = np.maximum(rr - 2 * fraction * rd + fraction * fraction * dd, 0)
 
         group_starts = np.concatenate(([0], np.flatnonzero(np.diff(segment)) + 1))
         group = np.repeat(np.arange(len(group_starts)), np.diff(np.append(group_starts, len(index))))
@@ -122,3 +123,13 @@ class Boundary:
         d = b - a
         t = np.clip(((p - a) * d).sum(axis=1) / np.maximum((d * d).sum(axis=1), 1e-12), 0, 1)
         return float(np.linalg.norm(a + t[:, None] * d - p, axis=1).min())
+
+
+def heading_at(coordinates, segment_lengths, mile):
+    """Compass heading (degrees, 0 = north) of the route segment containing ``mile``."""
+    cumulative = np.cumsum(segment_lengths)
+    i = int(min(np.searchsorted(cumulative, mile, side="right"), len(segment_lengths) - 1))
+    (lon1, lat1), (lon2, lat2) = np.radians(coordinates[i]), np.radians(coordinates[i + 1])
+    x = np.sin(lon2 - lon1) * np.cos(lat2)
+    y = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1)
+    return float(np.degrees(np.arctan2(x, y)) % 360)

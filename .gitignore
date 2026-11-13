@@ -12,3 +12,6 @@ db.sqlite3
 .pytest_cache/
 .ruff_cache/
 .cache/
+
+# Re-downloadable raw OSM extract; matched coordinates and provenance are committed.
+data/enrichment/

@@ -1,0 +1,26 @@
+[
+  {
+    "url": "https://router.project-osrm.org/route/v1/driving/-96.80439,32.79044;-97.32680,32.74690",
+    "params": {
+      "overview": "full",
+      "geometries": "polyline6",
+      "steps": "false",
+      "alternatives": "false",
+      "generate_hints": "false"
+    },
+    "status": 200,
+    "body": "{\"code\":\"Ok\",\"routes\":[{\"legs\":[{\"steps\":[],\"weight\":2440.8,\"summary\":\"\",\"duration\":2440.8,\"distance\":51566.1}],\"weight_name\":\"routability\",\"geometry\":\"cikp}@``nswDi@?aDA@qJEmUJsDTwAr@aEH_@hFlAjb@|I|IpBlRbE`GnAt@RrCb@r@NtCl@|@RzWlGp@PjEdAdFbArAVzc@~IpIdBlOzC~E`AvGdInTdYnAzAb@h@pAdBnFnHxB~CtGpI`@xDvBjGxC~FrAnBlQtUxGvItBpCdC`DpCpD`IfKtAhBzNlRfAxAxD|DbWtZb@h@lA|AqYz\\\\oDdE}@dAwBlDKP{AlDcAjEc@fCi@nE_@rFExBB~BLxCRlC^rDn@hFd@~Dd@|DfEd]lAtF`BhErClE~C|CnBrArD~AzTrHbHpEjBdDn@dAfCxFpAfE`@|CVpDtA~[pA`UHrAJ`C~HC|AIhAA`l@uCvO_A`W}A~XsCfScFxLyCnBWbOqB|T@~C?r`Ar@jU\\\\jLi@b[h@f~AvHdP^hPOzw@kGxK_BfYoBf]kBvzAeErOh@nN`CjLnEbMfJvSfUlA|BfAfCdBnGbFfVzJ`p@jRjtApDtXnC~VnWtbCnJdw@dBrO|NdbApKvl@|Kzj@rAzI|PxbAvI`o@`Ibr@tHrv@jFbj@hInmAdChb@xBf_@hCl_@bCt_@bCd^lCd_@zBz^rB|]`Cj`@fR`dD^~FdExs@rBjYpCtWtDrWdE~VvE~UlFpUvG|UjHjTbIrT`JrTvfAxcCbEzKzHdUhGzSxGhVrFbVtEbVtDfVbDvV|BvVfB`WjAdWt@bWHzR@f\\\\e@tW}@~VwAxVyBdWwC`WuDfYqHvb@aEjReKfj@cQj}@m~@x}Ey`@rvBeC`RgF~^iE`^aD`_@aCt^g@lH{@rQiFj{Bq@lj@mAtjA_DlsB}BdeBi@xgAi@x}AWnj@yA|tACfIs@nu@s@p{@kFf~F_CdxAc@nzAwDnfEiBdeCGn_@Rb_@f@~_@`Al_@rAj_@hBh_@bCd_@hId~@dIh{@jSdrBnDx^tC|^bCd_@hBt^jAd_@v@t_@n@``AhAr_C`@d}@J|VNvWXln@xAlzCd@lgAD|UAn{Bn@z`B?bCEjxAH~s@lCf}GLzh@dB`nAxCbhAtElnAbK`bCnMh{CdDzy@jF`qAfKteCxC~p@jDve@`NzwAdJ|u@hRbdBbFdf@bYnmCzNlwAfo@rdGnD|]`D|^~Cb_@jC`_@~Bv^nBt]jBj`@xA`_@nAp_@dA`_@z@b`@h@f_@Zt_@Rv_@SlzDMjkBE`j@Uv~CEpq@EdvAXn`@x@~^pAj`@jB~`@vBh^rFpq@tBfQbB|N|DvZlEvZ`FpZpFhZdG|Ynk@bhCbH~]pGh^dG|^dFt^lEv^lG~o@jD`g@lBn_@hA``@fAr_@z@~_@~@p_@hFnbCtEd|AjFh`CtMf`F`B|o@`Af_@|@d_@`Ar_@~@~^~@l_@v@n_@j@d`@b@d`@Tz_@Fr`@Cd`@Qb`@]|_@qAhy@_C`r@iHlkBaJptCyEtxA}Q~wF{@t_@k@t^e@``@Yp_@It^KliDc@~|@J~j@?rd@gAtoMv@pt@Rd}B@hiAM`t@o@dw@q@fhA@|w@@va@?hNElp@gAjdBBve@Dvg@ZjmD?vjB^zT@l`@Jj_A_@zkF?njBgAz}Bg@tzAmBn_Be@~~CDrm@z@zjCUnaAOfZWxa@}@|~AWxw@n@j~@Wzi@Sva@Kpf@o@rq@@ze@?pSFd\\\\Kx\\\\MvLDfTApURnRF~^?dICdSQrVNje@kAju@@bm@?zf@Fln@@xf@Ezl@?bf@?dh@YlWO~s@MfZmAxqBy@d{A}@||Bc@f{@O|r@\\\\phAEzuAfAbbCd@bi@HbVRd\\\\zA`fA^jbAMx{CEplAF`vB@jRE|UMn|@Mvt@Gl^\\\\bgBFdXKp[Shq@DvrBYdo@Qp_AbAtnGCbh@Elb@RlzB@pGGbIUt]NtjAPd~@?bdEk@vcCBniC@dhBGt{BI|t@Ah~@WjtHF|]DxNOrq@Wv{@Df_FEhzAaB~gBoB~xAqBn|AwAp{@yDlgCiAdmAc@|uBeA~iBf@fqCnB~hFJtOJlMr@pzCNriAtBztDz@hxDLtXl@`n@Hlh@rAbkFxB|eEv@biDbDjeIDj_@P~w@`A~uEMtkIMbbEAvRC~t@C`_@CfiAKzsBE`rABvVKbgBExzAKnyBGjqACtmAIxeA?nmCOttCAtk@Kxl@Ynf@GjIk@l]w@b`@u@fZ{@bZ}B|s@wGrjBaMzoDkEthAuCn|@yB|t@iCb|Ai@b}@hAxcB~Axy@fAnc@tAjZdE~~@|g@jgJnGzdAzM~mB`JvwAnDpl@`GdaA~Dps@pNhqC|Pd_ClYtsEdH`q@nJ|j@~Hh_@jGjWnEhOtPre@bNlWpD~GlW|l@rOh^xRdd@fi@vjAp]d}@rKzTnPz`@|Nz[xjBdkEhYxz@pPhj@p]b}AjM|v@vO|jA|CzVbDff@|An[tHnhC~Ahg@hBbo@hAvXlCxlAdXtyJfA|]n@~ZVvGfAtf@nC~z@fLvqDl@`RbA`\\\\xC~bA~HxbBvDrt@zDdj@p@nLnB`]vHhnA`Gru@zFleAzF|mBt@zc@HvFxCjyBbAhx@cAzwAPx`@j@d_@|Bpe@dRvaCxC|d@zH|fBlGjgAhHpzAt@bSr@~MPrCvCfXrEt`@~@vHhAxQ`@tLN|IAn@QlH?RQtMy@`p@{@jn@GfD\",\"weight\":2440.8,\"duration\":2440.8,\"distance\":51566.1}],\"waypoints\":[{\"distance\":27.7948378,\"name\":\"\",\"location\":[-96.804369,32.79069]},{\"distance\":23.431522,\"name\":\"West Lancaster Avenue\",\"location\":[-97.326813,32.746689]}]}",
+    "headers": {
+      "Server": "nginx",
+      "Date": "Thu, 12 Nov 2026 23:34:09 GMT",
+      "Content-Type": "application/json; charset=UTF-8",
+      "Content-Length": "2133",
+      "Connection": "keep-alive",
+      "Content-Encoding": "gzip",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET",
+      "Access-Control-Allow-Headers": "X-Requested-With, Content-Type",
+      "Content-Disposition": "inline; filename=\"response.json\""
+    }
+  }
+]

@@ -1,0 +1,198 @@
+[
+  {
+    "start": "Chicago, IL",
+    "finish": "Los Angeles, CA",
+    "mode": "new_route",
+    "status": 200,
+    "http_stack_ms": 1470.027,
+    "metadata": {
+      "routing_calls": 1,
+      "route_cache_hit": false,
+      "plan_cache_hit": false,
+      "route_source": "loaded",
+      "candidate_stations": 209,
+      "search_corridor_miles": 5.0,
+      "candidate_pool_stations": 6626,
+      "stop_coordinate_precision": {
+        "city_centroid": 3,
+        "exit_match": 6
+      },
+      "itinerary_routed": false,
+      "timing_ms": {
+        "routing": 1166.9,
+        "matching": 0.0,
+        "selection": 158.3,
+        "itinerary_routing": 0.0,
+        "optimize": 0.0,
+        "total": 1325.4
+      },
+      "geocoding_calls": 0
+    },
+    "cost_usd": "625.68",
+    "error": null
+  },
+  {
+    "start": "Chicago, IL",
+    "finish": "Los Angeles, CA",
+    "mode": "cached",
+    "status": 200,
+    "http_stack_ms": 1.162,
+    "metadata": {
+      "routing_calls": 0,
+      "route_cache_hit": true,
+      "plan_cache_hit": true,
+      "route_source": "memory",
+      "candidate_stations": 209,
+      "search_corridor_miles": 5.0,
+      "candidate_pool_stations": 6626,
+      "stop_coordinate_precision": {
+        "city_centroid": 3,
+        "exit_match": 6
+      },
+      "itinerary_routed": false,
+      "timing_ms": {
+        "routing": 0.0,
+        "matching": 0.0,
+        "selection": 0.0,
+        "itinerary_routing": 0.0,
+        "optimize": 0.0,
+        "total": 0.2
+      },
+      "geocoding_calls": 0
+    },
+    "cost_usd": "625.68",
+    "error": null
+  },
+  {
+    "start": "New York, NY",
+    "finish": "Miami, FL",
+    "mode": "new_route",
+    "status": 200,
+    "http_stack_ms": 844.764,
+    "metadata": {
+      "routing_calls": 1,
+      "route_cache_hit": false,
+      "plan_cache_hit": false,
+      "route_source": "loaded",
+      "candidate_stations": 254,
+      "search_corridor_miles": 5.0,
+      "candidate_pool_stations": 6626,
+      "stop_coordinate_precision": {
+        "city_centroid": 1,
+        "exit_match": 3,
+        "osm_identity_match": 1
+      },
+      "itinerary_routed": false,
+      "timing_ms": {
+        "routing": 681.4,
+        "matching": 0.0,
+        "selection": 161.1,
+        "itinerary_routing": 0.0,
+        "optimize": 0.0,
+        "total": 842.9
+      },
+      "geocoding_calls": 0
+    },
+    "cost_usd": "381.48",
+    "error": null
+  },
+  {
+    "start": "New York, NY",
+    "finish": "Miami, FL",
+    "mode": "cached",
+    "status": 200,
+    "http_stack_ms": 0.753,
+    "metadata": {
+      "routing_calls": 0,
+      "route_cache_hit": true,
+      "plan_cache_hit": true,
+      "route_source": "memory",
+      "candidate_stations": 254,
+      "search_corridor_miles": 5.0,
+      "candidate_pool_stations": 6626,
+      "stop_coordinate_precision": {
+        "city_centroid": 1,
+        "exit_match": 3,
+        "osm_identity_match": 1
+      },
+      "itinerary_routed": false,
+      "timing_ms": {
+        "routing": 0.0,
+        "matching": 0.0,
+        "selection": 0.0,
+        "itinerary_routing": 0.0,
+        "optimize": 0.0,
+        "total": 0.1
+      },
+      "geocoding_calls": 0
+    },
+    "cost_usd": "381.48",
+    "error": null
+  },
+  {
+    "start": "Seattle, WA",
+    "finish": "Boston, MA",
+    "mode": "new_route",
+    "status": 200,
+    "http_stack_ms": 1176.97,
+    "metadata": {
+      "routing_calls": 1,
+      "route_cache_hit": false,
+      "plan_cache_hit": false,
+      "route_source": "loaded",
+      "candidate_stations": 338,
+      "search_corridor_miles": 5.0,
+      "candidate_pool_stations": 6626,
+      "stop_coordinate_precision": {
+        "city_centroid": 2,
+        "exit_match": 7,
+        "osm_identity_match": 1
+      },
+      "itinerary_routed": false,
+      "timing_ms": {
+        "routing": 979.9,
+        "matching": 0.0,
+        "selection": 193.5,
+        "itinerary_routing": 0.0,
+        "optimize": 0.0,
+        "total": 1173.9
+      },
+      "geocoding_calls": 0
+    },
+    "cost_usd": "979.95",
+    "error": null
+  },
+  {
+    "start": "Seattle, WA",
+    "finish": "Boston, MA",
+    "mode": "cached",
+    "status": 200,
+    "http_stack_ms": 1.714,
+    "metadata": {
+      "routing_calls": 0,
+      "route_cache_hit": true,
+      "plan_cache_hit": true,
+      "route_source": "memory",
+      "candidate_stations": 338,
+      "search_corridor_miles": 5.0,
+      "candidate_pool_stations": 6626,
+      "stop_coordinate_precision": {
+        "city_centroid": 2,
+        "exit_match": 7,
+        "osm_identity_match": 1
+      },
+      "itinerary_routed": false,
+      "timing_ms": {
+        "routing": 0.0,
+        "matching": 0.0,
+        "selection": 0.0,
+        "itinerary_routing": 0.0,
+        "optimize": 0.0,
+        "total": 0.2
+      },
+      "geocoding_calls": 0
+    },
+    "cost_usd": "979.95",
+    "error": null
+  }
+]

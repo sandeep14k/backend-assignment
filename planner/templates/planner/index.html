@@ -42,11 +42,11 @@
 <body>
 <main>
   <h1>Fuel Route Planner</h1>
-  <p class="sub">Cheapest fuel stops for a US road trip · 500-mile range · 10 MPG · 50-gallon tank</p>
+  <p class="sub">Cost-effective fuel stops for a US road trip · 500-mile range · 10 MPG · 50-gallon tank</p>
 
   <form id="form">
-    <label>Start <input id="start" name="start" value="Chicago, IL" required></label>
-    <label>Finish <input id="finish" name="finish" value="Los Angeles, CA" required></label>
+    <label>Start <input id="start" name="start" value="New York, NY" required></label>
+    <label>Finish <input id="finish" name="finish" value="Miami, FL" required></label>
     <label class="small">Fuel at start (gal) <input id="initial" name="initial_fuel_gallons" type="number" min="0" max="50" step="any" placeholder="auto"></label>
     <label class="small">Corridor (mi) <input id="corridor" name="corridor_miles" type="number" min="0.1" max="25" step="any" placeholder="5"></label>
     <button id="submit">Plan route</button>
@@ -56,7 +56,7 @@
   <div class="cards" id="cards" hidden></div>
   <div id="map" aria-label="Route map"></div>
   <div class="table-wrap"><table id="stops" hidden></table></div>
-  <p class="note">Station positions are their city's coordinates, because the price file has no coordinates. Prices come from the supplied CSV.</p>
+  <p class="note">Prices come from the supplied CSV. Stations are placed at the station itself where matched, otherwise at the OpenStreetMap exit named in their address, otherwise at their listed town. Each stop's detour is included in the fuel and cost. Add <code>verify_stops=true</code> to route by road through every stop.</p>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -65,7 +65,7 @@ const $ = (id) => document.getElementById(id);
 const map = L.map("map").setView([39, -98], 4);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · <a href="https://www.openstreetmap.org/fixthemap">Fix the map</a>',
 }).addTo(map);
 let layer = null;
 
@@ -111,7 +111,7 @@ function render(data) {
   const t = data.metadata.timing_ms;
   $("cards").replaceChildren(
     card(`$${data.total_cost_usd}`, "total fuel cost"),
-    card(`$${data.savings.savings_usd}`, `saved (${data.savings.savings_percent}%) vs price-blind $${data.savings.price_blind_cost_usd}`, "save"),
+    ...(data.savings.savings_usd === null ? [] : [card(`$${data.savings.savings_usd}`, `saved (${data.savings.savings_percent}%) vs price-blind $${data.savings.price_blind_cost_usd}`, "save")]),
     card(`${Math.round(data.distance_miles).toLocaleString()} mi`, `${data.duration_hours.toFixed(1)} h driving`),
     card(String(data.fuel_stops.length), "fuel stops"),
     card(`${data.fuel_purchased_gallons.toFixed(1)} gal`, data.average_price_per_gallon ? `avg $${data.average_price_per_gallon}/gal` : "purchased"),
@@ -125,7 +125,7 @@ function render(data) {
   table.replaceChildren(head);
   data.fuel_stops.forEach((s, i) => {
     const row = el("tr");
-    row.append(el("td", String(i + 1)), el("td", s.name), el("td", `${s.city}, ${s.state}`),
+    row.append(el("td", String(i + 1)), el("td", s.name), el("td", `${s.city}, ${s.state}${s.coordinate_precision === "city_centroid" ? " (town centre)" : ""}`),
       el("td", s.route_mile.toFixed(0), "num"), el("td", `$${Number(s.price_per_gallon).toFixed(3)}`, "num"),
       el("td", s.gallons_purchased.toFixed(1), "num"), el("td", `$${s.cost_usd}`, "num"), el("td", s.reason, "why"));
     table.append(row);
@@ -134,7 +134,7 @@ function render(data) {
 }
 
 async function plan() {
-  // Keep every option from the map_url (e.g. min_stop_gallons) so the map shows the same plan as the API.
+  // Keep every option from the map_url (e.g. corridor_miles) so the map shows the same plan as the API.
   const params = new URLSearchParams(location.search);
   params.set("start", $("start").value);
   params.set("finish", $("finish").value);

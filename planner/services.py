@@ -1,11 +1,23 @@
 """Trip planning pipeline: route -> stations on the route -> cheapest purchases."""
 
+import copy
+import hashlib
 import time
+from collections import Counter
 
 from planner import cache
-from planner.data import station_index, stations
-from planner.optimizer import CAPACITY_GALLONS, MPG, RANGE_MILES, ROAD_FACTOR, candidates, optimize
-from planner.routing import fetch_route
+from planner.data import station_index
+from planner.geo import heading_at
+from planner.optimizer import (
+    CAPACITY_GALLONS,
+    MPG,
+    RANGE_MILES,
+    InfeasibleRoute,
+    candidates,
+    detour_miles,
+    optimize,
+)
+from planner.routing import NoRoute, RoutingBudget, fetch_itinerary, fetch_route
 
 STOP_FIELDS = (
     "id",
@@ -16,6 +28,8 @@ STOP_FIELDS = (
     "latitude",
     "longitude",
     "coordinate_precision",
+    "coordinate_source",
+    "road_snap_metres",
     "price_per_gallon",
     "route_mile",
     "offset_miles",
@@ -73,25 +87,233 @@ def _geojson(route, start, finish, stops):
     }
 
 
-def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, min_stop_gallons=5.0):
-    """Plan the cheapest fuel purchases between two resolved locations."""
+def coverage_gaps(nodes, distance, initial):
+    """Unreachable intervals in the forward estimated-detour reachability graph."""
+    reachable = [(0.0, (50 if initial is None else initial) * MPG)]
+    gaps = []
+    for node in nodes:
+        mile, detour = node["route_mile"], detour_miles(node)
+        if any(mile - pos + detour <= fuel + 1e-6 for pos, fuel in reachable):
+            reachable.append((mile, RANGE_MILES - detour))
+    frontier = max(pos + fuel for pos, fuel in reachable)
+    if frontier < distance - 1e-6:
+        left = max(pos for pos, _ in reachable)
+        right = next((s["route_mile"] for s in nodes if s["route_mile"] > frontier), distance)
+        gaps.append((left, right))
+    return gaps
+
+
+def select_adaptively(route, index, initial, corridor):
+    nodes = candidates(route, index, corridor)
+    for radius in [corridor, *[r for r in (10, 15, 25) if r > corridor]]:
+        expanded = candidates(route, index, radius) if radius > corridor else []
+        while True:
+            try:
+                return optimize(nodes, route["distance_miles"], initial), nodes, radius
+            except InfeasibleRoute:
+                if not expanded:
+                    break
+                gaps = coverage_gaps(nodes, route["distance_miles"], initial)
+                if not gaps:
+                    gaps = [(0, nodes[0]["route_mile"] if nodes else route["distance_miles"])]
+                by_id = {s["id"]: s for s in nodes}
+                by_id.update({s["id"]: s for s in expanded if any(a <= s["route_mile"] <= b for a, b in gaps)})
+                if len(by_id) == len(nodes):
+                    break
+                nodes = sorted(by_id.values(), key=lambda s: s["route_mile"])
+    raise InfeasibleRoute(_coverage_message(route, index))
+
+
+def _coverage_message(route, index):
+    """Say where the supplied price list leaves the route without fuel, e.g. 'mile 0 to 537'."""
+    wide = candidates(route, index, 25)
+    ends = [(0.0, "the start"), *((s["route_mile"], f"{s['city']}, {s['state']}") for s in wide)]
+    ends.append((route["distance_miles"], "the finish"))
+    size, (left, left_name), (right, right_name) = max(
+        ((b[0] - a[0], a, b) for a, b in zip(ends, ends[1:], strict=False)), key=lambda gap: gap[0]
+    )
+    if size > RANGE_MILES:
+        return (
+            f"The supplied fuel-price list has no station within 25 miles of this route between mile {left:.0f} "
+            f"({left_name}) and mile {right:.0f} ({right_name}): a {size:.0f}-mile gap, longer than the "
+            f"{RANGE_MILES:.0f}-mile range."
+        )
+    return "No feasible fuel plan within the 25-mile station search limit. Try a larger initial_fuel_gallons."
+
+
+def _with_heading(route, stops):
+    """Exit positions sit on the motorway: give OSRM the direction of travel so it picks the right carriageway."""
+    return [
+        {**stop, "heading": heading_at(route["coordinates"], route["segment_miles"], stop["route_mile"])}
+        if stop.get("coordinate_precision") == "exit_match"
+        else stop
+        for stop in stops
+    ]
+
+
+def locate_itinerary(route, selected):
+    mile, located = 0.0, []
+    for stop, leg, snap in zip(selected, route["leg_miles"][:-1], route["station_snap_metres"], strict=True):
+        mile += leg
+        located.append({**stop, "route_mile": mile, "offset_miles": 0.0, "road_snap_metres": snap})
+    return located
+
+
+def repair_selection(route, selected, index, initial):
+    """Insert one estimated-reachable bridge in the first infeasible road leg."""
+    miles = [0.0]
+    for leg in route["leg_miles"]:
+        miles.append(miles[-1] + leg)
+    for i, leg in enumerate(route["leg_miles"]):
+        limit = (initial * MPG if initial is not None else RANGE_MILES) if i == 0 else RANGE_MILES
+        if leg <= limit + 1e-6:
+            continue
+        choices = [
+            s
+            for s in candidates(route, index, 25)
+            if s["id"] not in {n["id"] for n in selected}
+            and miles[i] <= s["route_mile"] <= miles[i + 1]
+            and s["route_mile"] - miles[i] + detour_miles(s) <= limit
+            and miles[i + 1] - s["route_mile"] + detour_miles(s) <= RANGE_MILES
+        ]
+        if choices:
+            bridge = min(choices, key=lambda s: (s["offset_miles"], float(s["price_per_gallon"])))
+            return [*selected[:i], bridge, *selected[i:]]
+        break
+    raise InfeasibleRoute("Verified itinerary exceeds range; no reachable bridging station found.")
+
+
+def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, verify_stops=False):
+    """Plan the cheapest fuel purchases between two resolved locations.
+
+    Default: one routing call. Stations are matched to the route geometry and the
+    optimizer charges each stop's estimated detour (``detour_miles``, both
+    ways) against the tank, so the plan never relies on fuel it does not have.
+    ``verify_stops`` spends one or two more calls to route through the chosen
+    stations and re-solve purchases on the actual road legs.
+    """
     started = time.perf_counter()
-    route, routing_calls, route_source = fetch_route(start, finish)
+    budget = RoutingBudget()
+    route, routing_calls, route_source = fetch_route(start, finish, budget=budget)
+    budget.used = max(budget.used, routing_calls)
     routing_ms = _elapsed_ms(started)
 
     step = time.perf_counter()
     index = station_index()
-    on_route, _ = cache.get_or_load(
-        f"{route['cache_key']}:corridor:{corridor_miles:g}",
-        lambda: candidates(route, index, corridor_miles),
-    )
+    derived_key = f"{route['cache_key']}:data:{index.fingerprint}"
     matching_ms = _elapsed_ms(step)
-
     step = time.perf_counter()
-    plan = optimize(on_route, route["distance_miles"], initial_fuel_gallons, min_stop_gallons)
+    estimated_selection, selection_source = cache.get_or_load(
+        f"{derived_key}:adaptive:v2:{corridor_miles!r}:{initial_fuel_gallons!r}",
+        lambda: select_adaptively(route, index, initial_fuel_gallons, corridor_miles),
+    )
+    estimated, on_route, search_radius = estimated_selection
+    selection_ms = _elapsed_ms(step)
+    step = time.perf_counter()
+    selected, located = estimated["fuel_stops"], []
+    if not verify_stops:
+        plan = copy.deepcopy(estimated)
+        for stop in plan["fuel_stops"]:
+            stop["road_snap_metres"] = None
+        itinerary_ms = optimize_ms = 0.0
+        plan_source = selection_source
+        return _response(
+            route,
+            start,
+            finish,
+            plan,
+            [],
+            on_route,
+            search_radius,
+            routing_calls,
+            route_source,
+            plan_source,
+            initial_fuel_gallons,
+            corridor_miles,
+            False,
+            [routing_ms, matching_ms, selection_ms, 0.0, 0.0],
+        )
+    if selected:
+        selected = _with_heading(route, selected)
+        before = budget.used
+        try:
+            route, verification_calls, _ = fetch_itinerary(
+                start, finish, selected, max_calls=min(2, budget.remaining), budget=budget
+            )
+        except NoRoute as exc:
+            if not budget.remaining:
+                raise InfeasibleRoute("Station access could not be verified within the routing budget.") from exc
+            # Provider does not identify the bad waypoint: replace the nearest
+            # eligible alternative once, then require complete road verification.
+            alternatives = [
+                (abs(other["route_mile"] - stop["route_mile"]), i, other)
+                for i, stop in enumerate(selected)
+                for other in on_route
+                if other["id"] not in {s["id"] for s in selected}
+                and abs(other["route_mile"] - stop["route_mile"]) <= 25
+            ]
+            if not alternatives:
+                raise InfeasibleRoute("Station access failed; no alternative station available.") from exc
+            _, position, replacement = min(alternatives, key=lambda row: row[0])
+            selected = sorted(
+                [*selected[:position], *_with_heading(route, [replacement]), *selected[position + 1 :]],
+                key=lambda stop: stop["route_mile"],
+            )
+            try:
+                route, _, _ = fetch_itinerary(start, finish, selected, max_calls=1, budget=budget)
+            except NoRoute as retry:
+                raise InfeasibleRoute("Alternative station access could not be verified.") from retry
+            verification_calls = budget.used - before
+        routing_calls += verification_calls
+        budget.used = max(budget.used, routing_calls)
+        located = locate_itinerary(route, selected)
+        try:
+            optimize(located, route["distance_miles"], initial_fuel_gallons)
+        except InfeasibleRoute:
+            if not budget.remaining:
+                raise InfeasibleRoute("Verified itinerary exceeds range and routing budget is exhausted.") from None
+            selected = repair_selection(route, selected, index, initial_fuel_gallons)
+            # Only the new bridge lacks a heading; it was measured on this itinerary route.
+            selected = [stop if "heading" in stop else _with_heading(route, [stop])[0] for stop in selected]
+            route, repair_calls, _ = fetch_itinerary(start, finish, selected, max_calls=1, budget=budget)
+            routing_calls += repair_calls
+            located = locate_itinerary(route, selected)
+    itinerary_ms = _elapsed_ms(step)
+    step = time.perf_counter()
+    # Separate cache stages: never hold one cross-process cache lock while
+    # acquiring another. The final plan uses routed road legs, not offset * 1.3.
+    identities = hashlib.sha256(",".join(stop["id"] for stop in located).encode()).hexdigest()[:24]
+    final_key = f"{route['cache_key']}:final:v3:{index.fingerprint}:{initial_fuel_gallons!r}:{identities}"
+    plan, plan_source = cache.get_or_load(
+        final_key, lambda: optimize(located, route["distance_miles"], initial_fuel_gallons)
+    )
+    plan = copy.deepcopy(plan)
     optimize_ms = _elapsed_ms(step)
+    return _response(
+        route,
+        start,
+        finish,
+        plan,
+        located,
+        on_route,
+        search_radius,
+        routing_calls,
+        route_source,
+        plan_source,
+        initial_fuel_gallons,
+        corridor_miles,
+        bool(selected),
+        [routing_ms, matching_ms, selection_ms, itinerary_ms, optimize_ms],
+    )
 
+
+def _response(
+    route, start, finish, plan, located, on_route, search_radius, routing_calls, route_source, plan_source,
+    initial_fuel_gallons, corridor_miles, itinerary_routed, timings,
+):  # fmt: skip
     plan["fuel_stops"] = [{field: stop[field] for field in STOP_FIELDS} for stop in plan["fuel_stops"]]
+    routing_ms, matching_ms, selection_ms, itinerary_ms, optimize_ms = timings
+    precisions = Counter(stop["coordinate_precision"] for stop in plan["fuel_stops"])
     return {
         "start": start,
         "finish": finish,
@@ -99,29 +321,56 @@ def plan_trip(start, finish, initial_fuel_gallons=None, corridor_miles=5.0, min_
         "duration_hours": round(route["duration_seconds"] / 3600, 2),
         **plan,
         "map": _geojson(route, start, finish, plan["fuel_stops"]),
+        "routed_leg_miles": route.get("leg_miles", [route["distance_miles"]]),
+        "routed_waypoints": [
+            {
+                "id": stop["id"],
+                "name": stop["name"],
+                "latitude": stop["latitude"],
+                "longitude": stop["longitude"],
+                "road_snap_metres": stop["road_snap_metres"],
+                "route_mile": stop["route_mile"],
+            }
+            for stop in located
+        ],
         "assumptions": {
             "range_miles": RANGE_MILES,
             "mpg": MPG,
             "tank_capacity_gallons": CAPACITY_GALLONS,
             "initial_fuel_gallons": initial_fuel_gallons,
             "corridor_miles": corridor_miles,
-            "min_stop_gallons": min_stop_gallons,
-            "starting_fuel": "Omitted initial_fuel_gallons: the vehicle starts with just enough fuel to reach the "
-            "first station on the route, and that fuel is valued at the station's price and included in the total.",
-            "detours": f"Reaching an off-route station costs {ROAD_FACTOR:g}x its straight-line distance each way; "
-            "that fuel is bought at the stop and included. A small reserve keeps the tank between 0 and 50 gallons.",
-            "station_locations": "Station positions are their city's coordinates (the price file has no coordinates).",
+            "starting_fuel": "Automatic mode values the routed first-leg fuel at the first station's price. "
+            "Explicit starting fuel is already owned and is not charged again.",
+            "detours": (
+                "Mileage and fuel use the OSRM road legs through the chosen stations (verify_stops=true)."
+                if itinerary_routed
+                else "Each stop's detour is estimated as 1.3 x its straight-line offset from the route, each way, "
+                "and that fuel is charged against the tank and included in fuel_burned_gallons."
+            ),
+            "station_locations": f"All {len(station_index().stations):,} priced US stations are candidates. "
+            "coordinate_precision says where each position comes from: osm_identity_match / "
+            "operator_identity_match (the station itself), exit_match (the OpenStreetMap interstate exit named in "
+            "its CSV address, plus 0.5 mile each way to reach the pumps), or city_centroid (its listed town).",
+            "optimization_scope": "Exact minimum-cost choice of stops and gallons for the fixed route and the "
+            "estimated detours (mixed-integer program). Each stop must save at least $0.50 to be made; "
+            "reported costs are fuel money only.",
             "prices": "Retail prices from the supplied CSV.",
         },
         "metadata": {
             "routing_calls": routing_calls,
             "route_cache_hit": routing_calls == 0,
+            "plan_cache_hit": plan_source != "loaded",
             "route_source": route_source,
             "candidate_stations": len(on_route),
-            "stations_without_coordinates": stations()[1],
+            "search_corridor_miles": search_radius,
+            "candidate_pool_stations": len(station_index().stations),
+            "stop_coordinate_precision": dict(precisions),
+            "itinerary_routed": itinerary_routed,
             "timing_ms": {
                 "routing": routing_ms,
                 "matching": matching_ms,
+                "selection": selection_ms,
+                "itinerary_routing": itinerary_ms,
                 "optimize": optimize_ms,
             },
         },

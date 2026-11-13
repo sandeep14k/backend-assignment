@@ -1,0 +1,26 @@
+[
+  {
+    "url": "https://router.project-osrm.org/route/v1/driving/-157.86300,21.30950;-87.61812,41.88585",
+    "params": {
+      "overview": "full",
+      "geometries": "polyline6",
+      "steps": "false",
+      "alternatives": "false",
+      "generate_hints": "false"
+    },
+    "status": 400,
+    "body": "{\"message\":\"Impossible route between points\",\"code\":\"NoRoute\"}",
+    "headers": {
+      "Server": "nginx",
+      "Date": "Thu, 12 Nov 2026 23:34:24 GMT",
+      "Content-Type": "application/json; charset=UTF-8",
+      "Content-Length": "78",
+      "Connection": "keep-alive",
+      "Content-Encoding": "gzip",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET",
+      "Access-Control-Allow-Headers": "X-Requested-With, Content-Type",
+      "Content-Disposition": "inline; filename=\"response.json\""
+    }
+  }
+]

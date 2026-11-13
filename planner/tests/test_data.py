@@ -4,10 +4,11 @@ import csv
 from collections import defaultdict
 from decimal import Decimal
 
+import numpy as np
 from django.conf import settings
 from django.test import SimpleTestCase
 
-from planner.data import CANADIAN_PROVINCES, cities, find_city, location, station_index, stations
+from planner.data import CANADIAN_PROVINCES, cities, find_city, is_sourced, location, station_index, stations
 
 
 def csv_rows():
@@ -39,14 +40,21 @@ class FuelDataTests(SimpleTestCase):
             self.assertAlmostEqual(Decimal(station["price_per_gallon"]), mean, places=7)
         self.assertEqual(self.by_id["7"]["price_per_gallon"], "3.00733333")
 
-    def test_each_station_sits_at_its_own_city(self):
+    def test_each_station_sits_at_its_city_unless_overridden_nearby(self):
+        from planner.geo import segment_miles
+
         for row in self.rows:
             station = self.by_id.get(row["OPIS Truckstop ID"].strip())
             if station is None:
                 continue
             city = find_city(row["City"].strip(), row["State"].strip())
-            expected = (float(city["LATITUDE"]), float(city["LONGITUDE"]))
-            self.assertEqual((station["latitude"], station["longitude"]), expected)
+            centre = (float(city["LATITUDE"]), float(city["LONGITUDE"]))
+            position = (station["latitude"], station["longitude"])
+            if station["coordinate_precision"] == "city_centroid":
+                self.assertEqual(position, centre)
+            else:  # An entry in data/station_coordinates.csv: must still be near its own city.
+                distance = segment_miles(np.array([[centre[1], centre[0]], [position[1], position[0]]]))[0]
+                self.assertLessEqual(distance, 25.0)
 
     def test_names_and_addresses_are_trimmed(self):
         for station in self.inventory:
@@ -56,8 +64,24 @@ class FuelDataTests(SimpleTestCase):
 
     def test_index_matches_inventory(self):
         index = station_index()
+        self.assertGreater(len(index.stations), 0, "Bundled station coordinates must support real fuel plans")
+        # Every priced US station is a candidate: no trip fails for want of eligible stations.
         self.assertEqual(len(index.stations), len(self.inventory))
         self.assertEqual(index.xyz.shape, (len(self.inventory), 3))
+        sourced = [s for s in index.stations if is_sourced(s)]
+        self.assertGreater(len(sourced), 250)
+        # Every position is labelled by its real source: identity match, OSM exit, or town centre.
+        self.assertTrue(
+            all(is_sourced(s) or s["coordinate_precision"] in {"exit_match", "city_centroid"} for s in index.stations)
+        )
+        exits = [s for s in index.stations if s["coordinate_precision"] == "exit_match"]
+        self.assertGreater(len(exits), 3000)
+        # "AMPM, I-10, EXIT 140" had been name-matched to a store 15 miles from I-10; its exit overrules that.
+        ampm = next(s for s in index.stations if s["id"] == "69912")
+        self.assertEqual(ampm["coordinate_precision"], "exit_match")
+        for station in index.stations:
+            if station["coordinate_precision"] == "exit_match":
+                self.assertTrue(station["coordinate_source"].startswith("https://www.openstreetmap.org/node/"))
 
 
 class LocationTests(SimpleTestCase):

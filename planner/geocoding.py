@@ -49,13 +49,22 @@ def _census(address):
         raise GeocoderUnavailable(str(exc)) from exc
     if not matches:
         return {"not_found": True}
-    best = matches[0]
-    return {"address": best["matchedAddress"], "x": best["coordinates"]["x"], "y": best["coordinates"]["y"]}
+    try:
+        best = matches[0]
+        return {
+            "address": best["matchedAddress"],
+            "x": float(best["coordinates"]["x"]),
+            "y": float(best["coordinates"]["y"]),
+        }
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        raise GeocoderUnavailable("Invalid address response") from exc
 
 
 def resolve(value):
     """Return ``(location, geocoding_calls)`` for one user-supplied location."""
-    if not (isinstance(value, str) and STREET_ADDRESS.match(value)):
+    if not isinstance(value, str) or not value.strip() or len(value) > 200:
+        return location(value), 0  # Validate before making any network request.
+    if not STREET_ADDRESS.match(value):
         return location(value), 0
     key = "geocode:v2:" + hashlib.sha256(" ".join(value.lower().split()).encode()).hexdigest()[:32]
     try:
@@ -72,6 +81,10 @@ def resolve(value):
 
 def resolve_pair(start, finish):
     """Resolve both ends, geocoding in parallel when both are street addresses."""
+    if not all(isinstance(value, str) and STREET_ADDRESS.match(value) for value in (start, finish)):
+        start_point, start_calls = resolve(start)
+        finish_point, finish_calls = resolve(finish)
+        return start_point, finish_point, start_calls + finish_calls
     first, second = _executor.submit(resolve, start), _executor.submit(resolve, finish)
     (start_point, start_calls), (finish_point, finish_calls) = first.result(), second.result()
     return start_point, finish_point, start_calls + finish_calls

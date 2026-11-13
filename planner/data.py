@@ -6,6 +6,7 @@ handling never geocodes over the network.
 
 import csv
 import difflib
+import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -256,19 +257,27 @@ def _price(text):
     return price if price.is_finite() and price > 0 else None
 
 
+def _coordinate_file(name):
+    path = settings.BASE_DIR / name
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as source:
+        return {row["id"].strip(): row for row in csv.DictReader(source)}
+
+
 @lru_cache(maxsize=1)
 def stations():
     """Return ``(stations, unlocated_count)`` from the supplied fuel-price CSV.
 
-    Stations are placed at their city's coordinates unless verified pump
-    coordinates are supplied in ``data/station_coordinates.csv``. Some truck
-    stops are listed several times with different prices; they get the mean.
+    Each station's position, best source first: an identity match in
+    ``data/station_coordinates.csv`` (OSM or operator), the OSM interstate exit
+    its address names (``data/exit_coordinates.csv``, see ``planner.exits``),
+    else its town's coordinates. ``coordinate_precision`` says which. An identity
+    match more than 3 miles from the exit its own address names is overruled.
+    Some truck stops are listed several times with different prices; they get the mean.
     """
-    overrides = {}
-    path = settings.BASE_DIR / "data/station_coordinates.csv"
-    if path.exists():
-        with path.open(encoding="utf-8") as source:
-            overrides = {r["id"].strip(): (float(r["latitude"]), float(r["longitude"])) for r in csv.DictReader(source)}
+    overrides = _coordinate_file("data/station_coordinates.csv")
+    exits = _coordinate_file("data/exit_coordinates.csv")
 
     by_id, prices, unlocated = {}, {}, set()
     with (settings.BASE_DIR / "fuel-prices-for-be-assessment.csv").open(encoding="utf-8-sig") as source:
@@ -285,8 +294,14 @@ def stations():
                 unlocated.add(station_id)
                 continue
             city = find_city(city_name, state)
-            if station_id in overrides:
-                (latitude, longitude), precision = overrides[station_id], "verified"
+            # An exit row exists for an identity-matched station only when the two disagree by
+            # over 3 miles (see locate_exits): the store matched is then not the one listed.
+            evidence = exits.get(station_id) or overrides.get(station_id)
+            if evidence:
+                latitude, longitude = float(evidence["latitude"]), float(evidence["longitude"])
+                precision = "exit_match" if station_id in exits else evidence.get("precision") or "unverified"
+                if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+                    raise ValueError(f"Invalid station coordinates: {station_id}")
             elif city:
                 latitude, longitude = float(city["LATITUDE"]), float(city["LONGITUDE"])
                 precision = "city_centroid"
@@ -303,6 +318,7 @@ def stations():
                 "latitude": latitude,
                 "longitude": longitude,
                 "coordinate_precision": precision,
+                "coordinate_source": (evidence or {}).get("source", ""),
             }
     for station_id, station in by_id.items():
         listed = prices[station_id]
@@ -318,16 +334,39 @@ class StationIndex:
     xyz: np.ndarray
     tree: cKDTree
     prices: list
+    fingerprint: str
 
     @classmethod
     def build(cls, stations):
         xyz = to_xyz([[s["longitude"], s["latitude"]] for s in stations]) if stations else np.empty((0, 3))
-        return cls(stations, xyz, cKDTree(xyz), [Decimal(s["price_per_gallon"]) for s in stations])
+        fingerprint = hashlib.sha256(json.dumps(stations, sort_keys=True).encode()).hexdigest()[:24]
+        return cls(stations, xyz, cKDTree(xyz), [Decimal(s["price_per_gallon"]) for s in stations], fingerprint)
+
+
+SOURCED_PRECISIONS = {
+    "osm_identity_match": "https://www.openstreetmap.org/",
+    "operator_identity_match": "https://www.loves.com/",
+}
+
+
+def is_sourced(station):
+    """True when the station's coordinates come from a cited OSM/operator match, not its city centre."""
+    prefix = SOURCED_PRECISIONS.get(station.get("coordinate_precision"))
+    return bool(prefix) and station.get("coordinate_source", "").startswith(prefix)
 
 
 @lru_cache(maxsize=1)
 def station_index():
-    return StationIndex.build(stations()[0])
+    """Every priced US station is a candidate, so any US trip can be planned.
+
+    Identity matches use their exact coordinates, exit matches the OSM exit
+    named in their address ("exit_match"), and the rest their town's
+    coordinates ("city_centroid"). The optimizer charges estimated detour fuel
+    for every stop. A position is never labelled more precise than its source.
+    """
+    return StationIndex.build(
+        [s for s in stations()[0] if is_sourced(s) or s["coordinate_precision"] in {"exit_match", "city_centroid"}]
+    )
 
 
 def warm():

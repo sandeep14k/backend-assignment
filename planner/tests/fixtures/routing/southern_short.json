@@ -1,0 +1,26 @@
+[
+  {
+    "url": "https://router.project-osrm.org/route/v1/driving/-80.19820,25.77900;-80.12878,26.12156",
+    "params": {
+      "overview": "full",
+      "geometries": "polyline6",
+      "steps": "false",
+      "alternatives": "false",
+      "generate_hints": "false"
+    },
+    "status": 200,
+    "body": "{\"code\":\"Ok\",\"routes\":[{\"legs\":[{\"steps\":[],\"weight\":2356.4,\"summary\":\"\",\"duration\":2356.4,\"distance\":44573.1}],\"weight_name\":\"routability\",\"geometry\":\"egldp@db|}wCIcMGgDeDKcAEwGJgMRwZ`@qBBBbCRfNBdB\\\\lW|@zq@BhAD~C}EJya@z@kBDs@@sI\\\\_BFgCEqC?iLNo^n@kEHsEDmF@}JtByEpAwAn@aBhAaA`Au@|@kAtAwAlBkAxAwBjCeAfAoBpBwBnBaCjBeDzB_DjBuDpBaGtCaLbFirBrz@wa@hOsIbDwN`GeQhIsb@nR{IzEuCrGsAj@cKxE{hCxeAcLrFm_@vOcLpEcKlDwGtBoJhC_RbE{UvE{JdB{KrBw]bEi^xAoYA}wAfCuYRgcDz@mhIfMu_@EuPTkQb@ib@f@ie@?ua@`@qWXem@p@iBDsj@bAe_@`@mWV}o@r@i]`@cPP}h@n@qf@f@eTP{\\\\Pyq@b@qk@`@mMJg]T}_A|@uKFwe@^_SR}ORwWVef@UyxA~AevBfEmeCzG{Yh@kZf@oYh@kzAbCwX[eUaAyReBmRmBe^{Fqu@aMwf@yGkVkB_f@}AwU[}l@j@oZj@eo@pA{qCbEkdAvAsg@Vgi@?_p@[q`@M{ZIgt@VkYPc\\\\n@qWn@wSrAyQjBwP|BqPxC_WxGs}@h[mZfLiYxIkU`F{WbEwSlBkQhAu\\\\dAwb@jAum@|AcZn@w`CdGsS\\\\{ML_v@rAuzApBgRR_nAjAsdBdBu`B|@yjDbEcf@f@uxDhDmo@p@{zDtDqb@b@a{@lAoYn@kY`AkY|A{h@jDcd@zBal@hAsh@`A_rBzC{_@j@_~AzBix@|AywAfAcQHca@i@cr@eBom@u@u_@B}_@f@w~BhFsVl@uuAbB}`AbBsc@x@qw@rAuyAlCqm@`@anBpEk|@bBaOP{oApB{hAhCuZj@w\\\\z@_]xA_^jBo|@nEqe@xAgh@fAucBpAy{@Eaa@QwWM{v@yA}l@e@urAw@khAWgU?sYPur@Hca@Fca@FeODaVPw]t@yXj@gv@z@co@nAgl@bAmWf@s[`AkoAjBadBdEwv@tCa~@bEaObA_HPoDAiEQcCSeCOmD_@aC]iCa@uCa@oCg@yBc@qBe@qBa@}Bm@oBi@{Bo@mDgAgCy@mBs@_C}@kBw@aC_AkCkAmB_AaCoAyBmAuBmA_CwAsCiBaCaBgBqAyBeBeCoBaFiEeFoEuEyDuBkBwBsBgBeBgBeBmBoBwB{B}AcBwAcBwAcBqBaCkCaDiB}BaBsByHeKqLgPiMgQaI{KgFcHi@w@}BeDcC_DeCgDsCsDyBmCkBwBgBoBo@o@wByBuBuBaDcDuAqAiB}AwBiBiEiDqB{A}AoAmBsAkCgBwDaC_EeCgC{AkAs@}A}@_B{@sBcAoBcAmB}@yAq@gBy@iBw@qBy@yB}@_EyAmJmD_GsB{HuCgDkAoEeBqDsAcDkA}CiAqBs@eBo@mBq@{Ak@}Am@uAe@kAc@eAa@mAe@aBm@aBm@yAi@wAk@qAi@kAg@{DeBeEgBsDkB{DqBeDkB_DgByCiBaDsBgD_CkEcEkDuD{CqCwCkC_DuCqCoCsBoBgCkCmCuCyBeC_CwCe`A_lAkvBslCcFkGuw@wbAu]ge@yQgY}NgX}KiVyJwV}FaQwF{RyJm`@}Jsa@mJ{`@oJs_@uKw\\\\wKcZ_Ow[iOaXgTy[wa@{j@qUi[_e@yk@{jAmxAgQiRi[eYgSsNk\\\\sSeXcMwlAie@_Y_MqPyI{JaGoY}QcUaPoSsQw`@ob@maDgaEc[q`@q~BsuCuh@_t@yt@seAqaA_dB}fCgrE}jAouBmb@es@m[kb@cb@}c@gd@s]y_@aV_g@_Ug|@iY}w@{Kcl@gFqmA_F{k@sAyuA`@ap@n@_gBrHcoD`PmuB`Iu`ApB{aA`@qlAqC}x@sDanAuIe~@qFkw@eBs{A|A}i@j@}z@xAyhCbDi_@?{_BfB}ZZglA`Ba`F`Goh@j@cr@b@ga@tAae@zDkx@hK{x@zKy_@|Dsp@~Fm[xBi_@dBmi@tAep@`@mdAuAue@uAeeDeIqaAOmcAp@oh@PkrAbAmh@tA}dA`Gyl@zDk]dAq_AfC{_BtA}\\\\Po{EvD}h@s@ot@{DsUwBgo@eIeo@mLqWqG_g@cOohAsZwpAi]wm@oNqmAeW_bAuPot@gJy^mE}r@}G_nGma@wmBmNwRuAwpB}L_YuAm~B{OapDcT{]_Ccq@yEw}@}E}x@w@ahApAe`B|DynBbHmu@vBagAfJcj@vIm[~E{lBp]yvBxc@s]jGgnBn\\\\alBh_@grAhX}Bd@_]rIk}@|Oy`Bf`@oYbHwe@bMiuAj^_xBti@ke@~I_[hFqa@fF{IbAoZvDiZtCyYnBqZl@kp@\\\\{f@W{y@EyV[oYo@uNe@_k@iBwb@yA_kAeD{VsAyUeBoXmAmPUyNIyL@ccAIsSHmULkQHaMTqMLmLL_MT{LZsL`@iMb@wMf@kKf@{|@bEiVpAkQbAyRp@iQf@eSj@yRb@oQ^cXh@yKTcSNgpBhAg{DxBocDUi}@gAqLQaMUcLWsLWoMWkLUuLWoLY{La@uL_@}LYuLYiLSiLOqb@cFo`@gBqPq@sNk@iOq@kuAyEs}@_DmHWwGQgFIaHA_F?yED}DHyFJyFPgGZ_FVuF^sz@zFyHb@{G^oHZ_J^aJXcJPkHNwJRsRT{SOwKLaMJyLH_MFuKDsLAiM?}LG{MKmPMuN[oMSgNWwMWyLa@eM_@ob@eB{PwA}f@oCkPcAw]eE}N{@wAQw@UgA]eAa@oA}@o@w@w@gAw@}Ao@{Aa@gBQ_BQqBg@c]gA}jAGsFK{GKsFYyQEoBaBy]OoCmB}c@c@}T?wOCaWE_^@ik@@eGI{MGsJGuMGcJKqREeG_@wa@IgIo@gu@Yo[o@ot@K{K?cAIyJa@{h@GqFCyEoAs_Bo@yy@EoGG}GeAinAQgUA}@SuX[qd@GqIEiIUwOKq`@]mp@EkJEcHIePUyf@Nw`AJoED{B@kUJuI@wFAkGA_C?}E?gK?eKGuJA}HOsGUkPWaQi@iL_@qHScGi@_w@E{KGyVIuWUmr@C}HGkHo@mz@O_XO{SIaLq@w|@EuGEcHEiGE{HAU[eNK{CEeAeA{Vi@aTaCsTEyEAqDQiYQmZCaIOgc@KoVE}Ei@_x@Wkc@K_TCiEKaVImOWoVIwNQsVIiWOsc@rOWdNSzWYvNK@tI\",\"weight\":2356.4,\"duration\":2356.4,\"distance\":44573.1}],\"waypoints\":[{\"distance\":20.0582759,\"name\":\"Northwest 5th Street\",\"location\":[-80.198195,25.778819]},{\"distance\":7.534377745,\"name\":\"\",\"location\":[-80.128779,26.121492]}]}",
+    "headers": {
+      "Server": "nginx",
+      "Date": "Thu, 12 Nov 2026 23:34:10 GMT",
+      "Content-Type": "application/json; charset=UTF-8",
+      "Content-Length": "2506",
+      "Connection": "keep-alive",
+      "Content-Encoding": "gzip",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET",
+      "Access-Control-Allow-Headers": "X-Requested-With, Content-Type",
+      "Content-Disposition": "inline; filename=\"response.json\""
+    }
+  }
+]

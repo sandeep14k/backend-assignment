@@ -1,0 +1,269 @@
+{
+  "mode": "recorded HTTP replay",
+  "results": [
+    {
+      "name": "chicago_la",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 57474,
+      "elapsed_ms": 410.17
+    },
+    {
+      "name": "seattle_boston",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 87971,
+      "elapsed_ms": 990.43
+    },
+    {
+      "name": "ny_miami",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 32122,
+      "elapsed_ms": 965.81
+    },
+    {
+      "name": "north_south",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 26701,
+      "elapsed_ms": 1021.13
+    },
+    {
+      "name": "rural",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 12553,
+      "elapsed_ms": 839.35
+    },
+    {
+      "name": "chicago_short",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 4984,
+      "elapsed_ms": 977.86
+    },
+    {
+      "name": "seattle_short",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 7377,
+      "elapsed_ms": 1003.06
+    },
+    {
+      "name": "ny_alias",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 9564,
+      "elapsed_ms": 1009.74
+    },
+    {
+      "name": "coordinates",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 5041,
+      "elapsed_ms": 996.77
+    },
+    {
+      "name": "partial_tank",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 3590,
+      "elapsed_ms": 1001.89
+    },
+    {
+      "name": "southern_short",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 3695,
+      "elapsed_ms": 1000.55
+    },
+    {
+      "name": "western_short",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 5762,
+      "elapsed_ms": 1004.77
+    },
+    {
+      "name": "chicago_houston",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 27096,
+      "elapsed_ms": 1107.03
+    },
+    {
+      "name": "la_houston",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 30609,
+      "elapsed_ms": 956.88
+    },
+    {
+      "name": "dallas_denver",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 22466,
+      "elapsed_ms": 1119.24
+    },
+    {
+      "name": "seattle_miami",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 82928,
+      "elapsed_ms": 1218.74
+    },
+    {
+      "name": "bangor_san_diego",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 1,
+      "response_bytes": 87802,
+      "elapsed_ms": 815.67
+    },
+    {
+      "name": "verified_chicago_houston",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 2,
+      "response_bytes": 27944,
+      "elapsed_ms": 1828.3
+    },
+    {
+      "name": "verified_ny_miami",
+      "passed": true,
+      "status": 200,
+      "routing_calls": 2,
+      "response_bytes": 33164,
+      "elapsed_ms": 1992.71
+    },
+    {
+      "name": "gap_sf_vegas",
+      "passed": true,
+      "status": 422,
+      "routing_calls": null,
+      "response_bytes": 227,
+      "elapsed_ms": 1005.9
+    },
+    {
+      "name": "gap_portland_phoenix",
+      "passed": true,
+      "status": 422,
+      "routing_calls": null,
+      "response_bytes": 236,
+      "elapsed_ms": 1019.01
+    },
+    {
+      "name": "empty_remote",
+      "passed": true,
+      "status": 422,
+      "routing_calls": null,
+      "response_bytes": 151,
+      "elapsed_ms": 1030.5
+    },
+    {
+      "name": "disconnected",
+      "passed": true,
+      "status": 422,
+      "routing_calls": null,
+      "response_bytes": 75,
+      "elapsed_ms": 946.94
+    },
+    {
+      "name": "coverage_alaska",
+      "passed": true,
+      "status": 422,
+      "routing_calls": null,
+      "response_bytes": 151,
+      "elapsed_ms": 1011.25
+    },
+    {
+      "name": "non_us",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 136,
+      "elapsed_ms": 51.52
+    },
+    {
+      "name": "foreign_coords",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 87,
+      "elapsed_ms": 2.17
+    },
+    {
+      "name": "empty_start",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 151,
+      "elapsed_ms": 0.28
+    },
+    {
+      "name": "same_place",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 82,
+      "elapsed_ms": 0.26
+    },
+    {
+      "name": "ambiguous",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 130,
+      "elapsed_ms": 0.25
+    },
+    {
+      "name": "bad_tank",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 95,
+      "elapsed_ms": 0.22
+    },
+    {
+      "name": "negative_tank",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 95,
+      "elapsed_ms": 0.21
+    },
+    {
+      "name": "unknown_city",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 153,
+      "elapsed_ms": 2.29
+    },
+    {
+      "name": "border",
+      "passed": true,
+      "status": 400,
+      "routing_calls": null,
+      "response_bytes": 93,
+      "elapsed_ms": 0.56
+    }
+  ]
+}

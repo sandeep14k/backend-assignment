@@ -5,7 +5,7 @@ import random
 import numpy as np
 from django.test import SimpleTestCase
 
-from planner.geo import decode_polyline, segment_miles, simplify, to_xyz
+from planner.geo import decode_polyline, heading_at, segment_miles, simplify, to_xyz
 from planner.optimizer import candidates
 from planner.tests.helpers import encode, fake_route, index_of, make_station
 
@@ -23,7 +23,8 @@ def reference_simplify(points, tolerance):
         length = np.linalg.norm(direction)
         inner = xyz[first + 1 : last]
         if length:
-            distances = np.linalg.norm(np.cross(direction, inner - a), axis=1) / length
+            fractions = np.clip(((inner - a) @ direction) / length**2, 0, 1)
+            distances = np.linalg.norm(inner - a - fractions[:, None] * direction, axis=1)
         else:
             distances = np.linalg.norm(inner - a, axis=1)
         farthest = int(distances.argmax())
@@ -71,6 +72,10 @@ class SimplifyTests(SimpleTestCase):
         for _ in range(15):
             points = random_walk(rng, rng.randint(3, 2500))
             np.testing.assert_array_equal(simplify(points, 0.03), reference_simplify(points, 0.03))
+
+    def test_reversal_beyond_endpoint_is_preserved(self):
+        points = np.array([[-90, 40], [-89.9, 40], [-89.99, 40]])
+        np.testing.assert_array_equal(simplify(points), points)
 
     def test_keeps_endpoints_and_drops_collinear_points(self):
         line = np.array([[-90 + i / 10000, 40.0] for i in range(1001)])  # 5 miles: straight to < 1 m
@@ -130,3 +135,14 @@ class CandidateTests(SimpleTestCase):
         self.assertAlmostEqual(result[0]["route_mile"], 50, delta=0.1)
         # 0.69 mi along the 40th parallel; measured to the great-circle chord it is ~0.62 mi.
         self.assertAlmostEqual(result[0]["offset_miles"], 0.69, delta=0.1)
+
+
+class HeadingTests(SimpleTestCase):
+    def test_heading_of_the_segment_at_a_mile(self):
+        # East along the equator, then north.
+        points = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0]])
+        lengths = segment_miles(points)
+        self.assertAlmostEqual(heading_at(points, lengths, 10), 90, places=3)
+        self.assertAlmostEqual(heading_at(points, lengths, lengths[0] + 10), 0, places=3)
+        self.assertAlmostEqual(heading_at(points[::-1], lengths[::-1], 10), 180, places=3)
+        self.assertAlmostEqual(heading_at(points, lengths, 1e9), 0, places=3)  # Past the end: last segment.
